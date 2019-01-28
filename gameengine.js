@@ -14,7 +14,11 @@ function GameEngine() {
     this.ctx = null;
     this.surfaceWidth = null;
     this.surfaceHeight = null;
-    this.space = false;
+    this.w = false;
+    this.a = false;
+    this.s = false;
+    this.d = false;
+    this.lclick = false;
 }
 
 GameEngine.prototype.init = function (ctx) {
@@ -52,18 +56,39 @@ GameEngine.prototype.startInput = function () {
 
     var that = this;
 
+    this.ctx.canvas.addEventListener("mousedown", (e) => {
+        that.lclick = true;
+    });
+
+    this.ctx.canvas.addEventListener("mouseup", (e) => {
+        that.lclick = false;
+    });
+
     this.ctx.canvas.addEventListener("keydown", (e) => {
-        if(e.keyCode === 32){
-            that.space = true;
-        }
+        that.handleInputs(e.keyCode, true);
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
-        if(e.keyCode === 32){
-            that.space = false;
-        }
+        that.handleInputs(e.keyCode, false);
     });
 
     console.log('Input started');
+}
+
+GameEngine.prototype.handleInputs = function(keycode, value){
+    switch(keycode){
+        case 119:
+            this.w = value;
+            break;
+        case 97:
+            this.a = value;
+            break;
+        case 115:
+            this.s = value;
+            break;
+        case 100:
+            this.d = value;
+            break;
+    }    
 }
 
 GameEngine.prototype.addEntity = function (entity) {
