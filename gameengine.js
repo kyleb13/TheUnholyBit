@@ -9,6 +9,13 @@ window.requestAnimFrame = (function () {
             };
 })();
 
+
+
+//function canvasLoaded(){
+
+//}
+
+
 function GameEngine() {
     this.entities = [];
     this.ctx = null;
@@ -19,13 +26,41 @@ function GameEngine() {
     this.s = false;
     this.d = false;
     this.lclick = false;
+    this.pointerx = 50;
+    this.pointery = 50;
+    this.pointerLocked = false;
+    // this.showOutlines = true;
+    this.showOutlines = false;
 }
 
 GameEngine.prototype.init = function (ctx) {
     this.ctx = ctx;
     this.surfaceWidth = this.ctx.canvas.width;
     this.surfaceHeight = this.ctx.canvas.height;
+    this.rect = this.ctx.canvas.getBoundingClientRect();
     this.timer = new Timer();
+    var that = this;
+    var canvas = ctx.canvas;
+    var mousePositionUpdate = function(e) {
+        var dx = e.movementX;
+        var dy = e.movementY;
+        if(0<=that.pointerx + dx && that.pointerx + dx<=canvas.width){
+            that.pointerx += dx;
+        }
+        if(0<=that.pointery + dy && that.pointery + dy<=canvas.height){
+            that.pointery += dy;
+        }
+        document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
+    }
+    document.addEventListener('pointerlockchange', () => {
+        if(document.pointerLockElement === canvas){
+            document.addEventListener("mousemove", mousePositionUpdate);
+            that.pointerLocked = true;
+        } else {
+            document.removeEventListener("mousemove", mousePositionUpdate);
+            that.pointerLocked = false;
+        }
+    });
     this.startInput();
     console.log('game initialized');
 }
@@ -42,7 +77,7 @@ GameEngine.prototype.start = function () {
 GameEngine.prototype.startInput = function () {
     console.log('Starting input');
 
-    var getXandY = function (e) {
+    /*var getXandY = function (e) {
         var x = e.clientX - that.ctx.canvas.getBoundingClientRect().left;
         var y = e.clientY - that.ctx.canvas.getBoundingClientRect().top;
 
@@ -54,7 +89,18 @@ GameEngine.prototype.startInput = function () {
         return { x: x, y: y };
     }
 
+
+
+
+
+    */
     var that = this;
+    var getXandY = function(evt) {
+        return {
+            x: (evt.clientX - that.rect.left) / (that.rect.right - that.rect.left)* that.ctx.canvas.width,
+            y: (evt.clientY - that.rect.top) / (that.rect.bottom - that.rect.top) * that.ctx.canvas.height
+        };
+    }
 
     this.ctx.canvas.addEventListener("mousedown", (e) => {
         that.lclick = true;
@@ -70,6 +116,10 @@ GameEngine.prototype.startInput = function () {
     this.ctx.canvas.addEventListener("keyup", (e) => {
         that.handleInputs(e.code, false);
     });
+    // this.ctx.canvas.addEventListener("mousemove", (e) => {
+    //     // that.pointerPos = {x:pointerx, y:pointery};
+    //     document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
+    // });
 
     console.log('Input started');
 }

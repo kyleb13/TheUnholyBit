@@ -99,20 +99,25 @@ Background.prototype.update = function () {
 // function Camera()
 
 // function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
-
+    AM.queueDownload("./img/crosshair.png");
 AM.queueDownload("./img/castle_hall.png");
 AM.queueDownload("./img/charwalk.png");
+AM.queueDownload("./img/charstand.png");
 AM.queueDownload("./img/charshoot_loop.png");
 
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
     var ctx = canvas.getContext("2d");
-
+    canvas.onclick = function() {
+        canvas.requestPointerLock();
+    };
     var gameEngine = new GameEngine();
     gameEngine.init(ctx);
     gameEngine.start();
 
+    
     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
-    gameEngine.addEntity(new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png")));
+    gameEngine.addEntity(new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png")));
+    gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair.png")));
     console.log("All Done!");
 });
