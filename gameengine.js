@@ -65,10 +65,10 @@ GameEngine.prototype.startInput = function () {
     });
 
     this.ctx.canvas.addEventListener("keydown", (e) => {
-        that.handleInputs(e.keyCode, true);
+        that.handleInputs(e.code, true);
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
-        that.handleInputs(e.keyCode, false);
+        that.handleInputs(e.code, false);
     });
 
     console.log('Input started');
@@ -76,16 +76,16 @@ GameEngine.prototype.startInput = function () {
 
 GameEngine.prototype.handleInputs = function(keycode, value){
     switch(keycode){
-        case 119:
+        case "KeyW":
             this.w = value;
             break;
-        case 97:
+        case "KeyA":
             this.a = value;
             break;
-        case 115:
+        case "KeyS":
             this.s = value;
             break;
-        case 100:
+        case "KeyD":
             this.d = value;
             break;
     }    
