@@ -31,10 +31,13 @@ function GameEngine() {
     this.pointerLocked = false;
     // this.showOutlines = true;
     this.showOutlines = false;
+    this.camera = null;
+    this.player = null;
 }
 
-GameEngine.prototype.init = function (ctx) {
+GameEngine.prototype.init = function (ctx, camera) {
     this.ctx = ctx;
+    this.camera = camera;
     this.surfaceWidth = this.ctx.canvas.width;
     this.surfaceHeight = this.ctx.canvas.height;
     this.rect = this.ctx.canvas.getBoundingClientRect();
@@ -50,7 +53,7 @@ GameEngine.prototype.init = function (ctx) {
         if(0<=that.pointery + dy && that.pointery + dy<=canvas.height){
             that.pointery += dy;
         }
-        document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
+        //document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
     }
     document.addEventListener('pointerlockchange', () => {
         if(document.pointerLockElement === canvas){
@@ -65,7 +68,9 @@ GameEngine.prototype.init = function (ctx) {
     console.log('game initialized');
 }
 
-GameEngine.prototype.start = function () {
+GameEngine.prototype.start = function (player, camera) {
+    this.player = player;
+    this.camera = camera;
     console.log("starting game");
     var that = this;
     (function gameLoop() {
@@ -104,10 +109,12 @@ GameEngine.prototype.startInput = function () {
 
     this.ctx.canvas.addEventListener("mousedown", (e) => {
         that.lclick = true;
+        console.log("mdown");
     });
 
-    this.ctx.canvas.addEventListener("mousedown", (e) => {
+    this.ctx.canvas.addEventListener("mouseup", (e) => {
         that.lclick = false;
+        console.log("mup");
     });
 
     this.ctx.canvas.addEventListener("keydown", (e) => {
@@ -121,7 +128,6 @@ GameEngine.prototype.startInput = function () {
     //     document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
     // });
 
-    console.log('Input started');
 }
 
 GameEngine.prototype.handleInputs = function(keycode, value){
@@ -149,6 +155,7 @@ GameEngine.prototype.addEntity = function (entity) {
 GameEngine.prototype.draw = function () {
     this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
     this.ctx.save();
+    this.camera.draw();
     for (var i = 0; i < this.entities.length; i++) {
         this.entities[i].draw(this.ctx);
     }
@@ -157,7 +164,7 @@ GameEngine.prototype.draw = function () {
 
 GameEngine.prototype.update = function () {
     var entitiesCount = this.entities.length;
-
+    this.camera.update();
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
 
