@@ -25,7 +25,7 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
         if (this.loop){
             this.elapsedTime = 0;
         } else {
-            this.active = false
+            this.active = false;
         }
         
     }
@@ -47,10 +47,11 @@ Animation.prototype.drawFrameFromRow = function (tick, ctx, x, y, row) {
     this.active = true;
     this.elapsedTime += tick;
     if (this.isDone()) {
+        if(this.frames == 28) console.log("done");
         if (this.loop){
             this.elapsedTime = 0;
         } else {
-            this.active = false
+            this.active = false;
         }
         
     }
@@ -96,23 +97,58 @@ Background.prototype.draw = function () {
 Background.prototype.update = function () {
 };
 
-// function Camera()
+function Camera(game, obj, background, width, height){
+    this.game = game;
+    this.ctx = game.ctx;
+    var center = obj.center();
+    this.obj = obj;
+    this.background = background;
+    this.worldWidth=width;
+    this.worldHeight=height;
+    this.frameWidth = this.ctx.canvas.width;
+    this.frameHeight = this.ctx.canvas.height;
+    this.x =  0;
+    this.y = 0;
+    console.log(`width ${this.frameWidth}, height ${this.frameHeight}`);
+}
+
+Camera.prototype.update = function(){
+    this.x = this.obj.x - this.frameWidth/2;
+    this.y = this.obj.y - this.frameHeight/2;
+}
+
+Camera.prototype.draw = function() {
+    document.getElementById("debug-out2").innerHTML = `Camera: x-${this.x}, y-${this.y}`;
+
+    this.ctx.drawImage(this.background, this.x, this.y, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);		
+}
+
+
+
+
 
 // function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
-
+AM.queueDownload("./img/crosshair.png");
 AM.queueDownload("./img/castle_hall.png");
 AM.queueDownload("./img/charwalk.png");
+AM.queueDownload("./img/charstand.png");
 AM.queueDownload("./img/charshoot_loop.png");
 
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
     var ctx = canvas.getContext("2d");
-
+    canvas.onclick = function() {
+        canvas.requestPointerLock();
+    };
     var gameEngine = new GameEngine();
+    
+    
     gameEngine.init(ctx);
-    gameEngine.start();
-
-    gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
-    gameEngine.addEntity(new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png")));
+    var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"));
+    var camera = new Camera(gameEngine, player, AM.getAsset("./img/castle_hall.png"), 2688, 1392);
+    gameEngine.start(player, camera);
+    // gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
+    gameEngine.addEntity(player);
+    gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair.png")));
     console.log("All Done!");
 });
