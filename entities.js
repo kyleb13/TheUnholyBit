@@ -1,6 +1,6 @@
 function Player(game, walksheet, shootsheet, standsheet) {
     this.animation = new Animation(walksheet, 64, 64, 8, .12, 32, true, 1.5);
-    this.shootanimation = new Animation(shootsheet,64,64, 7, .06, 28, true, 1.5);
+    this.shootanimation = new Animation(shootsheet,64,64, 7, .05, 28, true, 1.5);
     this.standanimation = new Animation(standsheet, 64, 64, 1, .12, 4, true, 1.5);
     this.shootanimation.rowMode();
     this.maxSpeed = 200;
@@ -18,39 +18,76 @@ function Player(game, walksheet, shootsheet, standsheet) {
         offsety:15
     }
     Entity.call(this, game, 400, 400);
+    var that = this;
+    this.shootanimation.setCallbackOnFrame(6, {}, () =>{
+        var x = that.x;
+        var y = that.y;
+        switch(that.movedir){
+            case 0:
+                x += 30;
+                y -= 15;
+                break;
+            case 1:
+                y += 30;
+                break;
+            case 2:
+                y += 50;
+                x+=25;
+                break;
+            case 3:
+                x +=50;
+                y += 30;
+                break;
+        }
+        that.game.addEntity(new Projectile(that.game, 
+            {
+                img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                width:31, 
+                height:5
+            }, 300, //speed
+            {//start point
+                x:x, 
+                y:y
+            }, 
+            {//end Point
+                x:that.game.pointerx, 
+                y:that.game.pointery
+            }, 5));//lifetime
+    });
 }
 
 Player.prototype = new Entity();
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function () {
+    var px = this.game.pointerx;
+    var py = this.game.pointery;
+    var center = this.center();
+    var centerx = center.x;
+    var centery= center.y;
+    var xdiff = Math.abs(px - centerx);
+    var ydiff = Math.abs(py - centery);
+
+    //update direction character is pointing
+    if(py< centery){//pointer is above character
+        if(centerx > px && xdiff>ydiff){
+            this.movedir = 1;
+        } else if(ydiff>=xdiff){
+            this.movedir = 0;
+        } else{
+            this.movedir = 3;
+        }
+    } else {
+        if(centerx > px && xdiff>ydiff){
+            this.movedir = 1;
+        } else if(ydiff>=xdiff){
+            this.movedir = 2;
+        } else{
+            this.movedir = 3;
+        }
+    }
     if(!this.game.lclick && !this.shootanimation.active) {
         let time = this.game.clockTick;
-        var px = this.game.pointerx;
-        var py = this.game.pointery;
-        var centerx = this.ctx.canvas.width/2;
-        var centery= this.ctx.canvas.height/2;
-        var xdiff = Math.abs(px - centerx);
-        var ydiff = Math.abs(py - centery);
-
-        //update direction character is pointing
-        if(py< centery){//pointer is above character
-            if(centerx > px && xdiff>ydiff){
-                this.movedir = 1;
-            } else if(ydiff>=xdiff){
-                this.movedir = 0;
-            } else{
-                this.movedir = 3;
-            }
-        } else {
-            if(centerx > px && xdiff>ydiff){
-                this.movedir = 1;
-            } else if(ydiff>=xdiff){
-                this.movedir = 2;
-            } else{
-                this.movedir = 3;
-            }
-        }
         this.xspeed = 0;
         this.yspeed = 0;
 
@@ -69,35 +106,28 @@ Player.prototype.update = function () {
         this.y += time * this.yspeed;
         this.boundingBox.x = this.x + this.boundingBox.offsetx;
         this.boundingBox.y = this.y + this.boundingBox.offsety;
+    } else if(this.game.lclick){
+        this.xspeed = 0;
+        this.yspeed = 0;
     }
-    // var center = this.center();
-    // document.getElementById("debug-out").innerHTML = `Player pos: x-${center.x}, y-${center.y} direction = ${this.movedir}`;
     Entity.prototype.update.call(this);
 }
 
 Player.prototype.draw = function () {
-    // if(this.game.space || this.shootanimation.active){
-    //    this.shootanimation.loop = this.game.space?true:false;
-    //     this.shootanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y-2, this.movedir);
-    // } else {
-
-    //     this.animation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
-    // }
-    var x = (this.x - this.animation.frameWidth) - this.game.camera.x;
-    var y = (this.y - this.animation.frameHeight) - this.game.camera.y;
+    // var x = (this.x - this.animation.frameWidth/2) - this.game.camera.x;
+    // var y = (this.y - this.animation.frameHeight/2) - this.game.camera.y;
     if(this.game.lclick || this.shootanimation.active){
         this.shootanimation.loop = this.game.lclick?true:false;
-        this.shootanimation.drawFrameFromRow(this.game.clockTick, this.ctx, x, y, this.movedir);
+        this.shootanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
     } else {
         if(this.xspeed!==0 || this.yspeed!==0){
-            this.animation.drawFrameFromRow(this.game.clockTick, this.ctx, x, y, this.movedir);
+            this.animation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
         }else {
-            this.standanimation.drawFrameFromRow(this.game.clockTick, this.ctx, x, y, this.movedir);
+            this.standanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
         }
-        
-        if(this.game.showOutlines){
-            this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-        }
+    }
+    if(this.game.showOutlines){
+        this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     }
     Entity.prototype.draw.call(this);
 }
@@ -112,10 +142,66 @@ function Crosshair(game, spritesheet){
     this.game = game;
     this.ctx = game.ctx;
     this.sheet = spritesheet;
+    this.removeFromWorld = false;
 }
 
-Crosshair.prototype.update = function() {};
+Crosshair.prototype.update = function() {
+    this.game.pointerx += this.game.player.xspeed * this.game.clockTick;
+    this.game.pointery += this.game.player.yspeed * this.game.clockTick;
+};
 
 Crosshair.prototype.draw = function() {
     this.ctx.drawImage(this.sheet, this.game.pointerx, this.game.pointery);
 };
+
+function Projectile(game, spritesheet, speed, start, end, lifetime){
+    this.game = game;
+    this.ctx = game.ctx;
+    this.xspeed = 0;
+    this.yspeed = 0;
+    var theta = 0;
+    this.timer = 0;
+    this.lifetime = lifetime;
+    var dx = end.x - start.x;
+    var dy = end.y - start.y;
+    var pi = Math.PI;
+    //determine x and y speed based on calculated angle
+    if(dx === 0){
+        this.yspeed = dy<0?speed:-speed;
+        theta = dy<0?(4*pi)/3:pi/2;
+    } else if(dy === 0){
+        this.xspeed = dx>0?speed:-speed;
+        theta = dx>0?pi:0;
+    } else {
+        theta = Math.atan(Math.abs(dy/dx));
+        if(dy>0 && dx < 0) {
+            theta = pi + theta;
+        } else if(dy>0) {
+            theta = 2*pi - theta;
+        } else if(dx<0){
+            theta = pi-theta;
+        }
+        this.xspeed = speed*Math.cos(theta);
+        this.yspeed = -speed*Math.sin(theta);
+    }
+    this.sheet = Entity.prototype.rotateAndCache(spritesheet, -theta);
+    Entity.call(this, game, start.x, start.y);
+}
+
+Projectile.prototype = new Entity();
+Projectile.prototype.constructor = Projectile;
+
+Projectile.prototype.update = function() {
+    let time = this.game.clockTick;
+    this.timer += time;
+    if(this.timer < this.lifetime){
+        this.x += time * this.xspeed;
+        this.y += time * this.yspeed;
+    } else {
+        this.removeFromWorld = true;
+    }
+} 
+
+Projectile.prototype.draw = function(){
+    this.ctx.drawImage(this.sheet, this.x, this.y);
+}
