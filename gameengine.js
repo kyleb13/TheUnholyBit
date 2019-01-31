@@ -60,8 +60,6 @@ GameEngine.prototype.start = function (player, camera) {
             that.pointery += dy;
         }
         document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
-        // that.pointerx += dx;
-        // that.pointery += dy;
     }
     document.addEventListener('pointerlockchange', () => {
         if(document.pointerLockElement === canvas){
