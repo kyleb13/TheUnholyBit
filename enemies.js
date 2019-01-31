@@ -10,15 +10,42 @@ function Animation2(spriteSheet, startX, startY, frameWidth, frameHeight, frameD
     this.elapsedTime = 0;
     this.loop = loop;
     this.reverse = reverse;
+    this.callbackEnabled = false;
+    this.callbackFrame = -1;
+    this.callback = null;
+    this.callbackArgs = null;
+    this.callbackDone = false;
+}
+
+    
+function distance(a, b) {
+    var dx = a.x - b.x;
+    var dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+
+Animation2.prototype.setCallbackOnFrame = function(frame,args,callback){
+    this.callbackEnabled = true;
+    this.callbackFrame = frame;
+    this.callback = callback;
+    this.callbackArgs = args;
 }
 
 Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy) {
     var scaleBy = scaleBy || 1;
     this.elapsedTime += tick;
+    var frame = this.currentFrame();
+    if(this.callbackEnabled && frame === this.callbackFrame && !this.callbackDone){
+        this.callbackDone = true;
+        this.callback(this.callbackArgs);
+    }
     if (this.loop) {
         if (this.isDone()) {
             this.elapsedTime = 0;
+            this.callbackDone = false;
         }
+        
     } else if (this.isDone()) {
         return;
     }
@@ -133,6 +160,32 @@ function arrowSkeleton(game, spritesheet) {
     this.attackAnimations["down"]= new Animation2 (spritesheet, 0, 1153, 64, 64, 0.05, 13, true, false);
     this.attackAnimations["right"] = new Animation2 (spritesheet, 0, 1217, 64, 64, 0.05, 13, true, false);
 
+    var that = this;
+    
+    for (var index in this.attackAnimations) {
+        this.attackAnimations[index].setCallbackOnFrame(6, {}, () => {
+            var x = that.x;
+            var y = that.y;
+            switch(that.direction){
+                    case "up":
+                        x += 30;
+                        y -= 15;
+                        break;
+                    case "left":
+                        y += 30;
+                        break;
+                    case "right":
+                        y += 50;
+                        x+=25;
+                        break;
+                    case "down":
+                        x +=50;
+                        y += 30;
+                        break;
+                }
+                addProjectile(that, x, y, "arrow");
+                });
+    }
     this.standingAnimations["up"] = new Animation2 (spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
     this.standingAnimations["left"] = new Animation2 (spritesheet, 0, 576, 64, 64, 0.1, 1, true, false);
     this.standingAnimations["down"] = new Animation2 (spritesheet, 0, 640, 64, 64, 0.1, 1, true, false);
@@ -140,12 +193,13 @@ function arrowSkeleton(game, spritesheet) {
     
     this.DyingAnimation = new  Animation2 (spritesheet, 0, 1280, 64, 64, 0.1, 62, true, false);
 
+    this.following = {x:0, y:0};
     this.attacking = false;
     this.direction = "down";
     this.ctx = game.ctx;
     this.radius = 20;
-    this.visualRadius = 275;
-    this.attackRadius = 100;
+    this.visualRadius = 350;
+    this.attackRadius = 300;
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
     if (speed > maxSpeed) {
@@ -153,13 +207,34 @@ function arrowSkeleton(game, spritesheet) {
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
-    Entity.call(this, game, 400, 400);
+    Entity.call(this, game, 600, 400);
 }
 
 arrowSkeleton.prototype = new Entity();
 arrowSkeleton.prototype.constructor = arrowSkeleton;
 
-
+function addProjectile(that, x, y, proj) {  
+    var img;
+    if (proj === "arrow") {
+        img=that.game.assetManager.getAsset("./img/arrow.png")
+    } else {
+        img = that.game.assetManager.getAsset("./img/fireball.png")
+    } 
+     that.game.addEntity(new Projectile(that.game, 
+    {
+        img, 
+        width:31, 
+        height:5
+    }, 300, //speed
+    {//start point
+        x:x, 
+        y:y
+    }, 
+    {//end Point
+        x:that.following.x, 
+        y:that.following.y
+    }, 5));//lifetime
+}
 arrowSkeleton.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
 };
@@ -223,23 +298,28 @@ arrowSkeleton.prototype.update = function () {
             ent.y += ent.velocity.y * this.game.clockTick;
         }*/
 
-        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Bunny) {
+        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Player) {
             if (this instanceof arrowSkeleton) {
+                this.following = {x: ent.x, y: ent.y};
                 if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.attackRadius })) {
                     this.attacking = true;
-                } 
+                } else {
+                    this.attacking = false;
+                }
+            } 
                 shiftDirection(this, ent);
-            }
         }
     }
 }
 
 
+
 arrowSkeleton.prototype.draw = function () {
     if(!this.attacking) {
-        this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+        this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     }else {
-        this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+        this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+       // this.attacking = false;
     }
     
     Entity.prototype.draw.call(this);
@@ -251,39 +331,28 @@ function magicSkeleton(game, spritesheet) {
     this.attackAnimations =[];
     this.standingAnimations = [];
 
-    this.walkAnimations["up"] = new Animation2
-(spritesheet, 0, 512, 64, 64, 0.1, 8, true, false);
-    this.walkAnimations["left"] = new Animation2
-(spritesheet, 0, 576, 64, 64, 0.1, 8, true, false);
-    this.walkAnimations["down"] = new Animation2
-(spritesheet, 0, 640, 64, 64, 0.1, 8, true, false);
-    this.walkAnimations["right"] = new Animation2
-(spritesheet, 0, 704, 64, 64, 0.1, 8, true, false);
+    this.walkAnimations["up"] = new Animation2(spritesheet, 0, 512, 64, 64, 0.1, 8, true, false);
+    this.walkAnimations["left"] = new Animation2(spritesheet, 0, 576, 64, 64, 0.1, 8, true, false);
+    this.walkAnimations["down"] = new Animation2(spritesheet, 0, 640, 64, 64, 0.1, 8, true, false);
+    this.walkAnimations["right"] = new Animation2(spritesheet, 0, 704, 64, 64, 0.1, 8, true, false);
 
-    this.attackAnimations["up"] = new Animation2
-(spritesheet, 0, 0, 64, 64, 0.08, 7, true, false);
-    this.attackAnimations["left"] = new Animation2
-(spritesheet, 0, 64, 64, 64, 0.08, 7, true, false);
-    this.attackAnimations["down"]= new Animation2
-(spritesheet, 0, 128, 64, 64, 0.08, 7, true, false);
-    this.attackAnimations["right"] = new Animation2
-(spritesheet, 0, 192, 64, 64, 0.08, 7, true, false);
+    this.attackAnimations["up"] = new Animation2(spritesheet, 0, 0, 64, 64, 0.08, 7, true, false);
+    this.attackAnimations["left"] = new Animation2(spritesheet, 0, 64, 64, 64, 0.08, 7, true, false);
+    this.attackAnimations["down"]= new Animation2(spritesheet, 0, 128, 64, 64, 0.08, 7, true, false);
+    this.attackAnimations["right"] = new Animation2(spritesheet, 0, 192, 64, 64, 0.08, 7, true, false);
 
-    this.standingAnimations["up"] = new Animation2
-(spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
-    this.standingAnimations["left"] = new Animation2
-(spritesheet, 0, 576, 64, 64, 0.1, 1, true, false);
-    this.standingAnimations["down"] = new Animation2
-(spritesheet, 0, 640, 64, 64, 0.1, 1, true, false);
-    this.standingAnimations["right"] = new Animation2
-(spritesheet, 0, 704, 64, 64, 0.1, 1, true, false);
+    this.standingAnimations["up"] = new Animation2(spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
+    this.standingAnimations["left"] = new Animation2(spritesheet, 0, 576, 64, 64, 0.1, 1, true, false);
+    this.standingAnimations["down"] = new Animation2(spritesheet, 0, 640, 64, 64, 0.1, 1, true, false);
+    this.standingAnimations["right"] = new Animation2(spritesheet, 0, 704, 64, 64, 0.1, 1, true, false);
 
-    this.DyingAnimation = new  Animation2
-(spritesheet, 0, 1280, 64, 64, 0.1, 6, true, false);
+    this.DyingAnimation = new  Animation2(spritesheet, 0, 1280, 64, 64, 0.1, 6, true, false);
 
+    this.following = {x:0, y:0};
+    
     this.ctx = game.ctx;
     this.radius = 20;
-    this.attackRadius = 100;
+    this.attackRadius = 200;
     this.visualRadius = 275;
     this.attacking = false;
     this.direction = "down";
@@ -515,10 +584,9 @@ Bunny.prototype.update = function () {
             ent.y += ent.velocity.y * this.game.clockTick;
         }
  
-        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius })
-                                             && ent instanceof magicSkeleton) {
+        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Player ) {
             var dist = distance(this, ent);
-            if (this instanceof Bunny && dist > this.radius + ent.radius + 10) {
+            if (this instanceof Bunny) {
                 shiftDirection(this, ent);
                 var difX = (ent.x - this.x)/dist;
                 var difY = (ent.y - this.y)/dist;
@@ -540,7 +608,7 @@ Bunny.prototype.update = function () {
 }
 
 Bunny.prototype.draw = function () {
-    this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     Entity.prototype.draw.call(this);
 }
 
@@ -580,4 +648,4 @@ Fireball.prototype.draw = function () {
 // the "main" code begins here
 var friction = 1;
 var acceleration = 1000000;
-var maxSpeed = 150;
+var maxSpeed = 100;

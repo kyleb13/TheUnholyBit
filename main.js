@@ -177,14 +177,14 @@ AM.downloadAll(function () {
     var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"));
     var camera = new Camera(gameEngine, player, AM.getAsset("./img/castle_hall.png"), 2688, 1392);
     gameEngine.start(player, camera);
-    // gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
+    gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
     gameEngine.addEntity(player);
     gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair.png")));
-/*
+
     gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png")));
     gameEngine.addEntity(new arrowSkeleton(gameEngine, AM.getAsset("./img/arrowSkel.png")));
-    gameEngine.addEntity(new magicSkeleton(gameEngine, AM.getAsset("./img/magicSkel.png")));*/
+//    gameEngine.addEntity(new magicSkeleton(gameEngine, AM.getAsset("./img/magicSkel.png")));*/
  
     console.log("All Done!");
 });
