@@ -35,25 +35,33 @@ function GameEngine() {
     this.player = null;
 }
 
-GameEngine.prototype.init = function (ctx, camera) {
+GameEngine.prototype.init = function (ctx) {
     this.ctx = ctx;
-    this.camera = camera;
     this.surfaceWidth = this.ctx.canvas.width;
     this.surfaceHeight = this.ctx.canvas.height;
     this.rect = this.ctx.canvas.getBoundingClientRect();
     this.timer = new Timer();
+    this.startInput();
+    console.log('game initialized');
+}
+
+GameEngine.prototype.start = function (player, camera) {
+    this.player = player;
+    this.camera = camera;
     var that = this;
-    var canvas = ctx.canvas;
+    var canvas = this.ctx.canvas;
     var mousePositionUpdate = function(e) {
         var dx = e.movementX;
         var dy = e.movementY;
-        if(0<=that.pointerx + dx && that.pointerx + dx<=canvas.width){
+        if(that.pointerx + dx>that.player.x - canvas.width/2 && that.pointerx + dx<that.player.x + canvas.width/2){
             that.pointerx += dx;
         }
-        if(0<=that.pointery + dy && that.pointery + dy<=canvas.height){
+        if(that.pointery + dy>that.player.y - canvas.height/2 && that.pointery + dy<that.player.y + canvas.height/2){
             that.pointery += dy;
         }
-        //document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
+        document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
+        // that.pointerx += dx;
+        // that.pointery += dy;
     }
     document.addEventListener('pointerlockchange', () => {
         if(document.pointerLockElement === canvas){
@@ -64,13 +72,6 @@ GameEngine.prototype.init = function (ctx, camera) {
             that.pointerLocked = false;
         }
     });
-    this.startInput();
-    console.log('game initialized');
-}
-
-GameEngine.prototype.start = function (player, camera) {
-    this.player = player;
-    this.camera = camera;
     console.log("starting game");
     var that = this;
     (function gameLoop() {
@@ -81,24 +82,6 @@ GameEngine.prototype.start = function (player, camera) {
 
 GameEngine.prototype.startInput = function () {
     console.log('Starting input');
-
-    /*var getXandY = function (e) {
-        var x = e.clientX - that.ctx.canvas.getBoundingClientRect().left;
-        var y = e.clientY - that.ctx.canvas.getBoundingClientRect().top;
-
-        if (x < 1024) {
-            x = Math.floor(x / 32);
-            y = Math.floor(y / 32);
-        }
-
-        return { x: x, y: y };
-    }
-
-
-
-
-
-    */
     var that = this;
     var getXandY = function(evt) {
         return {
@@ -109,12 +92,10 @@ GameEngine.prototype.startInput = function () {
 
     this.ctx.canvas.addEventListener("mousedown", (e) => {
         that.lclick = true;
-        console.log("mdown");
     });
 
     this.ctx.canvas.addEventListener("mouseup", (e) => {
         that.lclick = false;
-        console.log("mup");
     });
 
     this.ctx.canvas.addEventListener("keydown", (e) => {
@@ -123,10 +104,6 @@ GameEngine.prototype.startInput = function () {
     this.ctx.canvas.addEventListener("keyup", (e) => {
         that.handleInputs(e.code, false);
     });
-    // this.ctx.canvas.addEventListener("mousemove", (e) => {
-    //     // that.pointerPos = {x:pointerx, y:pointery};
-    //     document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
-    // });
 
 }
 
@@ -157,7 +134,9 @@ GameEngine.prototype.draw = function () {
     this.ctx.save();
     this.camera.draw();
     for (var i = 0; i < this.entities.length; i++) {
-        this.entities[i].draw(this.ctx);
+        if(!this.entities[i].removeFromWorld){
+            this.entities[i].draw(this.ctx);
+        }
     }
     this.ctx.restore();
 }
@@ -167,8 +146,9 @@ GameEngine.prototype.update = function () {
     this.camera.update();
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
-
-        entity.update();
+        if(!entity.removeFromWorld){
+            entity.update();
+        }
     }
 }
 
@@ -224,9 +204,7 @@ Entity.prototype.rotateAndCache = function (image, angle) {
     offscreenCtx.translate(size / 2, size / 2);
     offscreenCtx.rotate(angle);
     offscreenCtx.translate(0, 0);
-    offscreenCtx.drawImage(image, -(image.width / 2), -(image.height / 2));
+    offscreenCtx.drawImage(image.img, -(image.width / 2), -(image.height / 2));
     offscreenCtx.restore();
-    //offscreenCtx.strokeStyle = "red";
-    //offscreenCtx.strokeRect(0,0,size,size);
     return offscreenCanvas;
 }

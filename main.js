@@ -12,6 +12,18 @@ function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDurati
     this.loop = loop;
     this.scale = scale;
     this.active = false;
+    this.callbackEnabled = false;
+    this.callbackFrame = -1;
+    this.callback = null;
+    this.callbackArgs = null;
+    this.callbackDone = false;
+}
+
+Animation.prototype.setCallbackOnFrame = function(frame,args,callback){
+    this.callbackEnabled = true;
+    this.callbackFrame = frame;
+    this.callback = callback;
+    this.callbackArgs = args;
 }
 
 Animation.prototype.rowMode = function(){
@@ -21,6 +33,11 @@ Animation.prototype.rowMode = function(){
 Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     this.active = true;
     this.elapsedTime += tick;
+    var frame = this.currentFrame();
+    if(this.callbackEnabled && frame === this.callbackFrame && !this.callbackDone){
+        this.callbackDone = true;
+        this.callback(this.callbackArgs);
+    }
     if (this.isDone()) {
         if (this.loop){
             this.elapsedTime = 0;
@@ -29,7 +46,7 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
         }
         
     }
-    var frame = this.currentFrame();
+    
     var xindex = 0;
     var yindex = 0;
     xindex = frame % this.sheetWidth;
@@ -43,19 +60,24 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
                  this.frameHeight * this.scale);
 }
 
+//draw frames from specified row
 Animation.prototype.drawFrameFromRow = function (tick, ctx, x, y, row) {
     this.active = true;
     this.elapsedTime += tick;
+    var frame = this.currentFrameFixedRow();
+    if(this.callbackEnabled && frame === this.callbackFrame && !this.callbackDone){
+        this.callbackDone = true;
+        this.callback(this.callbackArgs);
+    }
     if (this.isDone()) {
-        if(this.frames == 28) console.log("done");
         if (this.loop){
+            this.callbackDone = false;
             this.elapsedTime = 0;
         } else {
             this.active = false;
         }
         
     }
-    var frame = this.currentFrameFixedRow();
     // var imgheight =  (this.frames/this.sheetWidth)*this.frameHeight;
     var yidx = this.frameHeight*row;
     ctx.drawImage(this.spriteSheet,
@@ -80,7 +102,6 @@ Animation.prototype.isDone = function () {
     return (this.elapsedTime >= this.totalTime);
 }
 
-// no inheritance
 function Background(game, spritesheet) {
     this.x = 0;
     this.y = 0;
@@ -109,18 +130,19 @@ function Camera(game, obj, background, width, height){
     this.frameHeight = this.ctx.canvas.height;
     this.x =  0;
     this.y = 0;
-    console.log(`width ${this.frameWidth}, height ${this.frameHeight}`);
+    // console.log(`width ${this.frameWidth}, height ${this.frameHeight}`);
 }
 
 Camera.prototype.update = function(){
-    this.x = this.obj.x - this.frameWidth/2;
-    this.y = this.obj.y - this.frameHeight/2;
+    // this.x = this.obj.x - this.frameWidth/2;
+    // this.y = this.obj.y - this.frameHeight/2;
 }
 
 Camera.prototype.draw = function() {
-    document.getElementById("debug-out2").innerHTML = `Camera: x-${this.x}, y-${this.y}`;
-
-    this.ctx.drawImage(this.background, this.x, this.y, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);		
+    this.ctx.setTransform(1,0,0,1,0,0);
+    var camX = -this.obj.x + this.ctx.canvas.width/2;
+    var camY = -this.obj.y + this.ctx.canvas.height/2
+    this.ctx.translate( camX, camY );	
 }
 
 
@@ -133,6 +155,14 @@ AM.queueDownload("./img/castle_hall.png");
 AM.queueDownload("./img/charwalk.png");
 AM.queueDownload("./img/charstand.png");
 AM.queueDownload("./img/charshoot_loop.png");
+AM.queueDownload("./img/arrow.png");
+
+AM.queueDownload("./img/bunbun.png");
+AM.queueDownload("./img/napper.png");
+AM.queueDownload("./img/yap.png");
+AM.queueDownload("./img/arrowSkel.png");
+AM.queueDownload("./img/magicSkel.png");
+AM.queueDownload("./img/fireball.png");
 
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
@@ -141,14 +171,20 @@ AM.downloadAll(function () {
         canvas.requestPointerLock();
     };
     var gameEngine = new GameEngine();
-    
+    gameEngine.assetManager = AM;
     
     gameEngine.init(ctx);
     var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"));
     var camera = new Camera(gameEngine, player, AM.getAsset("./img/castle_hall.png"), 2688, 1392);
     gameEngine.start(player, camera);
-    // gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
+    gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
+    gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
     gameEngine.addEntity(player);
     gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair.png")));
+
+    gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png")));
+    gameEngine.addEntity(new arrowSkeleton(gameEngine, AM.getAsset("./img/arrowSkel.png")));
+//    gameEngine.addEntity(new magicSkeleton(gameEngine, AM.getAsset("./img/magicSkel.png")));*/
+ 
     console.log("All Done!");
 });
