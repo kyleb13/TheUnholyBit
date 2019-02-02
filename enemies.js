@@ -363,7 +363,7 @@ function Bunny(game, spritesheet) {
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
-    Entity.call(this, game, 0, 300);
+    Entity.call(this, game, 0, 100);
 }
 
 Bunny.prototype = new Entity();
