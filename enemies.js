@@ -144,7 +144,7 @@ function shiftDirection(ent1, ent2) {
 
 
 
-function arrowSkeleton(game, spritesheet) {
+function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
 
     this.walkAnimations = [];
     this.attackAnimations =[];
@@ -155,10 +155,10 @@ function arrowSkeleton(game, spritesheet) {
     this.walkAnimations["down"] = new Animation2 (spritesheet, 0, 640, 64, 64, 0.1, 8, true, false);
     this.walkAnimations["right"] = new Animation2 (spritesheet, 0, 704, 64, 64, 0.1, 8, true, false);
 
-    this.attackAnimations["up"] = new Animation2 (spritesheet, 0, 1025, 64, 64, 0.05, 13, true, false);
-    this.attackAnimations["left"] = new Animation2 (spritesheet, 0, 1089, 64, 64, 0.05, 13, true, false);
-    this.attackAnimations["down"]= new Animation2 (spritesheet, 0, 1153, 64, 64, 0.05, 13, true, false);
-    this.attackAnimations["right"] = new Animation2 (spritesheet, 0, 1217, 64, 64, 0.05, 13, true, false);
+    this.attackAnimations["up"] = new Animation2 (spritesheet, type.x, type.y, type.w, type.h, type.d, type.f, type.l, type.r);
+    this.attackAnimations["left"] = new Animation2 (spritesheet, type.x, type.y+64, type.w, type.h, type.d, type.f, type.l, type.r);
+    this.attackAnimations["down"]= new Animation2 (spritesheet, type.x, type.y+128, type.w, type.h, type.d, type.f, type.l, type.r);
+    this.attackAnimations["right"] = new Animation2 (spritesheet, type.x, type.y+192, type.w, type.h, type.d, type.f, type.l, type.r);
 
     var that = this;
     
@@ -168,22 +168,22 @@ function arrowSkeleton(game, spritesheet) {
             var y = that.y;
             switch(that.direction){
                     case "up":
-                        x += 30;
+                        x += 35;
                         y -= 15;
                         break;
                     case "left":
-                        y += 30;
+                        y += 25;
                         break;
                     case "right":
-                        y += 50;
+                        y += 30;
                         x+=25;
                         break;
                     case "down":
-                        x +=50;
+                        x +=30;
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, "arrow");
+                addProjectile(that, x, y, projectile);
                 });
     }
     this.standingAnimations["up"] = new Animation2 (spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
@@ -207,71 +207,64 @@ function arrowSkeleton(game, spritesheet) {
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
-    Entity.call(this, game, 600, 400);
+    Entity.call(this, game, spawnX, spawnY);
 }
 
-arrowSkeleton.prototype = new Entity();
-arrowSkeleton.prototype.constructor = arrowSkeleton;
+RangeSkeleton.prototype = new Entity();
+RangeSkeleton.prototype.constructor = RangeSkeleton;
 
-function addProjectile(that, x, y, proj) {  
+function addProjectile(that, x, y, type) {  
     var img;
-    if (proj === "arrow") {
-        img=that.game.assetManager.getAsset("./img/arrow.png")
+    var height;
+    var width;
+    var center = that.following.center();
+    if (type === "arrow") {
+        img = that.game.assetManager.getAsset("./img/arrow.png")
+        width = 31;
+        height = 5;
     } else {
         img = that.game.assetManager.getAsset("./img/fireball.png")
+        width = 26;
+        height = 17;
+        y = y + 20;
     } 
      that.game.addEntity(new Projectile(that.game, 
     {
         img, 
-        width:31, 
-        height:5
+        width, 
+        height
     }, 300, //speed
     {//start point
         x:x, 
         y:y
     }, 
     {//end Point
-        x:that.following.x, 
-        y:that.following.y
+        x:center.x, 
+        y:center.y
     }, 5));//lifetime
 }
-arrowSkeleton.prototype.collide = function (other) {
+RangeSkeleton.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
 };
 
-arrowSkeleton.prototype.collideLeft = function () {
+RangeSkeleton.prototype.collideLeft = function () {
     return (this.x - this.radius) < 0;
 };
 
-arrowSkeleton.prototype.collideRight = function () {
+RangeSkeleton.prototype.collideRight = function () {
     return (this.x + this.radius) > 800;
 };
 
-arrowSkeleton.prototype.collideTop = function () {
+RangeSkeleton.prototype.collideTop = function () {
     return (this.y - this.radius) < 0;
 };
 
-arrowSkeleton.prototype.collideBottom = function () {
+RangeSkeleton.prototype.collideBottom = function () {
     return (this.y + this.radius) > 650;
 };
 
-arrowSkeleton.prototype.update = function () {   
+RangeSkeleton.prototype.update = function () {   
     Entity.prototype.update.call(this);
-    /*if (this.collideLeft() || this.collideRight()) {
-        this.velocity.x = -this.velocity.x * friction;
-        if (this.collideLeft()) this.x = this.radius;
-        if (this.collideRight()) this.x = 800 - this.radius;
-        this.x += this.velocity.x * this.game.clockTick;
-        this.y += this.velocity.y * this.game.clockTick;
-    }
-
-    if (this.collideTop() || this.collideBottom()) {
-        this.velocity.y = -this.velocity.y * friction;
-        if (this.collideTop()) this.y = this.radius;
-        if (this.collideBottom()) this.y = 650 - this.radius;
-        this.x += this.velocity.x * this.game.clockTick;
-        this.y += this.velocity.y * this.game.clockTick;
-    }*/
     
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
@@ -299,8 +292,8 @@ arrowSkeleton.prototype.update = function () {
         }*/
 
         if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Player) {
-            if (this instanceof arrowSkeleton) {
-                this.following = {x: ent.x, y: ent.y};
+            if (this instanceof RangeSkeleton) {
+                this.following = ent;
                 if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.attackRadius })) {
                     this.attacking = true;
                 } else {
@@ -314,7 +307,7 @@ arrowSkeleton.prototype.update = function () {
 
 
 
-arrowSkeleton.prototype.draw = function () {
+RangeSkeleton.prototype.draw = function () {
     if(!this.attacking) {
         this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     }else {
@@ -325,67 +318,6 @@ arrowSkeleton.prototype.draw = function () {
     Entity.prototype.draw.call(this);
 }
 
-
-function magicSkeleton(game, spritesheet) {
-    this.walkAnimations = [];
-    this.attackAnimations =[];
-    this.standingAnimations = [];
-
-    this.walkAnimations["up"] = new Animation2(spritesheet, 0, 512, 64, 64, 0.1, 8, true, false);
-    this.walkAnimations["left"] = new Animation2(spritesheet, 0, 576, 64, 64, 0.1, 8, true, false);
-    this.walkAnimations["down"] = new Animation2(spritesheet, 0, 640, 64, 64, 0.1, 8, true, false);
-    this.walkAnimations["right"] = new Animation2(spritesheet, 0, 704, 64, 64, 0.1, 8, true, false);
-
-    this.attackAnimations["up"] = new Animation2(spritesheet, 0, 0, 64, 64, 0.08, 7, true, false);
-    this.attackAnimations["left"] = new Animation2(spritesheet, 0, 64, 64, 64, 0.08, 7, true, false);
-    this.attackAnimations["down"]= new Animation2(spritesheet, 0, 128, 64, 64, 0.08, 7, true, false);
-    this.attackAnimations["right"] = new Animation2(spritesheet, 0, 192, 64, 64, 0.08, 7, true, false);
-
-    this.standingAnimations["up"] = new Animation2(spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
-    this.standingAnimations["left"] = new Animation2(spritesheet, 0, 576, 64, 64, 0.1, 1, true, false);
-    this.standingAnimations["down"] = new Animation2(spritesheet, 0, 640, 64, 64, 0.1, 1, true, false);
-    this.standingAnimations["right"] = new Animation2(spritesheet, 0, 704, 64, 64, 0.1, 1, true, false);
-
-    this.DyingAnimation = new  Animation2(spritesheet, 0, 1280, 64, 64, 0.1, 6, true, false);
-
-    this.following = {x:0, y:0};
-    
-    this.ctx = game.ctx;
-    this.radius = 20;
-    this.attackRadius = 200;
-    this.visualRadius = 275;
-    this.attacking = false;
-    this.direction = "down";
-
-    this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
-    var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-    if (speed > maxSpeed) {
-        var ratio = maxSpeed / speed;
-        this.velocity.x *= ratio;
-        this.velocity.y *= ratio;
-    }
-    Entity.call(this, game, 200, 200);
-}
-
-magicSkeleton.prototype.collide = function (other) {
-    return distance(this, other) < this.radius + other.radius;
-};
-
-magicSkeleton.prototype.collideLeft = function () {
-    return (this.x - this.radius) < 0;
-};
-
-magicSkeleton.prototype.collideRight = function () {
-    return (this.x + this.radius) > 800;
-};
-
-magicSkeleton.prototype.collideTop = function () {
-    return (this.y - this.radius) < 0;
-};
-
-magicSkeleton.prototype.collideBottom = function () {
-    return (this.y + this.radius) > 650;
-};
 
 /*
 function collide(ent1, ent2) {
@@ -403,72 +335,6 @@ function collideTop (entity) {
 function collideBottom (entity) {
     return (entity.y + entity.radius) > 650;
 }*/
-
-
-magicSkeleton.prototype.update = function () {   
-    Entity.prototype.update.call(this);
-    /*if (this.collideLeft() || this.collideRight()) {
-        this.velocity.x = -this.velocity.x * friction;
-        if (this.collideLeft()) this.x = this.radius;
-        if (this.collideRight()) this.x = 800 - this.radius;
-        this.x += this.velocity.x * this.game.clockTick;
-        this.y += this.velocity.y * this.game.clockTick;
-    }
-
-    if (this.collideTop() || this.collideBottom()) {
-        this.velocity.y = -this.velocity.y * friction;
-        if (this.collideTop()) this.y = this.radius;
-        if (this.collideBottom()) this.y = 650 - this.radius;
-        this.x += this.velocity.x * this.game.clockTick;
-        this.y += this.velocity.y * this.game.clockTick;
-    }*/
-    
-    for (var i = 0; i < this.game.entities.length; i++) {
-        var ent = this.game.entities[i];
-      /*  if (ent !== this && this.collide(ent)) {
-            var temp = { x: this.velocity.x, y: this.velocity.y };
-
-            var dist = distance(this, ent);
-            var delta = this.radius + ent.radius - dist;
-            var difX = (this.x - ent.x)/dist;
-            var difY = (this.y - ent.y)/dist;
-
-            this.x += difX * delta / 2;
-            this.y += difY * delta / 2;
-            ent.x -= difX * delta / 2;
-            ent.y -= difY * delta / 2;
-
-            this.velocity.x = ent.velocity.x * friction;
-            this.velocity.y = ent.velocity.y * friction;
-            ent.velocity.x = temp.x * friction;
-            ent.velocity.y = temp.y * friction;
-            this.x += this.velocity.x * this.game.clockTick;
-            this.y += this.velocity.y * this.game.clockTick;
-            ent.x += ent.velocity.x * this.game.clockTick;
-            ent.y += ent.velocity.y * this.game.clockTick;
-        }*/
-
-        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Bunny) {
-            if (this instanceof magicSkeleton) {
-                if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.attackRadius })) {
-                    this.attacking = true;
-                } 
-                shiftDirection(this, ent);
-            }
-        }
-    }
-
-}
-magicSkeleton.prototype.draw = function () {
-    if(!this.attacking) {
-        this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-    }else {
-        this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-    }
-    
-    Entity.prototype.draw.call(this);
-}
-
 
 
 function Bunny(game, spritesheet) {
@@ -497,7 +363,7 @@ function Bunny(game, spritesheet) {
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
-    Entity.call(this, game, 0, 200);
+    Entity.call(this, game, 0, 100);
 }
 
 Bunny.prototype = new Entity();
@@ -525,39 +391,8 @@ Bunny.prototype.collideBottom = function () {
 
 Bunny.prototype.update = function () {
 
-
     this.x += this.velocity.x * this.game.clockTick;
     this.y += this.velocity.y * this.game.clockTick;
-
-    if (this.collideLeft() || this.collideRight()) {
-        this.velocity.x = -this.velocity.x * friction;
-        if (this.collideLeft()) { 
-            this.x = this.radius;
-            this.direction = "right";
-        }
-        if (this.collideRight()) {
-            this.x = 800 - this.radius;
-            this.direction = "left";
-        }
-        this.x += this.velocity.x * this.game.clockTick;
-        this.y += this.velocity.y * this.game.clockTick;
-    }
-
-    if (this.collideTop() || this.collideBottom()) {
-        this.velocity.y = -this.velocity.y * friction;
-        if (this.collideTop()) {
-            this.y = this.radius;
-            this.direction = "down";
-        }
-        if (this.collideBottom()) {
-            this.y = 650 - this.radius;
-            this.direction = "up";
-        }
-            
-        this.x += this.velocity.x * this.game.clockTick;
-        this.y += this.velocity.y * this.game.clockTick;
-    }
-    
 
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
@@ -611,38 +446,6 @@ Bunny.prototype.draw = function () {
     this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     Entity.prototype.draw.call(this);
 }
-
-function Fireball(game, spritesheet, x, y) {
-    this.animation = new Animation2
-(spritesheet, 0, 0, 64, 64, 0.1, 8, true, false);
-
-    this.speed = 200;
-    this.ctx = game.ctx;
-    this.remove = false;
-    Entity.call(this, game, x, y);
-}
-
-Fireball.prototype = new Entity();
-Fireball.prototype.constructor = Fireball;
-
-Fireball.prototype.update = function () {
-    this.x -= this.game.clockTick * this.speed;
-
-    if (this.x < 30) {
-        this.remove = true;
-    }
-
-    if (this.remove) {
-        this.removeFromWorld = true;
-    }
-    Entity.prototype.update.call(this);
-}
-
-Fireball.prototype.draw = function () {
-    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1);
-    Entity.prototype.draw.call(this);
-}
-
 
 
 // the "main" code begins here
