@@ -18,6 +18,7 @@ window.requestAnimFrame = (function () {
 
 function GameEngine() {
     this.entities = [];
+    this.projectiles = [];
     this.ctx = null;
     this.surfaceWidth = null;
     this.surfaceHeight = null;
@@ -59,9 +60,7 @@ GameEngine.prototype.start = function (player, camera) {
         if(that.pointery + dy>that.player.y - canvas.height/2 && that.pointery + dy<that.player.y + canvas.height/2){
             that.pointery += dy;
         }
-        document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
-        // that.pointerx += dx;
-        // that.pointery += dy;
+        //document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
     }
     document.addEventListener('pointerlockchange', () => {
         if(document.pointerLockElement === canvas){
@@ -128,6 +127,10 @@ GameEngine.prototype.addEntity = function (entity) {
     console.log('added entity');
     this.entities.push(entity);
 }
+GameEngine.prototype.addProjectile = function (entity) {
+    console.log('added projectile');
+    this.projectiles.push(entity);
+}
 
 GameEngine.prototype.draw = function () {
     this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
@@ -138,14 +141,24 @@ GameEngine.prototype.draw = function () {
             this.entities[i].draw(this.ctx);
         }
     }
+    for (var i = 0; i < this.projectiles.length; i++) {
+        if(!this.projectiles[i].removeFromWorld){
+            this.projectiles[i].draw(this.ctx);
+        }
+    }
     this.ctx.restore();
 }
 
 GameEngine.prototype.update = function () {
-    var entitiesCount = this.entities.length;
     this.camera.update();
-    for (var i = 0; i < entitiesCount; i++) {
+    for (var i = 0; i < this.entities.length; i++) {
         var entity = this.entities[i];
+        if(!entity.removeFromWorld){
+            entity.update();
+        }
+    }
+    for (var i = 0; i < this.projectiles.length; i++) {
+        var entity = this.projectiles[i];
         if(!entity.removeFromWorld){
             entity.update();
         }
@@ -202,9 +215,9 @@ Entity.prototype.rotateAndCache = function (image, angle) {
     var offscreenCtx = offscreenCanvas.getContext('2d');
     offscreenCtx.save();
     offscreenCtx.translate(size / 2, size / 2);
-    offscreenCtx.rotate(angle);
+    offscreenCtx.rotate(-angle);
     offscreenCtx.translate(0, 0);
     offscreenCtx.drawImage(image.img, -(image.width / 2), -(image.height / 2));
     offscreenCtx.restore();
-    return offscreenCanvas;
+    return {img:offscreenCanvas, center:{x:size/2, y:size/2}};
 }
