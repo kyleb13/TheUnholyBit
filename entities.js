@@ -215,8 +215,8 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter){
         console.log("Xspeed: " + this.xspeed);
         console.log("Yspeed: " + this.yspeed);
     }
-    this.sheet = Entity.prototype.rotateAndCache(spritesheet, -theta);
-    var temp = Entity.prototype.rotateAndCache(this.boundingBox, -theta);
+    this.sheet = Entity.prototype.rotateAndCache(spritesheet, theta);
+    var temp = Entity.prototype.rotateAndCache(this.boundingBox, theta);
     this.rotatedBoundingBox = temp.img;
     Entity.call(this, game, start.x, start.y);
 }
@@ -256,7 +256,7 @@ Projectile.prototype.draw = function(){
     var x = this.x - this.sheet.center.x;
     var y = this.y - this.sheet.center.y;
     this.ctx.drawImage(this.sheet.img, x, y);
-    this.ctx.drawImage(this.rotatedBoundingBox, this.x, this.y);
+    this.ctx.drawImage(this.rotatedBoundingBox, x, y);
 
 }
 
