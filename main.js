@@ -149,9 +149,9 @@ Camera.prototype.draw = function() {
 
 
 
-// function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
+
 AM.queueDownload("./img/crosshair.png");
-AM.queueDownload("./img/castle_hall.png");
+AM.queueDownload("./img/villagemap.png");
 AM.queueDownload("./img/charwalk.png");
 AM.queueDownload("./img/charstand.png");
 AM.queueDownload("./img/charshoot_loop.png");
@@ -180,24 +180,22 @@ AM.downloadAll(function () {
     
     gameEngine.init(ctx);
     var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"));
-    var camera = new Camera(gameEngine, player, AM.getAsset("./img/castle_hall.png"), 2688, 1392);
+    var camera = new Camera(gameEngine, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
     gameEngine.start(player, camera);
-    gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
-    gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castle_hall.png")));
+    gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/villagemap.png")));
     gameEngine.addEntity(player);
     gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair.png")));
 
 
     var ArrowType = {x:0, y:1025, w:64, h:64, d:0.05, f:13, l:true, r:false};
     var MagicType = {x:0, y:0, w:64, h:64, d:0.08, f:7, l:true, r:false};
-  //  gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png")));
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/arrowSkel.png"), 300, 600, ArrowType, "arrow"));
- /*   gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/magicSkel.png"), 400, 600, MagicType, "magic"));
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/HoodedRanger.png"), 200, 600, ArrowType, "arrow"));
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), 100, 600, MagicType, "magic"));
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightArcher.png"), 600, 600, ArrowType, "arrow"));
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightMage.png"), 500, 600, MagicType, "magic"));
-*/    
+    //gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png")));
+    gameEngine.addEntity(new RangeSkeleton(gameEngine, AM.getAsset("./img/arrowSkel.png"), 300, 600, ArrowType, "arrow"));
+    gameEngine.addEntity(new RangeSkeleton(gameEngine, AM.getAsset("./img/magicSkel.png"), 400, 600, MagicType, "magic"));
+    gameEngine.addEntity(new RangeSkeleton(gameEngine, AM.getAsset("./img/HoodedRanger.png"), 200, 600, ArrowType, "arrow"));
+    gameEngine.addEntity(new RangeSkeleton(gameEngine, AM.getAsset("./img/MageGirl.png"), 100, 600, MagicType, "magic"));
+    gameEngine.addEntity(new RangeSkeleton(gameEngine, AM.getAsset("./img/KnightArcher.png"), 600, 600, ArrowType, "arrow"));
+    gameEngine.addEntity(new RangeSkeleton(gameEngine, AM.getAsset("./img/KnightMage.png"), 500, 600, MagicType, "magic"));
     
     console.log("All Done!");
 });
