@@ -22,24 +22,27 @@ function Player(game, walksheet, shootsheet, standsheet) {
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
         var y = that.y;
+        //change direction arrows come from based on
+        //direction character is facing
         switch(that.movedir){
             case 0:
-                x += 30;
-                y -= 15;
+                x += 42;
+                y -= 5;
                 break;
             case 1:
-                y += 30;
+                y += 44;
+                x +=8;
                 break;
             case 2:
-                y += 50;
-                x+=25;
+                y += 75;
+                x+=40;
                 break;
             case 3:
-                x +=50;
-                y += 30;
+                x +=46;
+                y += 42;
                 break;
         }
-        that.game.addEntity(new Projectile(that.game, 
+        that.game.addProjectile(new Projectile(that.game, 
             {
                 img:that.game.assetManager.getAsset("./img/arrow.png"), 
                 width:31, 
@@ -114,8 +117,6 @@ Player.prototype.update = function () {
 }
 
 Player.prototype.draw = function () {
-    // var x = (this.x - this.animation.frameWidth/2) - this.game.camera.x;
-    // var y = (this.y - this.animation.frameHeight/2) - this.game.camera.y;
     if(this.game.lclick || this.shootanimation.active){
         this.shootanimation.loop = this.game.lclick?true:false;
         this.shootanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
@@ -151,9 +152,11 @@ Crosshair.prototype.update = function() {
 };
 
 Crosshair.prototype.draw = function() {
-    this.ctx.drawImage(this.sheet, this.game.pointerx, this.game.pointery);
+    this.ctx.drawImage(this.sheet, this.game.pointerx-7, this.game.pointery-7);
+    this.ctx.strokeRect(this.game.pointerx, this.game.pointery, 2, 2);
 };
 
+//the spritesheet should be packaged in a json object with the width and height
 function Projectile(game, spritesheet, speed, start, end, lifetime){
     this.game = game;
     this.ctx = game.ctx;
@@ -184,7 +187,8 @@ function Projectile(game, spritesheet, speed, start, end, lifetime){
         this.xspeed = speed*Math.cos(theta);
         this.yspeed = -speed*Math.sin(theta);
     }
-    this.sheet = Entity.prototype.rotateAndCache(spritesheet, -theta);
+    //document.getElementById("debug-out2").innerHTML = `Arrow endpoint: x-${end.x}, y-${end.y}`;
+    this.sheet = Entity.prototype.rotateAndCache(spritesheet, theta);
     Entity.call(this, game, start.x, start.y);
 }
 
@@ -203,5 +207,8 @@ Projectile.prototype.update = function() {
 } 
 
 Projectile.prototype.draw = function(){
-    this.ctx.drawImage(this.sheet, this.x, this.y);
+    var x = this.x - this.sheet.center.x;
+    var y = this.y - this.sheet.center.y;
+    this.ctx.drawImage(this.sheet.img, x, y);
+    //this.ctx.strokeRect(this.x, this.y, 2, 2);
 }
