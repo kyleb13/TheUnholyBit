@@ -29,8 +29,8 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    // this.showOutlines = true;
-    this.showOutlines = false;
+    this.showOutlines = true;
+    //this.showOutlines = false;
     this.camera = null;
     this.player = null;
 }
@@ -204,7 +204,21 @@ Entity.prototype.rotateAndCache = function (image, angle) {
     offscreenCtx.translate(size / 2, size / 2);
     offscreenCtx.rotate(angle);
     offscreenCtx.translate(0, 0);
-    offscreenCtx.drawImage(image.img, -(image.width / 2), -(image.height / 2));
+    if (!image.hasOwnProperty("img")) {
+        var r = getRotatedRect(image);
+        offscreenCtx.strokeRect(r.x, r.y, r.w, r.h);
+    } else {
+        offscreenCtx.drawImage(image.img, -(image.width / 2), -(image.height / 2));
+    }
     offscreenCtx.restore();
     return offscreenCanvas;
+}
+
+function getRotatedRect(boundingBox) {
+    return {
+      x: boundingBox.width / -2,
+      y: boundingBox.height / -2,
+      w: boundingBox.width,
+      h: boundingBox.height
+    };
 }
