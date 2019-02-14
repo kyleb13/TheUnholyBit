@@ -114,6 +114,7 @@ Background.prototype.draw = function () {
 
 Background.prototype.update = function () {
 };
+
 function shiftDirection(ent1, ent2) {
     var enemyX = ent2.x;
     var enemyY = ent2.y;
@@ -144,7 +145,7 @@ function shiftDirection(ent1, ent2) {
 
 
 
-function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
+function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
 
     this.walkAnimations = [];
     this.attackAnimations =[];
@@ -183,7 +184,7 @@ function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, projectile);
+                addProjectile(that, x, y, projectile, "Enemy");
                 });
     }
     this.standingAnimations["up"] = new Animation2 (spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
@@ -193,13 +194,38 @@ function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
     
     this.DyingAnimation = new  Animation2 (spritesheet, 0, 1280, 64, 64, 0.1, 62, true, false);
 
-    this.following = {x:0, y:0};
+    this.boundingBox = {
+        x:this.x, 
+        y:this.y,
+        width: 32,
+        height: 65,
+        offsetx:32,
+        offsety:24
+    }
+
+    this.visualBox = {
+        x:this.x, 
+        y:this.y,
+        width: 400,
+        height: 400,
+        offsetx:-158,
+        offsety:-120
+    }
+
+    this.attackBox = {
+        x:this.x, 
+        y:this.y,
+        width: 250,
+        height: 250,
+        offsetx:-85,
+        offsety:-55
+    }
+    this.followPoint = {x:0, y:0};
+    this.following = false;
     this.attacking = false;
     this.direction = "down";
     this.ctx = game.ctx;
-    this.radius = 20;
-    this.visualRadius = 350;
-    this.attackRadius = 300;
+    
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
     if (speed > maxSpeed) {
@@ -210,14 +236,14 @@ function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
     Entity.call(this, game, spawnX, spawnY);
 }
 
-RangeSkeleton.prototype = new Entity();
-RangeSkeleton.prototype.constructor = RangeSkeleton;
+RangeEnemy.prototype = new Entity();
+RangeEnemy.prototype.constructor = RangeEnemy;
 
-function addProjectile(that, x, y, type) {  
+function addProjectile(that, x, y, type, shooter) {  
     var img;
     var height;
     var width;
-    var center = that.following.center();
+    var center = that.followPoint.center();
     if (type === "arrow") {
         img = that.game.assetManager.getAsset("./img/arrow.png")
         width = 31;
@@ -241,88 +267,116 @@ function addProjectile(that, x, y, type) {
     {//end Point
         x:center.x, 
         y:center.y
-    }, 5));//lifetime
+    }, 5, shooter));//lifetime
 }
-RangeSkeleton.prototype.collide = function (other) {
+RangeEnemy.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
 };
 
-RangeSkeleton.prototype.collideLeft = function () {
+RangeEnemy.prototype.collideLeft = function () {
     return (this.x - this.radius) < 0;
 };
 
-RangeSkeleton.prototype.collideRight = function () {
+RangeEnemy.prototype.collideRight = function () {
     return (this.x + this.radius) > 800;
 };
 
-RangeSkeleton.prototype.collideTop = function () {
+RangeEnemy.prototype.collideTop = function () {
     return (this.y - this.radius) < 0;
 };
 
-RangeSkeleton.prototype.collideBottom = function () {
+RangeEnemy.prototype.collideBottom = function () {
     return (this.y + this.radius) > 650;
 };
 
-RangeSkeleton.prototype.update = function () {   
+RangeEnemy.prototype.update = function () {   
     Entity.prototype.update.call(this);
     
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
+    this.visualBox.x = this.x + this.visualBox.offsetx;
+    this.visualBox.y = this.y + this.visualBox.offsety;
+
+    this.attackBox.x = this.x + this.attackBox.offsetx;
+    this.attackBox.y = this.y + this.attackBox.offsety;
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-      /*  if (ent !== this && this.collide(ent)) {
-            var temp = { x: this.velocity.x, y: this.velocity.y };
+        if (ent instanceof Player) {
+            if (collide(this, ent)) {
+                console.log("Player collide");
+                var temp = { x: this.velocity.x, y: this.velocity.y };
 
-            var dist = distance(this, ent);
-            var delta = this.radius + ent.radius - dist;
-            var difX = (this.x - ent.x)/dist;
-            var difY = (this.y - ent.y)/dist;
+                tempVelocityX = temp.x * friction;
+                tempVelocityY = temp.y * friction;
 
-            this.x += difX * delta / 2;
-            this.y += difY * delta / 2;
-            ent.x -= difX * delta / 2;
-            ent.y -= difY * delta / 2;
-
-            this.velocity.x = ent.velocity.x * friction;
-            this.velocity.y = ent.velocity.y * friction;
-            ent.velocity.x = temp.x * friction;
-            ent.velocity.y = temp.y * friction;
-            this.x += this.velocity.x * this.game.clockTick;
-            this.y += this.velocity.y * this.game.clockTick;
-            ent.x += ent.velocity.x * this.game.clockTick;
-            ent.y += ent.velocity.y * this.game.clockTick;
-        }*/
-
-        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Player) {
-            if (this instanceof RangeSkeleton) {
-                this.following = ent;
-                if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.attackRadius })) {
+                ent.x += 20 * tempVelocityX * this.game.clockTick;
+                ent.y += 20 * tempVelocityY * this.game.clockTick;
+            }
+            
+            if (collide({boundingBox: this.visualBox}, ent)) {
+                this.following = true;
+                var dist = distance(this, ent);
+                this.followPoint = ent;
+                if (collide(ent, {boundingBox: this.attackBox})) {
                     this.attacking = true;
                 } else {
                     this.attacking = false;
+                    var difX = (ent.x - this.x)/dist;
+                    var difY = (ent.y - this.y)/dist;
+                    this.velocity.x += difX * acceleration / (dist*dist);
+                    this.velocity.y += difY * acceleration / (dist * dist);
+                    var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+                    if (speed > maxSpeed) {
+                        var ratio = maxSpeed / speed;
+                        this.velocity.x *= ratio;
+                        this.velocity.y *= ratio;
+                    }
+                    
+                    this.x += this.velocity.x * this.game.clockTick;
+                    this.y += this.velocity.y * this.game.clockTick;
                 }
-            } 
                 shiftDirection(this, ent);
-        }
+            } else if (!collide({boundingBox: this.visualBox}, ent)) {
+                this.following = false;
+            } 
+    
+        } 
+        
+       
     }
+
+    //console.log(this.attacking + '\n' + this.following);
 }
 
 
 
-RangeSkeleton.prototype.draw = function () {
-    if(!this.attacking) {
-        this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-    }else {
+RangeEnemy.prototype.draw = function () {
+    if (this.attacking) {
         this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-       // this.attacking = false;
-    }
-    
+    } else if (this.following) {
+        this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    } else {
+        this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    } 
+    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+    this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     Entity.prototype.draw.call(this);
 }
 
 
-/*
+
 function collide(ent1, ent2) {
-    return distance(ent1, ent2) < ent1.radius + ent2.radius;
-}
+    if ( !(ent1 instanceof Background || ent1 instanceof Crosshair)
+      && !(ent2 instanceof Background || ent2 instanceof Crosshair)) {
+        return (ent1.boundingBox.x < ent2.boundingBox.x + ent2.boundingBox.width
+            && ent1.boundingBox.x + ent1.boundingBox.width > ent2.boundingBox.x 
+            && ent1.boundingBox.y < ent2.boundingBox.y + ent2.boundingBox.height 
+            && ent1.boundingBox.height + ent1.boundingBox.y > ent2.boundingBox.y);
+    }
+    return false;
+}/*
 function collideLeft (entity) {
     return (entity.x - entity.radius) < 650;
 }
@@ -340,30 +394,42 @@ function collideBottom (entity) {
 function Bunny(game, spritesheet) {
     this.walkAnimations = [];
     
-    this.walkAnimations["down"] = new Animation2
-(spritesheet, 0, 0, 48, 64, 0.1, 7, true, false);
-    this.walkAnimations["up"] = new Animation2
-(spritesheet, 0, 64, 48, 64, 0.1, 7, true, false);
-    this.walkAnimations["right"] = new Animation2
-(spritesheet, 0, 128, 48, 64, 0.1, 7, true, false);
-    this.walkAnimations["left"] = new Animation2
-(spritesheet, 0, 192, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["down"] = new Animation2(spritesheet, 0, 0, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["up"] = new Animation2(spritesheet, 0, 64, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["right"] = new Animation2(spritesheet, 0, 128, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["left"] = new Animation2(spritesheet, 0, 192, 48, 64, 0.1, 7, true, false);
     
     this.direction = "right";
     this.visualRadius = 800;
-    this.radius = 20;
     this.runBack = false;
     this.ctx = game.ctx;
-    
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-    //this.speed = 100;
     if (speed > maxSpeed) {
         var ratio = maxSpeed / speed;
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
     Entity.call(this, game, 0, 100);
+    
+    this.boundingBox = {
+        x:this.x, 
+        y:this.y,
+        width: 40,
+        height: 40,
+        offsetx:15,
+        offsety:32
+    }
+
+    this.visualBox = {
+        x:this.x, 
+        y:this.y,
+        width: 400,
+        height: 400,
+        offsetx:-170,
+        offsety:-160
+    }
+
 }
 
 Bunny.prototype = new Entity();
@@ -394,11 +460,27 @@ Bunny.prototype.update = function () {
     this.x += this.velocity.x * this.game.clockTick;
     this.y += this.velocity.y * this.game.clockTick;
 
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
+    this.visualBox.x = this.x + this.visualBox.offsetx;
+    this.visualBox.y = this.y + this.visualBox.offsety;
+
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-        if (ent !== this && this.collide(ent)) {
-            var temp = { x: this.velocity.x, y: this.velocity.y };
+        if (ent instanceof Player && collide(this, ent)) {
+                var temp = { x: this.velocity.x, y: this.velocity.y };
 
+                tempVelocityX = temp.x * friction;
+                tempVelocityY = temp.y * friction;
+
+                ent.x += 20 * tempVelocityX * this.game.clockTick;
+                ent.y += 20 * tempVelocityY * this.game.clockTick;
+                
+/*
+
+                this.x -= 10* tempVelocityX * this.game.clockTick;
+                this.y -= 10* tempVelocityY * this.game.clockTick;
             var dist = distance(this, ent);
             var delta = this.radius + ent.radius - dist;
             var difX = (this.x - ent.x)/dist;
@@ -413,13 +495,13 @@ Bunny.prototype.update = function () {
             this.velocity.y = ent.velocity.y * friction;
             ent.velocity.x = temp.x * friction;
             ent.velocity.y = temp.y * friction;
-            this.x += this.velocity.x * this.game.clockTick;
-            this.y += this.velocity.y * this.game.clockTick;
-            ent.x += ent.velocity.x * this.game.clockTick;
-            ent.y += ent.velocity.y * this.game.clockTick;
+            /*this.x += this.velocity.x * this.game.clockTick;
+            this.y += this.velocity.y * this.game.clockTick;*/
+            /*ent.x += ent.velocity.x * this.game.clockTick;
+            ent.y += ent.velocity.y * this.game.clockTick;*/
         }
  
-        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Player ) {
+        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
             var dist = distance(this, ent);
             if (this instanceof Bunny) {
                 shiftDirection(this, ent);
@@ -439,11 +521,14 @@ Bunny.prototype.update = function () {
     this.velocity.x -= (1 - friction) * this.game.clockTick * this.velocity.x;
     this.velocity.y -= (1 - friction) * this.game.clockTick * this.velocity.y; 
 
+    
     Entity.prototype.update.call(this);
 }
 
 Bunny.prototype.draw = function () {
     this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     Entity.prototype.draw.call(this);
 }
 
