@@ -98,23 +98,22 @@ Animation2.prototype.currentFrameRow = function () {
     return Math.floor(this.elapsedTime / this.frameDuration)%this.sheetWidth;
 }
 
-// no inheritance
-function Background(game, spritesheet) {
-    this.x = 0;
-    this.y = 0;
-    this.spritesheet = spritesheet;
-    this.game = game;
-    this.ctx = game.ctx;
-};
+// // no inheritance
+// function Background(game, spritesheet) {
+//     this.x = 0;
+//     this.y = 0;
+//     this.spritesheet = spritesheet;
+//     this.game = game;
+//     this.ctx = game.ctx;
+// };
 
-Background.prototype.draw = function () {
-    this.ctx.drawImage(this.spritesheet,
-                   this.x, this.y);
-};
+// Background.prototype.draw = function () {
+//     this.ctx.drawImage(this.spritesheet,
+//                    this.x, this.y);
+// };
 
-Background.prototype.update = function () {
-};
-
+// Background.prototype.update = function () {
+// };
 function shiftDirection(ent1, ent2) {
     var enemyX = ent2.x;
     var enemyY = ent2.y;

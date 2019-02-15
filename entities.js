@@ -18,7 +18,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
         offsetx:30,
         offsety:15
     }
-    Entity.call(this, game, 400, 400);
+    Entity.call(this, game, 800, 800);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -167,6 +167,8 @@ function Crosshair(game, spritesheet){
     this.ctx = game.ctx;
     this.sheet = spritesheet;
     this.removeFromWorld = false;
+    this.game.pointerx = this.game.player.x;
+    this.game.pointery = this.game.player.y;
 }
 
 Crosshair.prototype.update = function() {

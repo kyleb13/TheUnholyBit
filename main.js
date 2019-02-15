@@ -107,12 +107,26 @@ function Background(game, spritesheet) {
     this.y = 0;
     this.spritesheet = spritesheet;
     this.game = game;
+    //console.log(loadVillageData());
+    console.log("making background");
+    var data = loadVillageData();
+    this.boundingBoxes = data.boundingBoxes;
     this.ctx = game.ctx;
 };
 
 Background.prototype.draw = function () {
     this.ctx.drawImage(this.spritesheet,
                    this.x, this.y);
+    var that = this;
+    this.boundingBoxes.forEach((box) => {
+        that.ctx.beginPath();
+        that.ctx.moveTo(box.p1.x, box.p1.y);
+        that.ctx.lineTo(box.p2.x, box.p2.y);
+        that.ctx.lineTo(box.p3.x, box.p3.y);
+        that.ctx.lineTo(box.p4.x, box.p4.y);
+        that.ctx.lineTo(box.p1.x, box.p1.y);
+        that.ctx.stroke();
+    });
 };
 
 Background.prototype.update = function () {
@@ -121,7 +135,7 @@ Background.prototype.update = function () {
 function Camera(game, obj, background, width, height){
     this.game = game;
     this.ctx = game.ctx;
-    var center = obj.center();
+    //var center = obj.center();
     this.obj = obj;
     this.background = background;
     this.worldWidth=width;
