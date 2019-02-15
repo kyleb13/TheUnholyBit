@@ -9,6 +9,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
     this.changeTimer = 0;
     this.ctx = game.ctx;
     this.movedir = 3;
+    this.velocity = { x: 200, y: 200 };
     this.boundingBox = {
         x:this.x, 
         y:this.y,
@@ -22,24 +23,27 @@ function Player(game, walksheet, shootsheet, standsheet) {
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
         var y = that.y;
+        //change direction arrows come from based on
+        //direction character is facing
         switch(that.movedir){
             case 0:
-                x += 30;
-                y -= 15;
+                x += 42;
+                y -= 5;
                 break;
             case 1:
-                y += 30;
+                y += 44;
+                x +=8;
                 break;
             case 2:
-                y += 50;
-                x+=25;
+                y += 75;
+                x+=40;
                 break;
             case 3:
-                x +=50;
-                y += 30;
+                x +=46;
+                y += 42;
                 break;
         }
-        that.game.addEntity(new Projectile(that.game, 
+        that.game.addProjectile(new Projectile(that.game, 
             {
                 img:that.game.assetManager.getAsset("./img/arrow.png"), 
                 width:31, 
@@ -52,7 +56,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
             {//end Point
                 x:that.game.pointerx, 
                 y:that.game.pointery
-            }, 5));//lifetime
+            }, 5, "Player"));//lifetime
     });
 }
 
@@ -104,18 +108,32 @@ Player.prototype.update = function () {
 
         this.x += time * this.xspeed;
         this.y += time * this.yspeed;
-        this.boundingBox.x = this.x + this.boundingBox.offsetx;
-        this.boundingBox.y = this.y + this.boundingBox.offsety;
+        if (!this.xspeed !== 0 || !this.yspeed !== 0) {
+            for (var i = 0; i < this.game.entities.length; i++) {
+                var ent = this.game.entities[i];
+                if (ent instanceof Bunny && collide(this, ent)) {
+                    tempVelocityX = ent.velocity.x * friction;
+                    tempVelocityY = ent.velocity.y * friction;
+
+                    ent.x -= 2 * tempVelocityX * this.game.clockTick;   
+                    ent.y -= 2 * tempVelocityY * this.game.clockTick;
+                  /*  ent.x -=  20;
+                    ent.y -= this.yspeed;*/
+                }
+            
+            }
+        }
     } else if(this.game.lclick){
         this.xspeed = 0;
         this.yspeed = 0;
     }
+
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
     Entity.prototype.update.call(this);
 }
 
 Player.prototype.draw = function () {
-    // var x = (this.x - this.animation.frameWidth/2) - this.game.camera.x;
-    // var y = (this.y - this.animation.frameHeight/2) - this.game.camera.y;
     if(this.game.lclick || this.shootanimation.active){
         this.shootanimation.loop = this.game.lclick?true:false;
         this.shootanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
@@ -151,10 +169,12 @@ Crosshair.prototype.update = function() {
 };
 
 Crosshair.prototype.draw = function() {
-    this.ctx.drawImage(this.sheet, this.game.pointerx, this.game.pointery);
+    this.ctx.drawImage(this.sheet, this.game.pointerx-7, this.game.pointery-7);
+    this.ctx.strokeRect(this.game.pointerx, this.game.pointery, 2, 2);
 };
 
-function Projectile(game, spritesheet, speed, start, end, lifetime){
+function Projectile(game, spritesheet, speed, start, end, lifetime, shooter){
+    this.shooter = shooter;
     this.game = game;
     this.ctx = game.ctx;
     this.xspeed = 0;
@@ -165,6 +185,15 @@ function Projectile(game, spritesheet, speed, start, end, lifetime){
     var dx = end.x - start.x;
     var dy = end.y - start.y;
     var pi = Math.PI;
+    
+    this.boundingBox = {
+        x:this.x, 
+        y:this.y,
+        width: 31,
+        height: 4,
+        offsetx:3,
+        offsety:12
+    }
     //determine x and y speed based on calculated angle
     if(dx === 0){
         this.yspeed = dy<0?speed:-speed;
@@ -183,8 +212,12 @@ function Projectile(game, spritesheet, speed, start, end, lifetime){
         }
         this.xspeed = speed*Math.cos(theta);
         this.yspeed = -speed*Math.sin(theta);
+        console.log("Xspeed: " + this.xspeed);
+        console.log("Yspeed: " + this.yspeed);
     }
-    this.sheet = Entity.prototype.rotateAndCache(spritesheet, -theta);
+    this.sheet = Entity.prototype.rotateAndCache(spritesheet, theta);
+    var temp = Entity.prototype.rotateAndCache(this.boundingBox, theta);
+    this.rotatedBoundingBox = temp.img;
     Entity.call(this, game, start.x, start.y);
 }
 
@@ -192,16 +225,46 @@ Projectile.prototype = new Entity();
 Projectile.prototype.constructor = Projectile;
 
 Projectile.prototype.update = function() {
+    
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
     let time = this.game.clockTick;
     this.timer += time;
     if(this.timer < this.lifetime){
+
+        for (var i = 0; i < this.game.entities.length; i++) {
+            var ent = this.game.entities[i];
+            if (this.shooter !== "Player" && ent instanceof Player && collide(this, ent)) {
+                this.handleCollision(ent);
+            } else if (this.shooter === "Player" 
+                        && (ent instanceof Bunny || ent instanceof RangeEnemy)
+                        && collide(this, ent)) {
+                this.handleCollision(ent);
+            }
+        }
         this.x += time * this.xspeed;
         this.y += time * this.yspeed;
+
+
     } else {
         this.removeFromWorld = true;
     }
 } 
 
 Projectile.prototype.draw = function(){
-    this.ctx.drawImage(this.sheet, this.x, this.y);
+    var x = this.x - this.sheet.center.x;
+    var y = this.y - this.sheet.center.y;
+    this.ctx.drawImage(this.sheet.img, x, y);
+    this.ctx.drawImage(this.rotatedBoundingBox, x, y);
+
+}
+
+Projectile.prototype.handleCollision = function(ent) {
+    tempVelocityX = this.xspeed * friction;
+    tempVelocityY = this.yspeed * friction;
+     
+    ent.x += 7 * tempVelocityX * this.game.clockTick;   
+    ent.y += 7 * tempVelocityY * this.game.clockTick;
+    this.removeFromWorld = true;
 }
