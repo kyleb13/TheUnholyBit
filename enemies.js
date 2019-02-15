@@ -206,19 +206,19 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
     this.visualBox = {
         x:this.x, 
         y:this.y,
-        width: 400,
-        height: 400,
-        offsetx:-158,
-        offsety:-120
+        width: 1300,
+        height: 1300,
+        offsetx:-645,
+        offsety:-650
     }
 
     this.attackBox = {
         x:this.x, 
         y:this.y,
-        width: 250,
-        height: 250,
-        offsetx:-85,
-        offsety:-55
+        width: 900,
+        height: 900,
+        offsetx:-440,
+        offsety:-450
     }
     this.followPoint = {x:0, y:0};
     this.following = false;
@@ -238,6 +238,12 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
 
 RangeEnemy.prototype = new Entity();
 RangeEnemy.prototype.constructor = RangeEnemy;
+
+RangeEnemy.prototype.center = function() {
+    var centerx = this.x + 64/2;
+    var centery= this.y + 64/2;
+    return {x:centerx, y:centery};
+}
 
 function addProjectile(that, x, y, type, shooter) {  
     var img;
@@ -341,12 +347,19 @@ RangeEnemy.prototype.update = function () {
                 this.following = false;
             } 
     
-        } 
-        
-       
-    }
+        } else if (ent instanceof RangeEnemy && ent !== this) {
+            if (collide(this, ent)) {
+                var temp = { x: this.velocity.x, y: this.velocity.y };
 
-    //console.log(this.attacking + '\n' + this.following);
+                tempVelocityX = temp.x * friction;
+                tempVelocityY = temp.y * friction;
+    
+                ent.x += 20 * tempVelocityX * this.game.clockTick;
+                ent.y += 20 * tempVelocityY * this.game.clockTick;
+            }
+            
+        } 
+    }
 }
 
 
@@ -411,7 +424,13 @@ function Bunny(game, spritesheet) {
         this.velocity.y *= ratio;
     }
     Entity.call(this, game, 0, 100);
-    
+    /*
+    this.radius  = {
+        x: this.x,
+        r:32,
+        offsetx: 35,
+        offsety: 53
+    };*/
     this.boundingBox = {
         x:this.x, 
         y:this.y,
@@ -424,10 +443,10 @@ function Bunny(game, spritesheet) {
     this.visualBox = {
         x:this.x, 
         y:this.y,
-        width: 400,
-        height: 400,
-        offsetx:-170,
-        offsety:-160
+        width: 1000,
+        height: 1000,
+        offsetx:-500,
+        offsety:-450
     }
 
 }
@@ -527,8 +546,9 @@ Bunny.prototype.update = function () {
 
 Bunny.prototype.draw = function () {
     this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    
+    //this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+    //this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     Entity.prototype.draw.call(this);
 }
 

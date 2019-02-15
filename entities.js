@@ -57,7 +57,13 @@ function Player(game, walksheet, shootsheet, standsheet) {
                 x:that.game.pointerx, 
                 y:that.game.pointery
             }, 5, "Player"));//lifetime
-    });
+    });    
+    this.radius  = {
+        x: this.x,
+        r: 700,
+        offsetx: 0,
+        offsety: 53
+    };
 }
 
 Player.prototype = new Entity();
