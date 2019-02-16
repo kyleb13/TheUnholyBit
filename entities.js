@@ -6,6 +6,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
     this.maxSpeed = 200;
     this.xspeed = 0;
     this.yspeed = 0;
+    this.health = 100;
     this.changeTimer = 0;
     this.ctx = game.ctx;
     this.movedir = 3;
@@ -18,7 +19,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
         offsetx:30,
         offsety:15
     }
-    Entity.call(this, game, 800, 800);
+    Entity.call(this, game, 925, 850);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -48,7 +49,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
                 img:that.game.assetManager.getAsset("./img/arrow.png"), 
                 width:31, 
                 height:5
-            }, 300, //speed
+            }, 350, //speed
             {//start point
                 x:x, 
                 y:y
@@ -56,8 +57,9 @@ function Player(game, walksheet, shootsheet, standsheet) {
             {//end Point
                 x:that.game.pointerx, 
                 y:that.game.pointery
-            }, 5, "Player"));//lifetime
+            }, 5,"Player", 25));//lifetime
     });
+    this.healthBar = new HealthBar(game, this, 46, -10);
 }
 
 Player.prototype = new Entity();
@@ -130,6 +132,7 @@ Player.prototype.update = function () {
 
     this.boundingBox.x = this.x + this.boundingBox.offsetx;
     this.boundingBox.y = this.y + this.boundingBox.offsety;
+    this.healthBar.update();
     Entity.prototype.update.call(this);
 }
 
@@ -147,6 +150,7 @@ Player.prototype.draw = function () {
     if(this.game.showOutlines){
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     }
+    this.healthBar.draw();
     Entity.prototype.draw.call(this);
 }
 
@@ -156,26 +160,7 @@ Player.prototype.center = function() {
     return {x:centerx, y:centery};
 }
 
-function Crosshair(game, spritesheet){
-    this.game = game;
-    this.ctx = game.ctx;
-    this.sheet = spritesheet;
-    this.removeFromWorld = false;
-    this.game.pointerx = this.game.player.x;
-    this.game.pointery = this.game.player.y;
-}
-
-Crosshair.prototype.update = function() {
-    this.game.pointerx += this.game.player.xspeed * this.game.clockTick;
-    this.game.pointery += this.game.player.yspeed * this.game.clockTick;
-};
-
-Crosshair.prototype.draw = function() {
-    this.ctx.drawImage(this.sheet, this.game.pointerx-7, this.game.pointery-7);
-    this.ctx.strokeRect(this.game.pointerx, this.game.pointery, 2, 2);
-};
-
-function Projectile(game, spritesheet, speed, start, end, lifetime, shooter){
+function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, damage){
     this.shooter = shooter;
     this.game = game;
     this.ctx = game.ctx;
@@ -187,6 +172,7 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter){
     var dx = end.x - start.x;
     var dy = end.y - start.y;
     var pi = Math.PI;
+    this.damage = damage;
     
     this.boundingBox = {
         x:this.x, 
@@ -268,5 +254,10 @@ Projectile.prototype.handleCollision = function(ent) {
      
     ent.x += 7 * tempVelocityX * this.game.clockTick;   
     ent.y += 7 * tempVelocityY * this.game.clockTick;
+    //TODO: make this less dumb
+    //since this allows for enemies to hurt eachother
+    if(ent.health){
+        ent.health = ent.health - this.damage;
+    }
     this.removeFromWorld = true;
 }

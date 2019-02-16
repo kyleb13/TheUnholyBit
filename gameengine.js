@@ -9,7 +9,7 @@ window.requestAnimFrame = (function () {
             };
 })();
 
-
+var pointerLocked = false;
 
 //function canvasLoaded(){
 
@@ -30,7 +30,7 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    this.showOutlines = true;
+    this.showOutlines = false;
     //this.showOutlines = false;
     this.camera = null;
     this.player = null;
@@ -52,13 +52,15 @@ GameEngine.prototype.start = function (player, camera) {
     var that = this;
     var canvas = this.ctx.canvas;
     var mousePositionUpdate = function(e) {
-        var dx = e.movementX;
-        var dy = e.movementY;
-        if(that.pointerx + dx>that.player.x - canvas.width/2 && that.pointerx + dx<that.player.x + canvas.width/2){
-            that.pointerx += dx;
-        }
-        if(that.pointery + dy>that.player.y - canvas.height/2 && that.pointery + dy<that.player.y + canvas.height/2){
-            that.pointery += dy;
+        if(that.pointerLocked){
+            var dx = e.movementX;
+            var dy = e.movementY;
+            if(that.pointerx + dx>that.player.x - canvas.width/2 && that.pointerx + dx<that.player.x + canvas.width/2){
+                that.pointerx += dx;
+            }
+            if(that.pointery + dy>that.player.y - canvas.height/2 && that.pointery + dy<that.player.y + canvas.height/2){
+                that.pointery += dy;
+            }
         }
         //document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
     }
@@ -66,13 +68,19 @@ GameEngine.prototype.start = function (player, camera) {
         if(document.pointerLockElement === canvas){
             document.addEventListener("mousemove", mousePositionUpdate);
             that.pointerLocked = true;
+            pointerLocked = true;
         } else {
             document.removeEventListener("mousemove", mousePositionUpdate);
             that.pointerLocked = false;
+            pointerLocked = false;
+            that.w = false;
+            that.a = false;
+            that.s = false;
+            that.d = false;
+            that.lclick = false;
         }
     });
     console.log("starting game");
-    var that = this;
     (function gameLoop() {
         that.loop();
         requestAnimFrame(gameLoop, that.ctx.canvas);
@@ -178,13 +186,17 @@ function Timer() {
 }
 
 Timer.prototype.tick = function () {
-    var wallCurrent = Date.now();
-    var wallDelta = (wallCurrent - this.wallLastTimestamp) / 1000;
-    this.wallLastTimestamp = wallCurrent;
+    if(pointerLocked){
+        var wallCurrent = Date.now();
+        var wallDelta = (wallCurrent - this.wallLastTimestamp) / 1000;
+        this.wallLastTimestamp = wallCurrent;
 
-    var gameDelta = Math.min(wallDelta, this.maxStep);
-    this.gameTime += gameDelta;
-    return gameDelta;
+        var gameDelta = Math.min(wallDelta, this.maxStep);
+        this.gameTime += gameDelta;
+        return gameDelta;
+    } else {
+        return 0;
+    }
 }
 
 function Entity(game, x, y) {
