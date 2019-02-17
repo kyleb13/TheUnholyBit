@@ -118,15 +118,17 @@ Background.prototype.draw = function () {
     this.ctx.drawImage(this.spritesheet,
                    this.x, this.y);
     var that = this;
-    this.boundingBoxes.forEach((box) => {
-        that.ctx.beginPath();
-        that.ctx.moveTo(box.p1.x, box.p1.y);
-        that.ctx.lineTo(box.p2.x, box.p2.y);
-        that.ctx.lineTo(box.p3.x, box.p3.y);
-        that.ctx.lineTo(box.p4.x, box.p4.y);
-        that.ctx.lineTo(box.p1.x, box.p1.y);
-        that.ctx.stroke();
-    });
+    if(this.game.showOutlines) {
+        this.boundingBoxes.forEach((box) => {
+            that.ctx.beginPath();
+            that.ctx.moveTo(box.p1.x, box.p1.y);
+            that.ctx.lineTo(box.p2.x, box.p2.y);
+            that.ctx.lineTo(box.p3.x, box.p3.y);
+            that.ctx.lineTo(box.p4.x, box.p4.y);
+            that.ctx.lineTo(box.p1.x, box.p1.y);
+            that.ctx.stroke();
+        });
+    }
 };
 
 Background.prototype.update = function () {
@@ -164,7 +166,7 @@ Camera.prototype.draw = function() {
 
 
 
-AM.queueDownload("./img/crosshair.png");
+AM.queueDownload("./img/crosshair-export.png");
 AM.queueDownload("./img/villagemap.png");
 AM.queueDownload("./img/charwalk.png");
 AM.queueDownload("./img/charstand.png");
@@ -198,9 +200,6 @@ AM.downloadAll(function () {
     gameEngine.start(player, camera);
     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/villagemap.png")));
     gameEngine.addEntity(player);
-    gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair.png")));
-
-
     var ArrowType = {x:0, y:1025, w:64, h:64, d:0.05, f:13, l:true, r:false};
     var MagicType = {x:0, y:0, w:64, h:64, d:0.08, f:7, l:true, r:false};
     gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png")));
@@ -211,5 +210,6 @@ AM.downloadAll(function () {
     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightArcher.png"), 600, 600, ArrowType, "arrow"));
     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightMage.png"), 500, 600, MagicType, "magic"));
     */
+    gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png")));
     console.log("All Done!");
 });

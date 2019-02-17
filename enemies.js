@@ -183,7 +183,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, projectile, "Enemy");
+                addProjectile(that, x, y, projectile,"Enemy");
                 });
     }
     this.standingAnimations["up"] = new Animation2 (spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
@@ -232,6 +232,8 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
+    this.health = 100;
+    this.healthBar = new HealthBar(game, this, 46, -10);
     Entity.call(this, game, spawnX, spawnY);
 }
 
@@ -272,7 +274,7 @@ function addProjectile(that, x, y, type, shooter) {
     {//end Point
         x:center.x, 
         y:center.y
-    }, 5, shooter));//lifetime
+    }, 5, shooter, 15));//lifetime
 }
 RangeEnemy.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
@@ -359,6 +361,8 @@ RangeEnemy.prototype.update = function () {
             
         } 
     }
+    this.healthBar.update();
+    //console.log(this.attacking + '\n' + this.following);
 }
 
 
@@ -374,6 +378,7 @@ RangeEnemy.prototype.draw = function () {
     this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
     this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    this.healthBar.draw();
     Entity.prototype.draw.call(this);
 }
 
