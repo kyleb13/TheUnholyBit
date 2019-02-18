@@ -44,11 +44,17 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
         if (this.isDone()) {
             this.elapsedTime = 0;
             this.callbackDone = false;
+            
+            if (ent !== undefined) {
+                ent.removeFromWorld = true;
+                console.log("Eureka!");
+            }
         }
         
     } else if (this.isDone()) {
         if (ent !== undefined) {
            ent.removeFromWorld = true;
+           console.log("Eureka!");
         }
         return;
     }
@@ -348,24 +354,7 @@ RangeEnemy.prototype.update = function () {
             }   
         } else if(ent instanceof Background) {
             ent.boundingBoxes.forEach((box) => {
-                /*
-                if (lineLine(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
-                        this.boundingBox.x, this.boundingBox.y,
-                        this.boundingBox.width, this.boundingBox.height)||
-                    lineLine(box.p2.x, box.p2.y, box.p4.x, box.p4.y,
-                        this.boundingBox.x, this.boundingBox.y,
-                        this.boundingBox.width, this.boundingBox.height)||
-                    lineLine(box.p1.x, box.p1.y, box.p3.x, box.p3.y,
-                        this.boundingBox.x, this.boundingBox.y,
-                        this.boundingBox.width, this.boundingBox.height)||
-                    lineLine(box.p4.x, box.p4.y, box.p2.x, box.p2.y,
-                        this.boundingBox.x, this.boundingBox.y,
-                        this.boundingBox.width, this.boundingBox.height)) {
-                            console.log("Welp");
-                        } else {
-                            this.x += this.velocity.x * this.game.clockTick;
-                            this.y += this.velocity.y * this.game.clockTick;
-                        }*/
+              
             });
         }
         
@@ -396,7 +385,6 @@ RangeEnemy.prototype.draw = function () {
     this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     if (this.dead) {
         this.DyingAnimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this);
-
     }
     this.healthBar.draw();
     Entity.prototype.draw.call(this);
@@ -430,11 +418,18 @@ function collideBottom (entity) {
 
 function Bunny(game, spritesheet) {
     this.walkAnimations = [];
+    this.deathAnimations = [];
+
     
     this.walkAnimations["down"] = new Animation2(spritesheet, 0, 0, 48, 64, 0.1, 7, true, false);
     this.walkAnimations["up"] = new Animation2(spritesheet, 0, 64, 48, 64, 0.1, 7, true, false);
     this.walkAnimations["right"] = new Animation2(spritesheet, 0, 128, 48, 64, 0.1, 7, true, false);
     this.walkAnimations["left"] = new Animation2(spritesheet, 0, 192, 48, 64, 0.1, 7, true, false);
+ 
+    this.deathAnimations["down"] = new Animation2(spritesheet, 288, 0, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["up"] = new Animation2(spritesheet, 288, 64, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["right"] = new Animation2(spritesheet, 288, 128, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, true);
     
     this.direction = "right";
     this.visualRadius = 800;
@@ -447,14 +442,8 @@ function Bunny(game, spritesheet) {
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
-    Entity.call(this, game, 0, 100);
-    /*
-    this.radius  = {
-        x: this.x,
-        r:32,
-        offsetx: 35,
-        offsety: 53
-    };*/
+    Entity.call(this, game, 100, 1000);
+    
     this.boundingBox = {
         x:this.x, 
         y:this.y,
@@ -472,6 +461,9 @@ function Bunny(game, spritesheet) {
         offsetx:-500,
         offsety:-450
     }
+    this.dead = false;
+    this.health = 100;
+    this.healthBar = new HealthBar(game, this, 46, -10);
 
 }
 
@@ -511,16 +503,8 @@ Bunny.prototype.update = function () {
 
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-        if (ent instanceof Player && collide(this, ent)) {
-                var temp = { x: this.velocity.x, y: this.velocity.y };
-
-                tempVelocityX = temp.x * friction;
-                tempVelocityY = temp.y * friction;
-
-                ent.x += 20 * tempVelocityX * this.game.clockTick;
-                ent.y += 20 * tempVelocityY * this.game.clockTick;
-                
-                ent.health -= 10;
+    
+     
 /*
 
                 this.x -= 10* tempVelocityX * this.game.clockTick;
@@ -543,11 +527,10 @@ Bunny.prototype.update = function () {
             this.y += this.velocity.y * this.game.clockTick;*/
             /*ent.x += ent.velocity.x * this.game.clockTick;
             ent.y += ent.velocity.y * this.game.clockTick;*/
-        }
+        //}
  
         if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
             var dist = distance(this, ent);
-            if (this instanceof Bunny) {
                 shiftDirection(this, ent);
                 var difX = (ent.x - this.x)/dist;
                 var difY = (ent.y - this.y)/dist;
@@ -559,23 +542,45 @@ Bunny.prototype.update = function () {
                     this.velocity.x *= ratio;
                     this.velocity.y *= ratio;
                 }
-            }
+                
+                if (ent instanceof Player && collide(this, ent)) {
+                    var temp = { x: this.velocity.x, y: this.velocity.y };
+
+                    tempVelocityX = temp.x * friction;
+                    tempVelocityY = temp.y * friction;
+                    
+                    ent.x += 20 * tempVelocityX * this.game.clockTick;
+                    ent.y += 20 * tempVelocityY * this.game.clockTick;
+                    
+                    ent.health -= 10;
+                }
+
         }
     }
 
+    if (this.health < 1) {
+        this.dead = true;
+    }
     this.velocity.x -= (1 - friction) * this.game.clockTick * this.velocity.x;
     this.velocity.y -= (1 - friction) * this.game.clockTick * this.velocity.y; 
 
     
+    this.healthBar.update();
     Entity.prototype.update.call(this);
 }
 
 Bunny.prototype.draw = function () {
-    this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-    
+  
+    if(this.dead){
+        this.deathAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this);
+    } else {
+        this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    }
     //this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     //this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     Entity.prototype.draw.call(this);
+    
+    this.healthBar.draw();
 }
 
 

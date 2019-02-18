@@ -200,8 +200,8 @@ AM.downloadAll(function () {
     gameEngine.addEntity(player);
     var ArrowType = {x:0, y:1025, w:64, h:64, d:0.05, f:13, l:true, r:false};
     var MagicType = {x:0, y:0, w:64, h:64, d:0.08, f:7, l:true, r:false};
-   // gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"))); 
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/arrowSkel.png"), 1000, 950, ArrowType, "arrow"));
+    gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"))); 
+    //gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/arrowSkel.png"), 1000, 950, ArrowType, "arrow"));
   // gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/magicSkel.png"), 1100, 950, MagicType, "magic"));
   /*  gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/HoodedRanger.png"), 200, 600, ArrowType, "arrow"));
     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), 100, 600, MagicType, "magic"));
