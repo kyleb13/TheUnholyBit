@@ -30,7 +30,7 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    this.showOutlines = false;
+    this.showOutlines = true;
     //this.showOutlines = false;
     this.camera = null;
     this.player = null;
@@ -62,7 +62,7 @@ GameEngine.prototype.start = function (player, camera) {
                 that.pointery += dy;
             }
         }
-        //document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
+        
     }
     document.addEventListener('pointerlockchange', () => {
         if(document.pointerLockElement === canvas){

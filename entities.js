@@ -19,7 +19,8 @@ function Player(game, walksheet, shootsheet, standsheet) {
         offsetx:30,
         offsety:15
     }
-    Entity.call(this, game, 925, 850);
+    //Entity.call(this, game, 925, 850);
+    Entity.call(this, game, 100, 850);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -57,7 +58,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
             {//end Point
                 x:that.game.pointerx, 
                 y:that.game.pointery
-            }, 5, "Player"));//lifetime
+            }, 5, "Player", 100));//lifetime
     });    
     this.radius  = {
         x: this.x,
@@ -79,7 +80,7 @@ Player.prototype.update = function () {
     var centery= center.y;
     var xdiff = Math.abs(px - centerx);
     var ydiff = Math.abs(py - centery);
-
+    var player = this;
     //update direction character is pointing
     if(py< centery){//pointer is above character
         if(centerx > px && xdiff>ydiff){
@@ -125,8 +126,23 @@ Player.prototype.update = function () {
 
                     ent.x -= 2 * tempVelocityX * this.game.clockTick;   
                     ent.y -= 2 * tempVelocityY * this.game.clockTick;
-                  /*  ent.x -=  20;
-                    ent.y -= this.yspeed;*/
+                } else if(ent instanceof Background) {
+                    ent.boundingBoxes.forEach((box) => {
+                     if (lineRect(box.p1.x, box.p1.x, box.p2.x, box.p2.y,
+                        this.boundingBox.x, this.boundingBox.y, 
+                        this.boundingBox.width, this.boundingBox.height) ||
+
+                         lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
+                        this.boundingBox.x, this.boundingBox.y,
+                        this.boundingBox.width, this.boundingBox.height) ||
+                        
+                        lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
+                            this.boundingBox.x, this.boundingBox.y,
+                            this.boundingBox.width, this.boundingBox.height)) {
+                            console.log("You're over");
+                         //   console.log(box.p2.x + " " + box.p2.y+ " "+  box.p3.x + " " + box.p3.y);
+                        }
+                    });
                 }
             
             }
@@ -135,6 +151,7 @@ Player.prototype.update = function () {
         this.xspeed = 0;
         this.yspeed = 0;
     }
+
 
     this.boundingBox.x = this.x + this.boundingBox.offsetx;
     this.boundingBox.y = this.y + this.boundingBox.offsety;

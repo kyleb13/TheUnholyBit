@@ -32,7 +32,7 @@ Animation2.prototype.setCallbackOnFrame = function(frame,args,callback){
     this.callbackArgs = args;
 }
 
-Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy) {
+Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
     var scaleBy = scaleBy || 1;
     this.elapsedTime += tick;
     var frame = this.currentFrame();
@@ -47,8 +47,12 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy) {
         }
         
     } else if (this.isDone()) {
+        if (ent !== undefined) {
+           ent.removeFromWorld = true;
+        }
         return;
     }
+
     var index = this.reverse ? this.frames - this.currentFrame() - 1 : this.currentFrame();
     var vindex = 0;
     if ((index + 1) * this.frameWidth + this.startX > this.spriteSheet.width) {
@@ -98,22 +102,6 @@ Animation2.prototype.currentFrameRow = function () {
     return Math.floor(this.elapsedTime / this.frameDuration)%this.sheetWidth;
 }
 
-// // no inheritance
-// function Background(game, spritesheet) {
-//     this.x = 0;
-//     this.y = 0;
-//     this.spritesheet = spritesheet;
-//     this.game = game;
-//     this.ctx = game.ctx;
-// };
-
-// Background.prototype.draw = function () {
-//     this.ctx.drawImage(this.spritesheet,
-//                    this.x, this.y);
-// };
-
-// Background.prototype.update = function () {
-// };
 function shiftDirection(ent1, ent2) {
     var enemyX = ent2.x;
     var enemyY = ent2.y;
@@ -191,7 +179,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
     this.standingAnimations["down"] = new Animation2 (spritesheet, 0, 640, 64, 64, 0.1, 1, true, false);
     this.standingAnimations["right"] = new Animation2 (spritesheet, 0, 704, 64, 64, 0.1, 1, true, false);
     
-    this.DyingAnimation = new  Animation2 (spritesheet, 0, 1280, 64, 64, 0.1, 62, true, false);
+    this.DyingAnimation = new Animation2(spritesheet, 0, 1280, 64, 64, 0.1, 6, false, false);
 
     this.boundingBox = {
         x:this.x, 
@@ -357,27 +345,59 @@ RangeEnemy.prototype.update = function () {
     
                 ent.x += 20 * tempVelocityX * this.game.clockTick;
                 ent.y += 20 * tempVelocityY * this.game.clockTick;
-            }
-            
-        } 
+            }   
+        } else if(ent instanceof Background) {
+            ent.boundingBoxes.forEach((box) => {
+                /*
+                if (lineLine(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
+                        this.boundingBox.x, this.boundingBox.y,
+                        this.boundingBox.width, this.boundingBox.height)||
+                    lineLine(box.p2.x, box.p2.y, box.p4.x, box.p4.y,
+                        this.boundingBox.x, this.boundingBox.y,
+                        this.boundingBox.width, this.boundingBox.height)||
+                    lineLine(box.p1.x, box.p1.y, box.p3.x, box.p3.y,
+                        this.boundingBox.x, this.boundingBox.y,
+                        this.boundingBox.width, this.boundingBox.height)||
+                    lineLine(box.p4.x, box.p4.y, box.p2.x, box.p2.y,
+                        this.boundingBox.x, this.boundingBox.y,
+                        this.boundingBox.width, this.boundingBox.height)) {
+                            console.log("Welp");
+                        } else {
+                            this.x += this.velocity.x * this.game.clockTick;
+                            this.y += this.velocity.y * this.game.clockTick;
+                        }*/
+            });
+        }
+        
     }
     this.healthBar.update();
-    //console.log(this.attacking + '\n' + this.following);
+
+    //if(isNaN(this.health)) {
+    if (this.health < 1) {
+        this.dead = true;
+        this.attacking = false;
+        this.following = false;
+    }
 }
 
 
 
 RangeEnemy.prototype.draw = function () {
-    if (this.attacking) {
+    if (this.attacking && !this.dead) {
         this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-    } else if (this.following) {
+        
+    } else if (this.following&& !this.dead) {
         this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-    } else {
+    } else if (!this.attacking && this.follwoing && !this.dead) {
         this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     } 
     this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
     this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    if (this.dead) {
+        this.DyingAnimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this);
+
+    }
     this.healthBar.draw();
     Entity.prototype.draw.call(this);
 }
@@ -500,6 +520,7 @@ Bunny.prototype.update = function () {
                 ent.x += 20 * tempVelocityX * this.game.clockTick;
                 ent.y += 20 * tempVelocityY * this.game.clockTick;
                 
+                ent.health -= 10;
 /*
 
                 this.x -= 10* tempVelocityX * this.game.clockTick;
@@ -541,6 +562,7 @@ Bunny.prototype.update = function () {
             }
         }
     }
+
     this.velocity.x -= (1 - friction) * this.game.clockTick * this.velocity.x;
     this.velocity.y -= (1 - friction) * this.game.clockTick * this.velocity.y; 
 
@@ -561,3 +583,74 @@ Bunny.prototype.draw = function () {
 var friction = 1;
 var acceleration = 1000000;
 var maxSpeed = 100;
+
+
+// LINE/RECTANGLE
+function lineRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+
+    // check if the line has hit any of the rectangle's sides
+    // uses the Line/Line function below
+    var left =   lineLine(x1,y1,x2,y2, rx,ry,rx, ry+rh);
+    var right =  lineLine(x1,y1,x2,y2, rx+rw,ry, rx+rw,ry+rh);
+    var top =    lineLine(x1,y1,x2,y2, rx,ry, rx+rw,ry);
+    var bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
+  
+    // if ANY of the above are true, the line
+    // has hit the rectangle
+    if (left || right || top || bottom) {
+      return true;
+    }
+    return false;
+  }
+  
+  
+  // LINE/LINE
+  function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+  
+    // calculate the direction of the lines
+    var uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+    var uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+  
+    // if uA and uB are between 0-1, lines are colliding
+    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+  
+  
+      return true;
+    }
+    return false;
+  }
+/*
+  function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
+    var m1 = (y2-y1)/(x2-x1);
+    var m2 = (y4-y3)/(x4-x3);
+    //lines aren't parallel
+    if(m1!==m2 && m1!=-m2){
+        //point of intersection
+        var xi = (m1*x1-m2*x3-y1+y3)/(m1-m2);
+        var yi = m1*(xi-x1)+y1;
+        var xstart = x1;
+        var ystart = y1;
+        var xend = x2;
+        var yend = y2;
+        if(x1>x2){
+            xstart = x2;
+            xend = x1;
+        }
+        if(y1>y2){
+            ystart = y2;
+            yend = y1;
+        }
+        //check if intersection point lies in the range of the line segment
+        if(xstart<=xi && xi<=xend && ystart<=yi && yi<=yend){
+            return true;
+        } else {
+            return false;
+        }
+    } else if(y1-(m1*x1) === y3-(m2*x3)){
+        //lines are parallel and have same y-intercept, so they
+        //must be the same line
+        return true;
+    } else {
+        return false;
+    }
+  }*/
