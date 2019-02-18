@@ -30,7 +30,7 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    this.showOutlines = false;
+    this.showOutlines = true;
     //this.showOutlines = false;
     this.camera = null;
     this.player = null;
@@ -62,7 +62,7 @@ GameEngine.prototype.start = function (player, camera) {
                 that.pointery += dy;
             }
         }
-        //document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
+        
     }
     document.addEventListener('pointerlockchange', () => {
         if(document.pointerLockElement === canvas){
@@ -213,7 +213,7 @@ Entity.prototype.draw = function (ctx) {
     if (this.game.showOutlines && this.radius) {
         this.game.ctx.beginPath();
         this.game.ctx.strokeStyle = "green";
-        this.game.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        this.game.ctx.arc(this.x+this.radius.offsetx, this.y+this.radius.offsety, this.radius.r, 0, Math.PI * 2, false);
         this.game.ctx.stroke();
         this.game.ctx.closePath();
     }
