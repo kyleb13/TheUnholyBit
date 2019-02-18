@@ -166,12 +166,8 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     this.ctx = game.ctx;
     this.xspeed = 0;
     this.yspeed = 0;
-    var theta = 0;
     this.timer = 0;
     this.lifetime = lifetime;
-    var dx = end.x - start.x;
-    var dy = end.y - start.y;
-    var pi = Math.PI;
     this.damage = damage;
     
     this.boundingBox = {
@@ -182,7 +178,12 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
         offsetx:3,
         offsety:12
     }
+
     //determine x and y speed based on calculated angle
+    var theta = 0;
+    var dx = end.x - start.x;
+    var dy = end.y - start.y;
+    var pi = Math.PI;
     if(dx === 0){
         this.yspeed = dy<0?speed:-speed;
         theta = dy<0?(4*pi)/3:pi/2;
