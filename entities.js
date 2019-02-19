@@ -120,46 +120,35 @@ Player.prototype.update = function () {
         if (!this.xspeed !== 0 || !this.yspeed !== 0) {
             for (var i = 0; i < this.game.entities.length; i++) {
                 var ent = this.game.entities[i];
-                if (this.insideOfRadius(ent) && ent instanceof Bunny) {
-                    //console.log("BUNNY")
-                    if (ent instanceof Bunny && collide(this, ent)) {
-                        tempVelocityX = ent.velocity.x * friction;
-                        tempVelocityY = ent.velocity.y * friction;
-                        ent.x -= 2 * tempVelocityX * this.game.clockTick;   
-                        ent.y -= 2 * tempVelocityY * this.game.clockTick;
-                    }
-
-                }
-           /* for (var i = 0; i < this.game.entities.length; i++) {
-                var ent = this.game.entities[i];
                 if (ent instanceof Bunny && collide(this, ent)) {
                     tempVelocityX = ent.velocity.x * friction;
                     tempVelocityY = ent.velocity.y * friction;
 
                     ent.x -= 2 * tempVelocityX * this.game.clockTick;   
                     ent.y -= 2 * tempVelocityY * this.game.clockTick;
-                } /*else if(ent instanceof Background) {
+                } else if(ent instanceof Background) {
                     ent.boundingBoxes.forEach((box) => {
-                     if (lineRect(box.p1.x, box.p1.x, box.p2.x, box.p2.y,
-                        this.boundingBox.x, this.boundingBox.y, 
-                        this.boundingBox.width, this.boundingBox.height) ||
-
-                         lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
-                        this.boundingBox.x, this.boundingBox.y,
-                        this.boundingBox.width, this.boundingBox.height) ||
-                        
-                        lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
+                        var left = lineRect(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
+                            this.boundingBox.x, this.boundingBox.y, 
+                            this.boundingBox.width, this.boundingBox.height);
+                        var bottom = lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
                             this.boundingBox.x, this.boundingBox.y,
-                            this.boundingBox.width, this.boundingBox.height)) {
+                            this.boundingBox.width, this.boundingBox.height);
+                        var right = lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
+                            this.boundingBox.x, this.boundingBox.y,
+                            this.boundingBox.width, this.boundingBox.height);
+                        var top = lineRect(box.p4.x, box.p4.y, box.p1.x, box.p1.y,
+                            this.boundingBox.x, this.boundingBox.y,
+                            this.boundingBox.width, this.boundingBox.height);
+                        if ( left|| bottom || right || top) {
                             console.log("You're over");
-
-
-                         //   console.log(box.p2.x + " " + box.p2.y+ " "+  box.p3.x + " " + box.p3.y);
+                            //   console.log(box.p2.x + " " + box.p2.y+ " "+  box.p3.x + " " + box.p3.y);
                         }
                     });
-                */}
+                }
+            
             }
-        
+        }
     } else if(this.game.lclick){
         this.xspeed = 0;
         this.yspeed = 0;
@@ -171,11 +160,6 @@ Player.prototype.update = function () {
     this.healthBar.update();
     Entity.prototype.update.call(this);
 }
-
-Player.prototype.insideOfRadius = function (other) {
-    return distance(other, this) < (this.radius.r);
-}
-
 
 Player.prototype.draw = function () {
     if(this.game.lclick || this.shootanimation.active){
@@ -207,12 +191,8 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     this.ctx = game.ctx;
     this.xspeed = 0;
     this.yspeed = 0;
-    var theta = 0;
     this.timer = 0;
     this.lifetime = lifetime;
-    var dx = end.x - start.x;
-    var dy = end.y - start.y;
-    var pi = Math.PI;
     this.damage = damage;
     
     this.boundingBox = {
@@ -223,7 +203,12 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
         offsetx:3,
         offsety:12
     }
+
     //determine x and y speed based on calculated angle
+    var theta = 0;
+    var dx = end.x - start.x;
+    var dy = end.y - start.y;
+    var pi = Math.PI;
     if(dx === 0){
         this.yspeed = dy<0?speed:-speed;
         theta = dy<0?(4*pi)/3:pi/2;

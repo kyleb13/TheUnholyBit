@@ -566,52 +566,106 @@ function lineRect(x1, y1, x2, y2, rx, ry, rw, rh) {
   
   
   // LINE/LINE
-  function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+//   function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
   
-    // calculate the direction of the lines
-    var uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
-    var uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+//     // calculate the direction of the lines
+//     var uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+//     var uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
   
-    // if uA and uB are between 0-1, lines are colliding
-    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+//     // if uA and uB are between 0-1, lines are colliding
+//     if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
   
   
-      return true;
-    }
-    return false;
-  }
-/*
-  function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
+//       return true;
+//     }
+//     return false;
+//   }
+
+function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
     var m1 = (y2-y1)/(x2-x1);
     var m2 = (y4-y3)/(x4-x3);
     //lines aren't parallel
-    if(m1!==m2 && m1!=-m2){
-        //point of intersection
-        var xi = (m1*x1-m2*x3-y1+y3)/(m1-m2);
-        var yi = m1*(xi-x1)+y1;
-        var xstart = x1;
-        var ystart = y1;
-        var xend = x2;
-        var yend = y2;
-        if(x1>x2){
-            xstart = x2;
-            xend = x1;
-        }
-        if(y1>y2){
-            ystart = y2;
-            yend = y1;
-        }
-        //check if intersection point lies in the range of the line segment
-        if(xstart<=xi && xi<=xend && ystart<=yi && yi<=yend){
+    if(m1!=0 && isFinite(m1) && m2 != 0 && isFinite(m2)){
+        if(m1!==m2 && m1!=-m2){
+            //point of intersection
+            var xi = (m1*x1-m2*x3-y1+y3)/(m1-m2);
+            var yi = m1*(xi-x1)+y1;
+            var xstart = x1;
+            var ystart = y1;
+            var xend = x2;
+            var yend = y2;
+            if(x1>x2){
+                xstart = x2;
+                xend = x1;
+            }
+            if(y1>y2){
+                ystart = y2;
+                yend = y1;
+            }
+            //check if intersection point lies in the range of the line segment
+            if(xstart<=xi && xi<=xend && ystart<=yi && yi<=yend){
+                return true;
+            } else {
+                return false;
+            }
+        } else if(y1-(m1*x1) === y3-(m2*x3)){
+            //lines are parallel and have same y-intercept, so they
+            //must be the same line
             return true;
         } else {
             return false;
         }
-    } else if(y1-(m1*x1) === y3-(m2*x3)){
-        //lines are parallel and have same y-intercept, so they
-        //must be the same line
-        return true;
     } else {
-        return false;
+        //both vertical
+        if(!isFinite(m1) && !isFinite(m2)){
+            //if they share any x values, they are intersecting
+            if(x1===x3)return true
+            else return false;
+        } else if(m1==0 && m2 == 0){
+            //both horizontal
+            if(y1===y3)return true
+            else return false;
+        } else if(!isFinite(m1) && m2===0){
+            //l1 vertical and l2 horizontal
+            return verticalHorizontal(x1, Math.min(y1, y2), Math.max(y1, y2), y3, Math.min(x3, x4), Math.max(x3, x4));
+        } else if(m1==0 && !isFinite(m2)){
+            //l2 vertical and l1 horizontal
+            return verticalHorizontal(x3, Math.min(y4, y3), Math.max(y4, y3), y1, Math.min(x2, x1), Math.max(x2, x1));
+        } else if(m1==0) {
+            //l1 horizontal and l2 diagonal
+            return horizontalDiagonal(y1, Math.min(x1, x2), Math.max(x1, x2), x3, y3, x4, y4);
+        } else if(m2==0){
+            //l2 horizontal and l1 diagonal
+            return horizontalDiagonal(y3, Math.min(x3, x4), Math.max(x3, x4), x1, y1, x2, y2);
+        } else if(!isFinite(m1)){
+            //l1 vertical and l2 diagonal
+            return verticalDiagonal(x1, Math.min(y1, y2), Math.max(y1, y2), x3, y3, x4, y4);
+        } else {
+            //l2 vertical and l1 diagonal
+            return verticalDiagonal(x3, Math.min(y3, y4), Math.max(y3, y4), x1, y1, x2, y2);
+        }
     }
-  }*/
+}
+
+function verticalHorizontal(vx, y1, y2, hy, x1, x2){
+    if(x1<=vx && vx<=x2 && y1<= hy && hy<=y2) return true;
+    else return false;
+}
+
+function horizontalDiagonal(hy, x1, x2, x3, y3, x4, y4){
+    var starty = Math.min(y3,y4);
+    var endy = Math.max(y3,y4);
+    var m2 = (y4-y3)/(x4-x3);
+    var xi = (hy+(m2*x3)-y3)/m2;
+    if(starty<=hy && hy<= endy && x1<=xi && xi<=x2) return true;
+    else return false;
+}
+
+function verticalDiagonal(vx, y1, y2, x3, y3, x4, y4){
+    var startx = Math.min(x3,x4);
+    var endx = Math.max(x3,x4);
+    var m2 = (y4-y3)/(x4-x3);
+    var yi = (m2*vx) - (m2*x3) + y3;
+    if(startx<=vx && vx<= endx && y1<=yi & yi<=y2) return true;
+    else return false;
+}
