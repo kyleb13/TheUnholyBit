@@ -128,19 +128,21 @@ Player.prototype.update = function () {
                     ent.y -= 2 * tempVelocityY * this.game.clockTick;
                 } else if(ent instanceof Background) {
                     ent.boundingBoxes.forEach((box) => {
-                     if (lineRect(box.p1.x, box.p1.x, box.p2.x, box.p2.y,
-                        this.boundingBox.x, this.boundingBox.y, 
-                        this.boundingBox.width, this.boundingBox.height) ||
-
-                         lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
-                        this.boundingBox.x, this.boundingBox.y,
-                        this.boundingBox.width, this.boundingBox.height) ||
-                        
-                        lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
+                        var left = lineRect(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
+                            this.boundingBox.x, this.boundingBox.y, 
+                            this.boundingBox.width, this.boundingBox.height);
+                        var bottom = lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
                             this.boundingBox.x, this.boundingBox.y,
-                            this.boundingBox.width, this.boundingBox.height)) {
+                            this.boundingBox.width, this.boundingBox.height);
+                        var right = lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
+                            this.boundingBox.x, this.boundingBox.y,
+                            this.boundingBox.width, this.boundingBox.height);
+                        var top = lineRect(box.p4.x, box.p4.y, box.p1.x, box.p1.y,
+                            this.boundingBox.x, this.boundingBox.y,
+                            this.boundingBox.width, this.boundingBox.height);
+                        if ( left|| bottom || right || top) {
                             console.log("You're over");
-                         //   console.log(box.p2.x + " " + box.p2.y+ " "+  box.p3.x + " " + box.p3.y);
+                            //   console.log(box.p2.x + " " + box.p2.y+ " "+  box.p3.x + " " + box.p3.y);
                         }
                     });
                 }
