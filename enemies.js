@@ -304,23 +304,22 @@ RangeEnemy.prototype.update = function () {
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
         if (ent instanceof Player) {
-            if (collide(this, ent)) {
-                console.log("Player collide");
-                var temp = { x: this.velocity.x, y: this.velocity.y };
-
-                tempVelocityX = temp.x * friction;
-                tempVelocityY = temp.y * friction;
-
-                ent.x += 20 * tempVelocityX * this.game.clockTick;
-                ent.y += 20 * tempVelocityY * this.game.clockTick;
-            }
-            
             if (collide({boundingBox: this.visualBox}, ent)) {
                 this.following = true;
                 var dist = distance(this, ent);
                 this.followPoint = ent;
                 if (collide(ent, {boundingBox: this.attackBox})) {
                     this.attacking = true;
+                    if (collide(this, ent)) {
+                        console.log("Player collide");
+                        var temp = { x: this.velocity.x, y: this.velocity.y };
+        
+                        tempVelocityX = temp.x * friction;
+                        tempVelocityY = temp.y * friction;
+        
+                        ent.x += 20 * tempVelocityX * this.game.clockTick;
+                        ent.y += 20 * tempVelocityY * this.game.clockTick;
+                    }
                 } else {
                     this.attacking = false;
                     var difX = (ent.x - this.x)/dist;
@@ -361,7 +360,6 @@ RangeEnemy.prototype.update = function () {
     }
     this.healthBar.update();
 
-    //if(isNaN(this.health)) {
     if (this.health < 1) {
         this.dead = true;
         this.attacking = false;
@@ -381,7 +379,7 @@ RangeEnemy.prototype.draw = function () {
         this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     } 
     this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-    this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+   // this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
     this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     if (this.dead) {
         this.DyingAnimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this);
@@ -401,20 +399,7 @@ function collide(ent1, ent2) {
             && ent1.boundingBox.height + ent1.boundingBox.y > ent2.boundingBox.y);
     }
     return false;
-}/*
-function collideLeft (entity) {
-    return (entity.x - entity.radius) < 650;
 }
-function collideRight(entity) {
-    return (entity.x + entity.radius) > 800;
-}
-function collideTop (entity) {
-    return (entity.y - entity.radius) < 0;
-}
-function collideBottom (entity) {
-    return (entity.y + entity.radius) > 650;
-}*/
-
 
 function Bunny(game, spritesheet) {
     this.walkAnimations = [];
@@ -433,7 +418,6 @@ function Bunny(game, spritesheet) {
     
     this.direction = "right";
     this.visualRadius = 800;
-    this.runBack = false;
     this.ctx = game.ctx;
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
@@ -456,10 +440,10 @@ function Bunny(game, spritesheet) {
     this.visualBox = {
         x:this.x, 
         y:this.y,
-        width: 1000,
-        height: 1000,
-        offsetx:-500,
-        offsety:-450
+        width: 1500,
+        height: 1500,
+        offsetx:-700,
+        offsety:-850
     }
     this.dead = false;
     this.health = 100;
@@ -492,9 +476,6 @@ Bunny.prototype.collideBottom = function () {
 
 Bunny.prototype.update = function () {
 
-    this.x += this.velocity.x * this.game.clockTick;
-    this.y += this.velocity.y * this.game.clockTick;
-
     this.boundingBox.x = this.x + this.boundingBox.offsetx;
     this.boundingBox.y = this.y + this.boundingBox.offsety;
 
@@ -503,32 +484,6 @@ Bunny.prototype.update = function () {
 
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-    
-     
-/*
-
-                this.x -= 10* tempVelocityX * this.game.clockTick;
-                this.y -= 10* tempVelocityY * this.game.clockTick;
-            var dist = distance(this, ent);
-            var delta = this.radius + ent.radius - dist;
-            var difX = (this.x - ent.x)/dist;
-            var difY = (this.y - ent.y)/dist;
-
-            this.x += difX * delta / 2;
-            this.y += difY * delta / 2;
-            ent.x -= difX * delta / 2;
-            ent.y -= difY * delta / 2;
-
-            this.velocity.x = ent.velocity.x * friction;
-            this.velocity.y = ent.velocity.y * friction;
-            ent.velocity.x = temp.x * friction;
-            ent.velocity.y = temp.y * friction;
-            /*this.x += this.velocity.x * this.game.clockTick;
-            this.y += this.velocity.y * this.game.clockTick;*/
-            /*ent.x += ent.velocity.x * this.game.clockTick;
-            ent.y += ent.velocity.y * this.game.clockTick;*/
-        //}
- 
         if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
             var dist = distance(this, ent);
                 shiftDirection(this, ent);
@@ -555,14 +510,15 @@ Bunny.prototype.update = function () {
                     ent.health -= 10;
                 }
 
+                this.x += this.velocity.x * this.game.clockTick;
+                this.y += this.velocity.y * this.game.clockTick;
+            
         }
     }
 
     if (this.health < 1) {
         this.dead = true;
     }
-    this.velocity.x -= (1 - friction) * this.game.clockTick * this.velocity.x;
-    this.velocity.y -= (1 - friction) * this.game.clockTick * this.velocity.y; 
 
     
     this.healthBar.update();
@@ -576,8 +532,8 @@ Bunny.prototype.draw = function () {
     } else {
         this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     }
-    //this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-    //this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     Entity.prototype.draw.call(this);
     
     this.healthBar.draw();
