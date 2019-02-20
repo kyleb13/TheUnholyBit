@@ -11,6 +11,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
     this.ctx = game.ctx;
     this.movedir = 3;
     this.velocity = { x: 200, y: 200 };
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
     this.boundingBox = {
         x:this.x, 
         y:this.y,
@@ -73,6 +74,7 @@ Player.prototype = new Entity();
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function () {
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
     var px = this.game.pointerx;
     var py = this.game.pointery;
     var center = this.center();
@@ -133,14 +135,19 @@ Player.prototype.update = function () {
                 }
             
             }
-            this.x += time * this.xspeed;
-            this.y += time * this.yspeed;
+            if((!this.moveRestrictions.left && this.xspeed<0) || (!this.moveRestrictions.right && this.xspeed>0)){
+                this.x += time * this.xspeed;
+                this.game.pointerx += this.xspeed * this.game.clockTick;
+            }
+            if((!this.moveRestrictions.up && this.yspeed<0) || (!this.moveRestrictions.down && this.yspeed>0)){
+                this.y += time * this.yspeed;
+                this.game.pointery += this.game.player.yspeed * this.game.clockTick;
+            }
         }
     } else if(this.game.lclick){
         this.xspeed = 0;
         this.yspeed = 0;
     }
-
 
     this.boundingBox.x = this.x + this.boundingBox.offsetx;
     this.boundingBox.y = this.y + this.boundingBox.offsety;
@@ -163,6 +170,7 @@ Player.prototype.draw = function () {
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     }
     this.healthBar.draw();
+    this.game.crosshair.draw();
     Entity.prototype.draw.call(this);
 }
 
@@ -173,6 +181,65 @@ Player.prototype.center = function() {
 }
 Player.prototype.insideOfRadius = function (other) {
     return distance(other, this) < (this.radius.r);
+}
+
+Player.prototype.handleCollision = function(box){
+    var hitboxlines = [
+        {x:this.boundingBox.x, y:this.boundingBox.y}, 
+        {x:this.boundingBox.x, y:this.boundingBox.y+this.boundingBox.height},
+        {x:this.boundingBox.x+this.boundingBox.width, y:this.boundingBox.y+this.boundingBox.height},
+        {x:this.boundingBox.x+this.boundingBox.width, y:this.boundingBox.y}
+    ];
+
+    var bl = [
+        {x:box.p1.x, y:box.p1.y}, 
+        {x:box.p2.x, y:box.p2.y},
+        {x:box.p3.x, y:box.p3.y},
+        {x:box.p4.x, y:box.p4.y}
+    ];
+
+    var isSteep = function(p1, p2){
+        if(p1.x!==p2.x && p1.y!==p2.y) return true;
+        else return false;
+    }
+
+    for(var a=1; a<=hitboxlines.length; a++){
+        var p1 = hitboxlines[a-1];
+        var p2 = hitboxlines[a%4];
+        var l = lineLine(p1.x, p1.y, p2.x, p2.y, bl[0].x, bl[0].y, bl[1].x, bl[1].y);
+        var d = lineLine(p1.x, p1.y, p2.x, p2.y, bl[1].x, bl[1].y, bl[2].x, bl[2].y);
+        var r = lineLine(p1.x, p1.y, p2.x, p2.y, bl[2].x, bl[2].y, bl[3].x, bl[3].y);
+        var u = lineLine(p1.x, p1.y, p2.x, p2.y, bl[3].x, bl[3].y, bl[0].x, bl[0].y);
+        if(l){
+            this.moveRestrictions.right = true;
+            if(isSteep(bl[0], bl[1])){
+                if(a==2) this.moveRestrictions.down = true;
+                else if(a==4) this.moveRestrictions.up = true;
+            }
+        }
+        if(r){
+            this.moveRestrictions.left = true;
+            if(isSteep(bl[2], bl[3])){
+                if(a==2) this.moveRestrictions.down = true;
+                else if(a==4) this.moveRestrictions.up = true;
+            }
+        }
+        if(d){
+            this.moveRestrictions.up = true;
+            if(isSteep(bl[1], bl[2])){
+                if(a==1) this.moveRestrictions.left = true;
+                else if(a==3) this.moveRestrictions.right = true;
+            }
+        }
+        if(u){
+            this.moveRestrictions.down = true;
+            if(isSteep(bl[3], bl[0])){
+                if(a==1) this.moveRestrictions.left = true;
+            else if(a==3) this.moveRestrictions.right = true;
+            }
+        }
+    }
+    document.getElementById("debug-out").innerHTML = `left:${this.moveRestrictions.left}, right:${this.moveRestrictions.right}, up:${this.moveRestrictions.up}, down:${this.moveRestrictions.down}`
 }
 
 function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, damage){
@@ -287,19 +354,7 @@ function LevelBoundingBoxCollsion(background, ent) {
                 ent.handleCollision(background);
             } else {
                 if (ent instanceof Player){
-                    if (top) {
-                        ent.y -= 1;
-                        ent.yspeed = -ent.yspeed 
-                    } if (right) {
-                        ent.x += 1;
-                        ent.xspeed = -ent.xspeed;
-                    } if (left) {
-                        ent.x -= 1;
-                        ent.xspeed = -ent.xspeed;
-                    } if(bottom) {
-                        ent.y += 1;
-                        ent.yspeed = -ent.yspeed
-                    }
+                    ent.handleCollision(box);
                 } else if (ent instanceof Bunny || ent instanceof RangeEnemy) {
                     if (top) {
                         ent.y -= 1;

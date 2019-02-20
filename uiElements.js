@@ -35,10 +35,10 @@ function Crosshair(game, spritesheet){
     this.game.pointery = this.game.player.y;
 }
 
-Crosshair.prototype.update = function() {
-    this.game.pointerx += this.game.player.xspeed * this.game.clockTick;
-    this.game.pointery += this.game.player.yspeed * this.game.clockTick;
-};
+// Crosshair.prototype.update = function() {
+//     this.game.pointerx += this.game.player.xspeed * this.game.clockTick;
+//     this.game.pointery += this.game.player.yspeed * this.game.clockTick;
+// };
 
 Crosshair.prototype.draw = function() {
     this.ctx.drawImage(this.sheet, this.game.pointerx-14, this.game.pointery-14);
