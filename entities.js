@@ -20,7 +20,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
         offsety:15
     }
     //Entity.call(this, game, 925, 850);
-    Entity.call(this, game, 100, 850);
+    Entity.call(this, game, 300, 850);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -115,39 +115,26 @@ Player.prototype.update = function () {
             this.yspeed = (this.yspeed/1.48);
         }
 
-        this.x += time * this.xspeed;
-        this.y += time * this.yspeed;
         if (!this.xspeed !== 0 || !this.yspeed !== 0) {
             for (var i = 0; i < this.game.entities.length; i++) {
                 var ent = this.game.entities[i];
-                if (ent instanceof Bunny && collide(this, ent)) {
-                    tempVelocityX = ent.velocity.x * friction;
-                    tempVelocityY = ent.velocity.y * friction;
+                if ((ent instanceof Bunny || ent instanceof RangeEnemy) 
+                    && this.insideOfRadius(ent) && !ent.removeFromWorld) {
+                    console.log(ent.constructor.name)    
+                    if (ent instanceof Bunny && collide(this, ent)) {
+                        tempVelocityX = ent.velocity.x * friction;
+                        tempVelocityY = ent.velocity.y * friction;
+                        ent.x -= 2 * tempVelocityX * this.game.clockTick;   
+                        ent.y -= 2 * tempVelocityY * this.game.clockTick;
+                    }
 
-                    ent.x -= 2 * tempVelocityX * this.game.clockTick;   
-                    ent.y -= 2 * tempVelocityY * this.game.clockTick;
                 } else if(ent instanceof Background) {
-                    ent.boundingBoxes.forEach((box) => {
-                        var left = lineRect(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
-                            this.boundingBox.x, this.boundingBox.y, 
-                            this.boundingBox.width, this.boundingBox.height);
-                        var bottom = lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
-                            this.boundingBox.x, this.boundingBox.y,
-                            this.boundingBox.width, this.boundingBox.height);
-                        var right = lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
-                            this.boundingBox.x, this.boundingBox.y,
-                            this.boundingBox.width, this.boundingBox.height);
-                        var top = lineRect(box.p4.x, box.p4.y, box.p1.x, box.p1.y,
-                            this.boundingBox.x, this.boundingBox.y,
-                            this.boundingBox.width, this.boundingBox.height);
-                        if ( left|| bottom || right || top) {
-                            console.log("You're over");
-                            //   console.log(box.p2.x + " " + box.p2.y+ " "+  box.p3.x + " " + box.p3.y);
-                        }
-                    });
+                    LevelBoundingBoxCollsion(ent, this);
                 }
             
             }
+            this.x += time * this.xspeed;
+            this.y += time * this.yspeed;
         }
     } else if(this.game.lclick){
         this.xspeed = 0;
@@ -183,6 +170,9 @@ Player.prototype.center = function() {
     var centerx = this.x + this.animation.frameWidth/2;
     var centery= this.y + this.animation.frameHeight/2;
     return {x:centerx, y:centery};
+}
+Player.prototype.insideOfRadius = function (other) {
+    return distance(other, this) < (this.radius.r);
 }
 
 function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, damage){
@@ -249,12 +239,16 @@ Projectile.prototype.update = function() {
 
         for (var i = 0; i < this.game.entities.length; i++) {
             var ent = this.game.entities[i];
-            if (this.shooter !== "Player" && ent instanceof Player && collide(this, ent)) {
-                this.handleCollision(ent);
-            } else if (this.shooter === "Player" 
-                        && (ent instanceof Bunny || ent instanceof RangeEnemy)
-                        && collide(this, ent)) {
-                this.handleCollision(ent);
+            if (!ent.removeFromWorld) {
+                if (this.shooter !== "Player" && ent instanceof Player && collide(this, ent)) {
+                    this.handleCollision(ent);
+                } else if (this.shooter === "Player" 
+                                        && (ent instanceof Bunny || ent instanceof RangeEnemy)
+                                        && collide(this, ent)) {
+                    this.handleCollision(ent);
+                } else if (ent instanceof Background) {
+                    LevelBoundingBoxCollsion(ent, this);
+                }
             }
         }
         this.x += time * this.xspeed;
@@ -274,16 +268,72 @@ Projectile.prototype.draw = function(){
 
 }
 
+function LevelBoundingBoxCollsion(background, ent) {
+    background.boundingBoxes.forEach((box) => {
+        var left = lineRect(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
+            ent.boundingBox.x, ent.boundingBox.y, 
+            ent.boundingBox.width, ent.boundingBox.height);
+        var bottom = lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
+            ent.boundingBox.x, ent.boundingBox.y,
+            ent.boundingBox.width, ent.boundingBox.height);
+        var right = lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
+            ent.boundingBox.x, ent.boundingBox.y,
+            ent.boundingBox.width, ent.boundingBox.height);
+        var top = lineRect(box.p4.x, box.p4.y, box.p1.x, box.p1.y,
+            ent.boundingBox.x, ent.boundingBox.y,
+            ent.boundingBox.width, ent.boundingBox.height);
+        if ( left|| bottom || right || top) {
+            if (ent instanceof Projectile) {
+                ent.handleCollision(background);
+            } else {
+                if (ent instanceof Player){
+                    if (top) {
+                        ent.y -= 1;
+                        ent.yspeed = -ent.yspeed 
+                    } if (right) {
+                        ent.x += 1;
+                        ent.xspeed = -ent.xspeed;
+                    } if (left) {
+                        ent.x -= 1;
+                        ent.xspeed = -ent.xspeed;
+                    } if(bottom) {
+                        ent.y += 1;
+                        ent.yspeed = -ent.yspeed
+                    }
+                } else if (ent instanceof Bunny || ent instanceof RangeEnemy) {
+                    if (top) {
+                        ent.y -= 1;
+                        ent.velocity.y = -ent.velocity.y; 
+                    } if (right) {
+                        ent.x += 1;
+                        ent.velocity.x = -ent.velocity.x;
+                    } if (left) {
+                        ent.x -= 1;
+                        ent.velocity.x = -ent.velocity.x;
+                    } if(bottom) {
+                        ent.y += 1;
+                        ent.velocity.y = -ent.velocity.y
+                    }
+                }
+        }
+         }
+    });
+    return false;
+}
+
+
 Projectile.prototype.handleCollision = function(ent) {
-    tempVelocityX = this.xspeed * friction;
-    tempVelocityY = this.yspeed * friction;
-     
-    ent.x += 7 * tempVelocityX * this.game.clockTick;   
-    ent.y += 7 * tempVelocityY * this.game.clockTick;
-    //TODO: make this less dumb
-    //since this allows for enemies to hurt eachother
-    if(ent.health){
-        ent.health = ent.health - this.damage;
+    if (!(ent instanceof Background)) {    
+        tempVelocityX = this.xspeed * friction;
+        tempVelocityY = this.yspeed * friction;
+        
+        ent.x += 7 * tempVelocityX * this.game.clockTick;   
+        ent.y += 7 * tempVelocityY * this.game.clockTick;
+        
+        if(ent.health){
+            ent.health = ent.health - this.damage;
+        }
     }
+    
     this.removeFromWorld = true;
 }

@@ -218,6 +218,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
     this.attacking = false;
     this.direction = "down";
     this.ctx = game.ctx;
+
     
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
@@ -352,9 +353,7 @@ RangeEnemy.prototype.update = function () {
                 ent.y += 20 * tempVelocityY * this.game.clockTick;
             }   
         } else if(ent instanceof Background) {
-            ent.boundingBoxes.forEach((box) => {
-              
-            });
+            LevelBoundingBoxCollsion(ent, this)
         }
         
     }
@@ -372,19 +371,22 @@ RangeEnemy.prototype.update = function () {
 RangeEnemy.prototype.draw = function () {
     if (this.attacking && !this.dead) {
         this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-        
     } else if (this.following&& !this.dead) {
         this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-    } else if (!this.attacking && this.follwoing && !this.dead) {
+    } else if (!this.attacking && !this.following && !this.dead) {
         this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     } 
-    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-   // this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
-    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+
+    
     if (this.dead) {
         this.DyingAnimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this);
     }
     this.healthBar.draw();
+    if (this.game.showOutlines) {
+        this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    }
     Entity.prototype.draw.call(this);
 }
 
@@ -513,6 +515,8 @@ Bunny.prototype.update = function () {
                 this.x += this.velocity.x * this.game.clockTick;
                 this.y += this.velocity.y * this.game.clockTick;
             
+        } else if (ent instanceof Background) {
+            LevelBoundingBoxCollsion(ent, this);
         }
     }
 
