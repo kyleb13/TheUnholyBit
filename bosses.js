@@ -55,14 +55,15 @@ function shiftDirection(ent1, ent2) {
 
 function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     this.animation = new Animation(movementsheet,82,75,17,.09,17,true,2);
-    this.RAanimation =  new Animation(attackRsheet,82,75,31,.1,31,true,2);
-    this.LAanimation = new Animation(attackLsheet,82,75,31,.1,31,true,2);
-  //  this.attackAnimation = [];
-   // this.attackAnimation["left"] = new Animation(attackLsheet,82,75,31,.1,31,true,2);
-  //  this.attackAnimation["right"] = new Animation(attackRsheet,82,75,31,.1,31,true,2);
+    //this.RAanimation =  new Animation(attackRsheet,82,75,31,.1,31,true,2);
+    //this.LAanimation = new Animation(attackLsheet,82,75,31,.1,31,true,2);
+    this.attackAnimations = [];
+    this.attackAnimations["left"] = new Animation(attackLsheet,82,75,31,.1,31,true,2);
+    this.attackAnimations["right"] = new Animation(attackRsheet,82,75,31,.1,31,true,2);
     this.attackVision = 200;
     this.attackL = false;
     this.attackR = false;
+    this.attack = false;
     this.ctx = game.ctx;
     this.speed = 10;
     this.location = false;
@@ -131,8 +132,24 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                         break;
                    
                 }
-                addProjectile(that, x, y, projectile, "Enemy");
-                });
+                 
+
+                addProjectile(new Projectile(that.game, 
+                    {
+                        img:that.game.assetManager.getAsset("./img/modball.png"), 
+                        width:26, 
+                        height:17
+                    }, 300, //speed
+                    {//start point
+                        x:x, 
+                        y:y
+                    }, 
+                    {//end Point
+                        x:that.game.player.x, 
+                        y:that.game.player.y
+                    }, 5, "Player"));//lifetime
+            
+         });
     }
     
 }
@@ -158,6 +175,37 @@ shadowBoss.prototype.update = function () {
 
     this.attackBox.x = this.x + this.attackBox.offsetx;
     this.attackBox.y = this.y + this.attackBox.offsety;
+
+    var ent = this.game.player;
+    if (!collide({boundingBox: this.visualBox}, ent)) {
+        this.following = false;
+    } else if (collide({boundingBox: this.visualBox}, ent)) {
+        this.following = true;
+        var dist = distance(this, ent);
+        this.followPoint = ent;
+        //if (collide(ent, {boundingBox: this.attackBox})) {
+        if(dist <= this.attackVision){
+            this.attack = true;
+            this.following =false;
+        }
+    }else {
+        this.attack = false;
+        var difX = (ent.x - this.x)/dist;
+        var difY = (ent.y - this.y)/dist;
+        this.velocity.x += difX * acceleration / (dist*dist);
+        this.velocity.y += difY * acceleration / (dist * dist);
+        var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+        if (speed > maxSpeed) {
+            var ratio = maxSpeed / speed;
+            this.velocity.x *= ratio;
+            this.velocity.y *= ratio;
+        }
+        
+        this.x += this.velocity.x * this.game.clockTick;
+        this.y += this.velocity.y * this.game.clockTick;
+    }
+    shiftDirection(this, ent);
+/*
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
         if (ent instanceof Player) {
@@ -171,7 +219,8 @@ shadowBoss.prototype.update = function () {
 
                 ent.x += 20 * tempVelocityX * this.game.clockTick;
                 ent.y += 20 * tempVelocityY * this.game.clockTick;
-            }*/
+            }
+            
             
             if (collide({boundingBox: this.visualBox}, ent)) {
                 this.following = true;
@@ -179,7 +228,9 @@ shadowBoss.prototype.update = function () {
                 this.followPoint = ent;
                 //if (collide(ent, {boundingBox: this.attackBox})) {
                 if(dist <= this.attackVision){
-                    if(this.x > ent.x){
+                    this.attack = true;
+                    this.following =false;
+                    /*if(this.x > ent.x){
                         this.attackR = true;
                     }
                     if(this.x < ent.x){
@@ -210,12 +261,12 @@ shadowBoss.prototype.update = function () {
         } 
         
        
-    }
+    }*/
 }
 
 shadowBoss.prototype.draw = function () {
     
-
+/*
     if(this.attackR) {
         this.RAanimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
             
@@ -224,12 +275,15 @@ shadowBoss.prototype.draw = function () {
 
     }else {
         this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-    }
-    /*
-    else if(this.attack){
-        this.attackAnimation[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-       
     }*/
+
+    if(this.following){
+        this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    }
+    else if(this.attack){
+        this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+       
+    }
     this.ctx.strokeStyle = "red";
     this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     this.ctx.strokeStyle = "black";
@@ -271,6 +325,12 @@ function addProjectile(that, x, y, shooter) {
 var friction = 1;
 var acceleration = 1000000;
 var maxSpeed = 100;
+
+
+function projectile(image,x,y){
+
+
+}
 
 /////////////////////////////////////////////////////////////////
 /*
