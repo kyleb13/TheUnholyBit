@@ -127,6 +127,10 @@ Background.prototype.draw = function () {
             that.ctx.lineTo(box.p4.x, box.p4.y);
             that.ctx.lineTo(box.p1.x, box.p1.y);
             that.ctx.stroke();
+            that.ctx.fillText(`${box.n}(1)`, box.p1.x-5, box.p1.y-5);
+            that.ctx.fillText(`${box.n}(2)`, box.p2.x-5, box.p2.y-5);
+            that.ctx.fillText(`${box.n}(3)`, box.p3.x+5, box.p3.y+5);
+            that.ctx.fillText(`${box.n}(4)`, box.p4.x+5, box.p4.y+5);
         });
     }
 };
@@ -201,6 +205,7 @@ AM.downloadAll(function () {
    // var powerup = new Powerup (gameEngine, 400, 900,  AM.getAsset("./img/arrowPile.png"))
    // gameEngine.addEntity(powerup);
     gameEngine.start(player, camera);
+    gameEngine.crosshair = new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png"));
     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/villagemap.png")));
     gameEngine.addEntity(player);
     var ArrowType = {x:0, y:1025, w:64, h:64, d:0.05, f:13, l:true, r:false};
@@ -213,6 +218,6 @@ AM.downloadAll(function () {
     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightArcher.png"), 600, 600, ArrowType, "arrow"));
     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightMage.png"), 500, 600, MagicType, "magic"));
     */
-    gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png")));
+    // gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png")));
     console.log("All Done!");
 });

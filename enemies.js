@@ -570,6 +570,9 @@ function lineRect(x1, y1, x2, y2, rx, ry, rw, rh) {
     var right =  lineLine(x1,y1,x2,y2, rx+rw,ry, rx+rw,ry+rh);
     var top =    lineLine(x1,y1,x2,y2, rx,ry, rx+rw,ry);
     var bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
+    if(bottom){
+        bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
+    }
   
     // if ANY of the above are true, the line
     // has hit the rectangle

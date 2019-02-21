@@ -14,6 +14,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
     this.ctx = game.ctx;
     this.movedir = 3;
     this.velocity = { x: 200, y: 200 };
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
     this.boundingBox = {
         x:this.x, 
         y:this.y,
@@ -76,6 +77,7 @@ Player.prototype = new Entity();
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function () {
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
     var px = this.game.pointerx;
     var py = this.game.pointery;
     var center = this.center();
@@ -136,8 +138,14 @@ Player.prototype.update = function () {
                 }
             
             }
-            this.x += time * this.xspeed;
-            this.y += time * this.yspeed;
+            if((!this.moveRestrictions.left && this.xspeed<0) || (!this.moveRestrictions.right && this.xspeed>0)){
+                this.x += time * this.xspeed;
+                this.game.pointerx += this.xspeed * this.game.clockTick;
+            }
+            if((!this.moveRestrictions.up && this.yspeed<0) || (!this.moveRestrictions.down && this.yspeed>0)){
+                this.y += time * this.yspeed;
+                this.game.pointery += this.game.player.yspeed * this.game.clockTick;
+            }
         }
     } else if(this.game.lclick){
         this.xspeed = 0;
@@ -178,6 +186,7 @@ Player.prototype.draw = function () {
         this.deathanimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this); 
     }
     this.healthBar.draw();
+    this.game.crosshair.draw();
     Entity.prototype.draw.call(this);
 }
 
@@ -362,19 +371,7 @@ function LevelBoundingBoxCollsion(background, ent) {
                 ent.handleCollision(background);
             } else {
                 if (ent instanceof Player){
-                    if (top) {
-                        ent.y -= 1;
-                        ent.yspeed = -ent.yspeed 
-                    } if (right) {
-                        ent.x += 1;
-                        ent.xspeed = -ent.xspeed;
-                    } if (left) {
-                        ent.x -= 1;
-                        ent.xspeed = -ent.xspeed;
-                    } if(bottom) {
-                        ent.y += 1;
-                        ent.yspeed = -ent.yspeed
-                    }wd
+                    ent.handleCollision(box);
                 } else if (ent instanceof Bunny || ent instanceof RangeEnemy) {
                     if (top) {
                         ent.y -= 1;
@@ -395,7 +392,6 @@ function LevelBoundingBoxCollsion(background, ent) {
     });
     return false;
 }
-
 
 Projectile.prototype.handleCollision = function(ent) {
     if (!(ent instanceof Background)) {    
