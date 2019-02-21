@@ -21,7 +21,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
         offsety:15
     }
     //Entity.call(this, game, 925, 850);
-    Entity.call(this, game, 300, 850);
+    Entity.call(this, game, 800, 850);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -216,8 +216,7 @@ Player.prototype.handleCollision = function(box){
                 if(a==2) this.moveRestrictions.down = true;
                 else if(a==4) this.moveRestrictions.up = true;
             }
-        }
-        if(r){
+        } else if(r){
             this.moveRestrictions.left = true;
             if(isSteep(bl[2], bl[3])){
                 if(a==2) this.moveRestrictions.down = true;
@@ -230,8 +229,7 @@ Player.prototype.handleCollision = function(box){
                 if(a==1) this.moveRestrictions.left = true;
                 else if(a==3) this.moveRestrictions.right = true;
             }
-        }
-        if(u){
+        } else if(u){
             this.moveRestrictions.down = true;
             if(isSteep(bl[3], bl[0])){
                 if(a==1) this.moveRestrictions.left = true;

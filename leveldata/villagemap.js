@@ -1,5 +1,6 @@
 var leveldata = 
 `{
+    "playerSpawn":{"x":800, "y":850}
     "boundingBoxes": [
         {
             "n":1,
