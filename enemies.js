@@ -40,6 +40,14 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
         this.callbackDone = true;
         this.callback(this.callbackArgs);
     }
+
+    var itemPercentage = Math.random(); 
+    var dropType;
+    if (itemPercentage > 0.5 && itemPercentage < 0.8) {
+        dropType = "ammo";
+    } else if(itemPercentage < 0.8&& itemPercentage >= 1.0) {
+        dropType = "HP";
+    }
     if (this.loop) {
         if (this.isDone()) {
             this.elapsedTime = 0;
@@ -47,14 +55,18 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
             
             if (ent !== undefined) {
                 ent.removeFromWorld = true;
-                console.log("Eureka!");
+                if (dropType !== "none") {
+                    ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+                }
             }
         }
         
     } else if (this.isDone()) {
         if (ent !== undefined) {
-           ent.removeFromWorld = true;
-           console.log("Eureka!");
+           ent.removeFromWorld = true; 
+             if (dropType !== "none") {
+                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+             }
         }
         return;
     }
@@ -304,7 +316,7 @@ RangeEnemy.prototype.update = function () {
     this.attackBox.y = this.y + this.attackBox.offsety;
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-        if (ent instanceof Player) {
+        if (ent instanceof Player && !ent.removeFromWorld) {
             if (collide({boundingBox: this.visualBox}, ent)) {
                 this.following = true;
                 var dist = distance(this, ent);
@@ -384,8 +396,7 @@ RangeEnemy.prototype.draw = function () {
     this.healthBar.draw();
     if (this.game.showOutlines) {
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
-        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);2
     }
     Entity.prototype.draw.call(this);
 }

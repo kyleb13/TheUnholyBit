@@ -168,7 +168,10 @@ AM.queueDownload("./img/villagemap.png");
 AM.queueDownload("./img/charwalk.png");
 AM.queueDownload("./img/charstand.png");
 AM.queueDownload("./img/charshoot_loop.png");
+AM.queueDownload("./img/character_edited.png");
 AM.queueDownload("./img/arrow.png");
+AM.queueDownload("./img/arrowPile.png");
+AM.queueDownload("./img/heart.png");
 
 AM.queueDownload("./img/bunbun.png");
 AM.queueDownload("./img/napper.png");
@@ -193,8 +196,10 @@ AM.downloadAll(function () {
     gameEngine.assetManager = AM;
     
     gameEngine.init(ctx);
-    var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"));
+    var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"), AM.getAsset("./img/character_edited.png"));
     var camera = new Camera(gameEngine, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
+   // var powerup = new Powerup (gameEngine, 400, 900,  AM.getAsset("./img/arrowPile.png"))
+   // gameEngine.addEntity(powerup);
     gameEngine.start(player, camera);
     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/villagemap.png")));
     gameEngine.addEntity(player);
