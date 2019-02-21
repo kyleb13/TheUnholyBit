@@ -11,6 +11,11 @@ window.requestAnimFrame = (function () {
 
 var pointerLocked = false;
 
+var audio = new Audio('./villageMusic.mp3');
+audio.volume = 0.10; // 75%
+audio.loop = true;
+
+
 //function canvasLoaded(){
 
 //}
@@ -69,6 +74,9 @@ GameEngine.prototype.start = function (player, camera) {
             document.addEventListener("mousemove", mousePositionUpdate);
             that.pointerLocked = true;
             pointerLocked = true;
+            if (audio.play)
+            audio.play();
+
         } else {
             document.removeEventListener("mousemove", mousePositionUpdate);
             that.pointerLocked = false;
@@ -78,6 +86,7 @@ GameEngine.prototype.start = function (player, camera) {
             that.s = false;
             that.d = false;
             that.lclick = false;
+            audio.pause();
         }
     });
     console.log("starting game");

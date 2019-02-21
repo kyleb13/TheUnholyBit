@@ -12,7 +12,7 @@ HealthBar.prototype.update = function () {
     this.barCurrent = this.entity.health;
     if(this.barCurrent <0){
         this.barCurrent = 0;
-    }
+    } 
 }
 
 HealthBar.prototype.draw = function() {
@@ -44,3 +44,4 @@ Crosshair.prototype.draw = function() {
     this.ctx.drawImage(this.sheet, this.game.pointerx-14, this.game.pointery-14);
     //this.ctx.strokeRect(this.game.pointerx, this.game.pointery, 2, 2);
 };
+
