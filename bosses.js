@@ -28,7 +28,7 @@ function collide(ent1, ent2) {
 
 
 
-function shiftDirection(ent1, ent2) {
+function shiftDirectionBoss(ent1, ent2) {
     var enemyX = ent2.x;
     var centerx = ent1.x;
     var xdiff = centerx-enemyX;
@@ -61,8 +61,8 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     //this.RAanimation =  new Animation(attackRsheet,82,75,31,.1,31,true,2);
     //this.LAanimation = new Animation(attackLsheet,82,75,31,.1,31,true,2);
     this.attackAnimations = [];
-    this.attackAnimations["left"] = new Animation(attackLsheet,82,75,31,.1,31,true,2);
-    this.attackAnimations["right"] = new Animation(attackRsheet,82,75,31,.1,31,true,2);
+    this.attackAnimations["left"] = new Animation(attackLsheet,82,75,31,.05,31,true,2);
+    this.attackAnimations["right"] = new Animation(attackRsheet,82,75,31,.05,31,true,2);
     this.attackVision = 200;
     this.attackL = false;
     this.attackR = false;
@@ -204,7 +204,7 @@ shadowBoss.prototype.update = function () {
         this.x += this.velocity.x * this.game.clockTick;
         this.y += this.velocity.y * this.game.clockTick;
     }
-    shiftDirection(this, ent);
+    shiftDirectionBoss(this, ent);
 /*
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
@@ -293,32 +293,32 @@ shadowBoss.prototype.draw = function () {
     Entity.prototype.draw.call(this);
 }
 
-function addProjectile(that, x, y, shooter) {  
-    var img;
-    var height;
-    var width;
-    var center = that.followPoint.center();
+// function addProjectile(that, x, y, shooter) {  
+//     var img;
+//     var height;
+//     var width;
+//     var center = that.followPoint.center();
     
-    img = that.game.assetManager.getAsset("./img/modball.png")
-    width = 26;
-    height = 17;
-    y = y + 20;
+//     img = that.game.assetManager.getAsset("./img/modball.png")
+//     width = 26;
+//     height = 17;
+//     y = y + 20;
     
-     that.game.addEntity(new Projectile(that.game, 
-    {
-        img, 
-        width, 
-        height
-    }, 300, //speed
-    {//start point
-        x:x, 
-        y:y
-    }, 
-    {//end Point
-        x:center.x, 
-        y:center.y
-    }, 5, shooter));//lifetime
-}
+//      that.game.addEntity(new Projectile(that.game, 
+//     {
+//         img, 
+//         width, 
+//         height
+//     }, 300, //speed
+//     {//start point
+//         x:x, 
+//         y:y
+//     }, 
+//     {//end Point
+//         x:center.x, 
+//         y:center.y
+//     }, 5, shooter));//lifetime
+// }
 
 
 

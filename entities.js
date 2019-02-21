@@ -6,6 +6,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
     this.maxSpeed = 200;
     this.xspeed = 0;
     this.yspeed = 0;
+    this.ammo = 10;
     this.health = 100;
     this.changeTimer = 0;
     this.ctx = game.ctx;
@@ -21,7 +22,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
         offsety:15
     }
     //Entity.call(this, game, 925, 850);
-    Entity.call(this, game, 5600, 1900);
+    Entity.call(this, game, 925, 850);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -169,6 +170,9 @@ Player.prototype.draw = function () {
     if(this.game.showOutlines){
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     }
+    this.ctx.font = "24px Arial";
+    this.ctx.fillStyle = "red";
+    this.ctx.fillText(`Ammo: ${this.ammo}`, this.x+550, this.y+300);
     this.healthBar.draw();
     this.game.crosshair.draw();
     Entity.prototype.draw.call(this);
