@@ -9,6 +9,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
     this.maxSpeed = 200;
     this.xspeed = 0;
     this.yspeed = 0;
+    this.ammo = 10;
     this.health = 100;
     this.changeTimer = 0;
     this.ctx = game.ctx;
@@ -24,7 +25,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
         offsety:15
     }
     //Entity.call(this, game, 925, 850);
-    Entity.call(this, game, 300, 850);
+    Entity.call(this, game, 925, 850);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -181,7 +182,9 @@ Player.prototype.draw = function () {
     if(this.game.showOutlines){
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     }
-
+    this.ctx.font = "24px Arial";
+    this.ctx.fillStyle = "red";
+    this.ctx.fillText(`Ammo: ${this.ammo}`, this.x+550, this.y+300);
     if (this.dead) {
         this.deathanimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this); 
     }
@@ -275,7 +278,9 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     this.timer = 0;
     this.lifetime = lifetime;
     this.damage = damage;
-    
+    if(spritesheet.path && spritesheet.path === "./img/modball.png"){
+        console.log("ayyyy");
+    }
     this.boundingBox = {
         x:this.x, 
         y:this.y,
