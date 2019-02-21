@@ -30,26 +30,29 @@ function collide(ent1, ent2) {
 
 function shiftDirection(ent1, ent2) {
     var enemyX = ent2.x;
-    var enemyY = ent2.y;
     var centerx = ent1.x;
-    var centery= ent1.y;
-    var xdiff = Math.abs(enemyX - centerx);
-    var ydiff = Math.abs(enemyY - centery);
+    var xdiff = centerx-enemyX;
 
-    //update direction character is pointing
-    if(enemyY< centery){//pointer is above character
-        if(centerx > enemyX && xdiff>ydiff){
-            ent1.direction = "left";
-        } else{
-            ent1.direction = "right";
-        }
+    if(xdiff>0){
+        ent1.direction = "right";
     } else {
-        if(centerx > enemyX && xdiff>ydiff){
-            ent1.direction = "left";
-        }  else{
-            ent1.direction = "right";
-        }
+        ent1.direction = "left"; 
     }
+    //console.log(`xdiff:${xdiff}, dir:${ent1.direction}`);
+    // //update direction character is pointing
+    // if(enemyY< centery){
+    //     if(centerx > enemyX && xdiff>ydiff){
+    //         ent1.direction = "left";
+    //     } else{
+    //         ent1.direction = "right";
+    //     }
+    // } else {
+    //     if(centerx > enemyX && xdiff>ydiff){
+    //         ent1.direction = "left";
+    //     }  else{
+    //         ent1.direction = "right";
+    //     }
+    // }
 }
 
 
@@ -95,10 +98,10 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     this.visualBox = {
         x:this.x, 
         y:this.y,
-        width: 1000,
-        height: 1000,
-        offsetx:-240,
-        offsety:-250
+        width: 1200,
+        height: 1200,
+        offsetx:-540,
+        offsety:-550
     }
 
     this.attackBox = {
@@ -116,13 +119,8 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     Entity.call(this, game, 5600, 1797);
 
     var that = this;
-    var shootcnt = 0;
     for (var index in this.attackAnimations) {
         this.attackAnimations[index].setCallbackOnFrame(16, {}, () => {
-            if(shootcnt === 1){
-                console.log("shooting again");
-            }
-            shootcnt +=1;
             var x = that.x;
             var y = that.y;
             switch(that.direction){
@@ -147,8 +145,8 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                     y:y
                 }, 
                 {//end Point
-                    x:(that.game.player,center()).x, 
-                    y:(that.game.player,center()).y
+                    x:(that.game.player.center()).x, 
+                    y:(that.game.player.center()).y
                 }, 5, "Boss", 25));//lifetime   
         });
     }
@@ -178,32 +176,17 @@ shadowBoss.prototype.update = function () {
     this.attackBox.y = this.y + this.attackBox.offsety;
 
     var ent = this.game.player;
-    if (!collide({boundingBox: this.visualBox}, ent)) {
-        this.following = false;
-    } else if (collide({boundingBox: this.visualBox}, ent)) {
+    if (collide({boundingBox: this.visualBox}, ent)) {
         this.following = true;
         var dist = distance(this, ent);
         this.followPoint = ent;
-        //if (collide(ent, {boundingBox: this.attackBox})) {
-        if(dist <= this.attackVision){
+        if (collide(ent, {boundingBox: this.attackBox})) {
+        //if(dist <= this.attackVision){
             this.attack = true;
             this.following =false;
         }
     }else {
-        // this.attack = false;
-        // var difX = (ent.x - this.x)/dist;
-        // var difY = (ent.y - this.y)/dist;
-        // this.velocity.x += difX * acceleration / (dist*dist);
-        // this.velocity.y += difY * acceleration / (dist * dist);
-        // var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-        // if (speed > maxSpeed) {
-        //     var ratio = maxSpeed / speed;
-        //     this.velocity.x *= ratio;
-        //     this.velocity.y *= ratio;
-        // }
-        
-        // this.x += this.velocity.x * this.game.clockTick;
-        // this.y += this.velocity.y * this.game.clockTick;
+        this.following = false;
     }
     if(this.following){
         this.attack = false;
