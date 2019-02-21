@@ -175,7 +175,7 @@ shadowBoss.prototype.update = function () {
     this.attackBox.x = this.x + this.attackBox.offsetx;
     this.attackBox.y = this.y + this.attackBox.offsety;
 
-    var ent = this.game.player;
+  /*  var ent = this.game.player;
     if (collide({boundingBox: this.visualBox}, ent)) {
         this.following = true;
         var dist = distance(this, ent);
@@ -204,12 +204,12 @@ shadowBoss.prototype.update = function () {
         this.x += this.velocity.x * this.game.clockTick;
         this.y += this.velocity.y * this.game.clockTick;
     }
-    shiftDirection(this, ent);
-/*
+    shiftDirection(this, ent);*/
+
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
         if (ent instanceof Player) {
-            /*
+            
             if (collide(this, ent)) {
                 console.log("Player collide");
                 var temp = { x: this.velocity.x, y: this.velocity.y };
@@ -226,16 +226,9 @@ shadowBoss.prototype.update = function () {
                 this.following = true;
                 var dist = distance(this, ent);
                 this.followPoint = ent;
-                //if (collide(ent, {boundingBox: this.attackBox})) {
-                if(dist <= this.attackVision){
+                if (collide(ent, {boundingBox: this.attackBox})) {
                     this.attack = true;
                     this.following =false;
-                    /*if(this.x > ent.x){
-                        this.attackR = true;
-                    }
-                    if(this.x < ent.x){
-                        this.attackL = true;
-                    }
                     
                 } else {
                     this.attack = false;
@@ -261,7 +254,7 @@ shadowBoss.prototype.update = function () {
         } 
         
        
-    }*/
+    }
 }
 
 shadowBoss.prototype.draw = function () {
