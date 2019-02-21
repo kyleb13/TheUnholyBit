@@ -40,6 +40,15 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
         this.callbackDone = true;
         this.callback(this.callbackArgs);
     }
+
+    var itemPercentage = Math.random(); 
+    var dropType;
+    if (itemPercentage > 0.5 && itemPercentage < 0.8) {
+        dropType = "ammo";
+    } else if(itemPercentage < 0.8 && itemPercentage <= 1.0) {
+        dropType = "HP";
+    }
+
     if (this.loop) {
         if (this.isDone()) {
             this.elapsedTime = 0;
@@ -47,14 +56,21 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
             
             if (ent !== undefined) {
                 ent.removeFromWorld = true;
-                console.log("Eureka!");
+                if (dropType !== undefined) {
+                    
+                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+                    
+                }
             }
         }
         
     } else if (this.isDone()) {
         if (ent !== undefined) {
-           ent.removeFromWorld = true;
-           console.log("Eureka!");
+           ent.removeFromWorld = true; 
+             if (dropType !== undefined) {
+                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+            
+             }
         }
         return;
     }
@@ -220,6 +236,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
     this.ctx = game.ctx;
 
     
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
     if (speed > maxSpeed) {
@@ -245,6 +262,7 @@ function addProjectile(that, x, y, type, shooter) {
     var img;
     var height;
     var width;
+    
     var center = that.followPoint.center();
     if (type === "arrow") {
         img = that.game.assetManager.getAsset("./img/arrow.png")
@@ -294,6 +312,7 @@ RangeEnemy.prototype.collideBottom = function () {
 RangeEnemy.prototype.update = function () {   
     Entity.prototype.update.call(this);
     
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
     this.boundingBox.x = this.x + this.boundingBox.offsetx;
     this.boundingBox.y = this.y + this.boundingBox.offsety;
 
@@ -304,11 +323,13 @@ RangeEnemy.prototype.update = function () {
     this.attackBox.y = this.y + this.attackBox.offsety;
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-        if (ent instanceof Player) {
+        if (ent instanceof Player && !ent.removeFromWorld) {
             if (collide({boundingBox: this.visualBox}, ent)) {
                 this.following = true;
                 var dist = distance(this, ent);
                 this.followPoint = ent;
+
+                let time = this.game.clockTick;
                 if (collide(ent, {boundingBox: this.attackBox})) {
                     this.attacking = true;
                     if (collide(this, ent)) {
@@ -333,9 +354,16 @@ RangeEnemy.prototype.update = function () {
                         this.velocity.x *= ratio;
                         this.velocity.y *= ratio;
                     }
+                    /*
+                    if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
+                        this.x += time * this.velocity.x;
+                    }
+                    if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
+                        this.y += time * this.velocity.y;
+                    }*/
                     
                     this.x += this.velocity.x * this.game.clockTick;
-                    this.y += this.velocity.y * this.game.clockTick;
+                this.y += this.velocity.y * this.game.clockTick;
                 }
                 shiftDirection(this, ent);
             } else if (!collide({boundingBox: this.visualBox}, ent)) {
@@ -385,7 +413,6 @@ RangeEnemy.prototype.draw = function () {
     if (this.game.showOutlines) {
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
         this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
-        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     }
     Entity.prototype.draw.call(this);
 }
@@ -421,6 +448,8 @@ function Bunny(game, spritesheet) {
     this.direction = "right";
     this.visualRadius = 800;
     this.ctx = game.ctx;
+    
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
     if (speed > maxSpeed) {
@@ -478,6 +507,7 @@ Bunny.prototype.collideBottom = function () {
 
 Bunny.prototype.update = function () {
 
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
     this.boundingBox.x = this.x + this.boundingBox.offsetx;
     this.boundingBox.y = this.y + this.boundingBox.offsety;
 
@@ -487,6 +517,8 @@ Bunny.prototype.update = function () {
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
         if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
+            
+        let time = this.game.clockTick;
             var dist = distance(this, ent);
                 shiftDirection(this, ent);
                 var difX = (ent.x - this.x)/dist;
@@ -505,15 +537,22 @@ Bunny.prototype.update = function () {
 
                     tempVelocityX = temp.x * friction;
                     tempVelocityY = temp.y * friction;
-                    
-                    ent.x += 20 * tempVelocityX * this.game.clockTick;
-                    ent.y += 20 * tempVelocityY * this.game.clockTick;
-                    
+                    /*
+                    ent.x += 10 * tempVelocityX * this.game.clockTick;
+                    ent.y += 10 * tempVelocityY * this.game.clockTick;
+                    */
+
+                   this.x -= 10 * tempVelocityX * this.game.clockTick;
+                   this.y -= 10 * tempVelocityY * this.game.clockTick;
                     ent.health -= 10;
                 }
-
-                this.x += this.velocity.x * this.game.clockTick;
-                this.y += this.velocity.y * this.game.clockTick;
+                if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
+                    this.x += time * this.velocity.x;
+                }
+                if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
+                    this.y += time * this.velocity.y;
+                }  
+                
             
         } else if (ent instanceof Background) {
             LevelBoundingBoxCollsion(ent, this);
