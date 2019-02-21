@@ -21,7 +21,7 @@ function Player(game, walksheet, shootsheet, standsheet) {
         offsety:15
     }
     //Entity.call(this, game, 925, 850);
-    Entity.call(this, game, 300, 850);
+    Entity.call(this, game, 5600, 1900);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -251,7 +251,9 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     this.timer = 0;
     this.lifetime = lifetime;
     this.damage = damage;
-    
+    if(spritesheet.path && spritesheet.path === "./img/modball.png"){
+        console.log("ayyyy");
+    }
     this.boundingBox = {
         x:this.x, 
         y:this.y,

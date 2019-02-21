@@ -41,6 +41,8 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     if (this.isDone()) {
         if (this.loop){
             this.elapsedTime = 0;
+            this.callbackDone = false;
+            this.elapsedTime = 0;
         } else {
             this.active = false;
         }
@@ -120,7 +122,6 @@ Background.prototype.draw = function () {
     var that = this;
     if(this.game.showOutlines) {
         this.boundingBoxes.forEach((box) => {
-            lineLine()
             that.ctx.moveTo(box.p1.x, box.p1.y);
             that.ctx.lineTo(box.p2.x, box.p2.y);
             that.ctx.lineTo(box.p3.x, box.p3.y);
@@ -186,6 +187,10 @@ AM.queueDownload("./img/MageGirl.png");
 
 AM.queueDownload("./img/KnightArcher.png");
 AM.queueDownload("./img/KnightMage.png");
+AM.queueDownload("./img/movement.png");
+AM.queueDownload("./img/shadowLeft.png");
+AM.queueDownload("./img/shadowRight.png");
+AM.queueDownload("./img/modball.png");
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
     

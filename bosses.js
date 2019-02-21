@@ -104,10 +104,10 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     this.attackBox = {
         x:this.x, 
         y:this.y,
-        width: 200,
-        height: 200,
-        offsetx:-20,
-        offsety:-25
+        width: 700,
+        height: 700,
+        offsetx:-270,
+        offsety:-270
     }
     this.followPoint = {x:0, y:0};
     this.direction = "right";
@@ -116,40 +116,41 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     Entity.call(this, game, 5600, 1797);
 
     var that = this;
-    
+    var shootcnt = 0;
     for (var index in this.attackAnimations) {
         this.attackAnimations[index].setCallbackOnFrame(16, {}, () => {
+            if(shootcnt === 1){
+                console.log("shooting again");
+            }
+            shootcnt +=1;
             var x = that.x;
             var y = that.y;
             switch(that.direction){
-                   
-                    case "left":
-                        y += 25;
-                        break;
-                    case "right":
-                        y += 30;
-                        x+=25;
-                        break;
-                   
-                }
-                 
-
-                addProjectile(new Projectile(that.game, 
-                    {
-                        img:that.game.assetManager.getAsset("./img/modball.png"), 
-                        width:26, 
-                        height:17
-                    }, 300, //speed
-                    {//start point
-                        x:x, 
-                        y:y
-                    }, 
-                    {//end Point
-                        x:that.game.player.x, 
-                        y:that.game.player.y
-                    }, 5, "Player"));//lifetime
-            
-         });
+                case "left":
+                    y += 25;
+                    break;
+                case "right":
+                    y += 30;
+                    x+=25;
+                    break;  
+            }
+            that.game.addProjectile( 
+                new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 300, //speed
+                {//start point
+                    x:x, 
+                    y:y
+                }, 
+                {//end Point
+                    x:(that.game.player,center()).x, 
+                    y:(that.game.player,center()).y
+                }, 5, "Boss", 25));//lifetime   
+        });
     }
     
 }
@@ -189,6 +190,22 @@ shadowBoss.prototype.update = function () {
             this.following =false;
         }
     }else {
+        // this.attack = false;
+        // var difX = (ent.x - this.x)/dist;
+        // var difY = (ent.y - this.y)/dist;
+        // this.velocity.x += difX * acceleration / (dist*dist);
+        // this.velocity.y += difY * acceleration / (dist * dist);
+        // var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+        // if (speed > maxSpeed) {
+        //     var ratio = maxSpeed / speed;
+        //     this.velocity.x *= ratio;
+        //     this.velocity.y *= ratio;
+        // }
+        
+        // this.x += this.velocity.x * this.game.clockTick;
+        // this.y += this.velocity.y * this.game.clockTick;
+    }
+    if(this.following){
         this.attack = false;
         var difX = (ent.x - this.x)/dist;
         var difY = (ent.y - this.y)/dist;
