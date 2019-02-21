@@ -216,7 +216,7 @@ function Powerup (game, x, y, type) {
             offsetx:3,
             offsety:12
         }
-    } else {
+    } else if (type === "HP"){
         spritesheet = game.assetManager.getAsset("./img/heart.png");
         this.boundingBox = {
             x:this.x, 
@@ -237,13 +237,15 @@ Powerup.prototype.update = function() {
         var ent = this.game.entities[i];
         if (ent instanceof Player) {
             if (collide({boundingBox: this.boundingBox}, ent)) {
-                
                 this.removeFromWorld = true;
-                if (ent.ammo && this.type === "ammo") {
+                if (this.type === "ammo") {
                     ent.ammo += 10;
-                } else if (ent.health && this.type === "HP") {
-                    ent.health += 15;
-
+                } else if (this.type === "HP") {
+                    if (ent.health + 15 > 100) {
+                        ent.health = 100;
+                    } else {
+                        ent.health += 15;
+                    }
 
                 }
             }
@@ -260,6 +262,11 @@ Powerup.prototype.draw = function() {
 }
 
 function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, damage){
+    
+
+    var audio = new Audio('arrow_shooting.mp3');
+    audio.volume = 0.10; // 75%
+    audio.play();
     this.shooter = shooter;
     this.game = game;
     this.ctx = game.ctx;
@@ -309,6 +316,64 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     Entity.call(this, game, start.x, start.y);
 }
 
+function handleBoxCollision (ent, box){
+    var hitboxlines = [
+        {x:ent.boundingBox.x, y:ent.boundingBox.y}, 
+        {x:ent.boundingBox.x, y:ent.boundingBox.y+ent.boundingBox.height},
+        {x:ent.boundingBox.x+ent.boundingBox.width, y:ent.boundingBox.y+ent.boundingBox.height},
+        {x:ent.boundingBox.x+ent.boundingBox.width, y:ent.boundingBox.y}
+    ];
+
+    var bl = [
+        {x:box.p1.x, y:box.p1.y}, 
+        {x:box.p2.x, y:box.p2.y},
+        {x:box.p3.x, y:box.p3.y},
+        {x:box.p4.x, y:box.p4.y}
+    ];
+
+    var isSteep = function(p1, p2){
+        if(p1.x!==p2.x && p1.y!==p2.y) return true;
+        else return false;
+    }
+
+    for(var a=1; a<=hitboxlines.length; a++){
+        var p1 = hitboxlines[a-1];
+        var p2 = hitboxlines[a%4];
+        var l = lineLine(p1.x, p1.y, p2.x, p2.y, bl[0].x, bl[0].y, bl[1].x, bl[1].y);
+        var d = lineLine(p1.x, p1.y, p2.x, p2.y, bl[1].x, bl[1].y, bl[2].x, bl[2].y);
+        var r = lineLine(p1.x, p1.y, p2.x, p2.y, bl[2].x, bl[2].y, bl[3].x, bl[3].y);
+        var u = lineLine(p1.x, p1.y, p2.x, p2.y, bl[3].x, bl[3].y, bl[0].x, bl[0].y);
+        if(l){
+            ent.moveRestrictions.right = true;
+            if(isSteep(bl[0], bl[1])){
+                if(a==2) ent.moveRestrictions.down = true;
+                else if(a==4) ent.moveRestrictions.up = true;
+            }
+        }
+        if(r){
+            ent.moveRestrictions.left = true;
+            if(isSteep(bl[2], bl[3])){
+                if(a==2) ent.moveRestrictions.down = true;
+                else if(a==4) ent.moveRestrictions.up = true;
+            }
+        }
+        if(d){
+            ent.moveRestrictions.up = true;
+            if(isSteep(bl[1], bl[2])){
+                if(a==1) ent.moveRestrictions.left = true;
+                else if(a==3) ent.moveRestrictions.right = true;
+            }
+        }
+        if(u){
+            ent.moveRestrictions.down = true;
+            if(isSteep(bl[3], bl[0])){
+                if(a==1) ent.moveRestrictions.left = true;
+            else if(a==3) ent.moveRestrictions.right = true;
+            }
+        }
+    }
+   // document.getElementById("debug-out").innerHTML = `left:${this.moveRestrictions.left}, right:${this.moveRestrictions.right}, up:${this.moveRestrictions.up}, down:${this.moveRestrictions.down}`
+}
 Projectile.prototype = new Entity();
 Projectile.prototype.constructor = Projectile;
 
@@ -371,8 +436,9 @@ function LevelBoundingBoxCollsion(background, ent) {
                 ent.handleCollision(background);
             } else {
                 if (ent instanceof Player){
-                    ent.handleCollision(box);
-                } else if (ent instanceof Bunny || ent instanceof RangeEnemy) {
+                    handleBoxCollision(ent, box);
+                } else if (ent instanceof Bunny || ent instanceof RangeEnemy) {            
+                    //handleBoxCollision(ent, box);
                     if (top) {
                         ent.y -= 1;
                         ent.velocity.y = -ent.velocity.y; 
@@ -386,6 +452,7 @@ function LevelBoundingBoxCollsion(background, ent) {
                         ent.y += 1;
                         ent.velocity.y = -ent.velocity.y
                     }
+        
                 }
         }
          }
@@ -394,16 +461,18 @@ function LevelBoundingBoxCollsion(background, ent) {
 }
 
 Projectile.prototype.handleCollision = function(ent) {
-    if (!(ent instanceof Background)) {    
+    if (ent instanceof Bunny || ent instanceof RangeEnemy) {    
         tempVelocityX = this.xspeed * friction;
         tempVelocityY = this.yspeed * friction;
         
         ent.x += 7 * tempVelocityX * this.game.clockTick;   
         ent.y += 7 * tempVelocityY * this.game.clockTick;
         
-        if(ent.health){
-            ent.health = ent.health - this.damage;
-        }
+        
+    }   
+
+    if(ent.health){
+        ent.health = ent.health - this.damage;
     }
     
     this.removeFromWorld = true;

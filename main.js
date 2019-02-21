@@ -103,6 +103,7 @@ Animation.prototype.isDone = function () {
 }
 
 function Background(game, spritesheet) {
+    
     this.x = 0;
     this.y = 0;
     this.spritesheet = spritesheet;
@@ -200,6 +201,7 @@ AM.downloadAll(function () {
     gameEngine.assetManager = AM;
     
     gameEngine.init(ctx);
+
     var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"), AM.getAsset("./img/character_edited.png"));
     var camera = new Camera(gameEngine, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
    // var powerup = new Powerup (gameEngine, 400, 900,  AM.getAsset("./img/arrowPile.png"))
@@ -208,7 +210,7 @@ AM.downloadAll(function () {
     gameEngine.crosshair = new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png"));
     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/villagemap.png")));
     gameEngine.addEntity(player);
-    var ArrowType = {x:0, y:1025, w:64, h:64, d:0.05, f:13, l:true, r:false};
+    var ArrowType = {x:0, y:1025, w:64, h:64, d:0.07, f:13, l:true, r:false};
     var MagicType = {x:0, y:0, w:64, h:64, d:0.08, f:7, l:true, r:false};
     gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"))); 
     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/arrowSkel.png"), 1000, 950, ArrowType, "arrow"));
