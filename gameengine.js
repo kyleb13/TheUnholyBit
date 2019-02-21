@@ -9,7 +9,7 @@ window.requestAnimFrame = (function () {
             };
 })();
 
-
+var pointerLocked = false;
 
 //function canvasLoaded(){
 
@@ -30,8 +30,8 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    // this.showOutlines = true;
-    this.showOutlines = false;
+    this.showOutlines = true;
+    //this.showOutlines = false;
     this.camera = null;
     this.player = null;
 }
@@ -52,27 +52,35 @@ GameEngine.prototype.start = function (player, camera) {
     var that = this;
     var canvas = this.ctx.canvas;
     var mousePositionUpdate = function(e) {
-        var dx = e.movementX;
-        var dy = e.movementY;
-        if(that.pointerx + dx>that.player.x - canvas.width/2 && that.pointerx + dx<that.player.x + canvas.width/2){
-            that.pointerx += dx;
+        if(that.pointerLocked){
+            var dx = e.movementX;
+            var dy = e.movementY;
+            if(that.pointerx + dx>that.player.x - canvas.width/2 && that.pointerx + dx<that.player.x + canvas.width/2){
+                that.pointerx += dx;
+            }
+            if(that.pointery + dy>that.player.y - canvas.height/2 && that.pointery + dy<that.player.y + canvas.height/2){
+                that.pointery += dy;
+            }
         }
-        if(that.pointery + dy>that.player.y - canvas.height/2 && that.pointery + dy<that.player.y + canvas.height/2){
-            that.pointery += dy;
-        }
-        //document.getElementById("debug-out").innerHTML = `Pointer Coordinates: x-${that.pointerx}, y-${that.pointery}`;
+        
     }
     document.addEventListener('pointerlockchange', () => {
         if(document.pointerLockElement === canvas){
             document.addEventListener("mousemove", mousePositionUpdate);
             that.pointerLocked = true;
+            pointerLocked = true;
         } else {
             document.removeEventListener("mousemove", mousePositionUpdate);
             that.pointerLocked = false;
+            pointerLocked = false;
+            that.w = false;
+            that.a = false;
+            that.s = false;
+            that.d = false;
+            that.lclick = false;
         }
     });
     console.log("starting game");
-    var that = this;
     (function gameLoop() {
         that.loop();
         requestAnimFrame(gameLoop, that.ctx.canvas);
@@ -178,13 +186,17 @@ function Timer() {
 }
 
 Timer.prototype.tick = function () {
-    var wallCurrent = Date.now();
-    var wallDelta = (wallCurrent - this.wallLastTimestamp) / 1000;
-    this.wallLastTimestamp = wallCurrent;
+    if(pointerLocked){
+        var wallCurrent = Date.now();
+        var wallDelta = (wallCurrent - this.wallLastTimestamp) / 1000;
+        this.wallLastTimestamp = wallCurrent;
 
-    var gameDelta = Math.min(wallDelta, this.maxStep);
-    this.gameTime += gameDelta;
-    return gameDelta;
+        var gameDelta = Math.min(wallDelta, this.maxStep);
+        this.gameTime += gameDelta;
+        return gameDelta;
+    } else {
+        return 0;
+    }
 }
 
 function Entity(game, x, y) {
@@ -201,7 +213,9 @@ Entity.prototype.draw = function (ctx) {
     if (this.game.showOutlines && this.radius) {
         this.game.ctx.beginPath();
         this.game.ctx.strokeStyle = "green";
-        this.game.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+       // this.game.ctx.arc(this.centerx, this.centery, this.radius.r, 0, Math.PI * 2, false);
+        
+        this.game.ctx.arc(this.x+this.radius.offsetx, this.y+this.radius.offsety, this.radius.r, 0, Math.PI * 2, false);
         this.game.ctx.stroke();
         this.game.ctx.closePath();
     }
@@ -217,7 +231,22 @@ Entity.prototype.rotateAndCache = function (image, angle) {
     offscreenCtx.translate(size / 2, size / 2);
     offscreenCtx.rotate(-angle);
     offscreenCtx.translate(0, 0);
-    offscreenCtx.drawImage(image.img, -(image.width / 2), -(image.height / 2));
+    if (!image.hasOwnProperty("img")) {
+        var r = getRotatedRect(image);
+        offscreenCtx.strokeRect(r.x, r.y, r.w, r.h);
+    } else {
+        offscreenCtx.drawImage(image.img, -(image.width / 2), -(image.height / 2));
+    }
     offscreenCtx.restore();
     return {img:offscreenCanvas, center:{x:size/2, y:size/2}};
+    //return offscreenCanvas;
+}
+
+function getRotatedRect(boundingBox) {
+    return {
+      x: boundingBox.width / -2,
+      y: boundingBox.height / -2,
+      w: boundingBox.width,
+      h: boundingBox.height
+    };
 }

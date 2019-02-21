@@ -32,7 +32,7 @@ Animation2.prototype.setCallbackOnFrame = function(frame,args,callback){
     this.callbackArgs = args;
 }
 
-Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy) {
+Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
     var scaleBy = scaleBy || 1;
     this.elapsedTime += tick;
     var frame = this.currentFrame();
@@ -44,11 +44,21 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy) {
         if (this.isDone()) {
             this.elapsedTime = 0;
             this.callbackDone = false;
+            
+            if (ent !== undefined) {
+                ent.removeFromWorld = true;
+                console.log("Eureka!");
+            }
         }
         
     } else if (this.isDone()) {
+        if (ent !== undefined) {
+           ent.removeFromWorld = true;
+           console.log("Eureka!");
+        }
         return;
     }
+
     var index = this.reverse ? this.frames - this.currentFrame() - 1 : this.currentFrame();
     var vindex = 0;
     if ((index + 1) * this.frameWidth + this.startX > this.spriteSheet.width) {
@@ -98,22 +108,6 @@ Animation2.prototype.currentFrameRow = function () {
     return Math.floor(this.elapsedTime / this.frameDuration)%this.sheetWidth;
 }
 
-// no inheritance
-function Background(game, spritesheet) {
-    this.x = 0;
-    this.y = 0;
-    this.spritesheet = spritesheet;
-    this.game = game;
-    this.ctx = game.ctx;
-};
-
-Background.prototype.draw = function () {
-    this.ctx.drawImage(this.spritesheet,
-                   this.x, this.y);
-};
-
-Background.prototype.update = function () {
-};
 function shiftDirection(ent1, ent2) {
     var enemyX = ent2.x;
     var enemyY = ent2.y;
@@ -144,7 +138,7 @@ function shiftDirection(ent1, ent2) {
 
 
 
-function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
+function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
 
     this.walkAnimations = [];
     this.attackAnimations =[];
@@ -183,7 +177,7 @@ function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, projectile);
+                addProjectile(that, x, y, projectile,"Enemy");
                 });
     }
     this.standingAnimations["up"] = new Animation2 (spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
@@ -191,15 +185,41 @@ function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
     this.standingAnimations["down"] = new Animation2 (spritesheet, 0, 640, 64, 64, 0.1, 1, true, false);
     this.standingAnimations["right"] = new Animation2 (spritesheet, 0, 704, 64, 64, 0.1, 1, true, false);
     
-    this.DyingAnimation = new  Animation2 (spritesheet, 0, 1280, 64, 64, 0.1, 62, true, false);
+    this.DyingAnimation = new Animation2(spritesheet, 0, 1280, 64, 64, 0.1, 6, false, false);
 
-    this.following = {x:0, y:0};
+    this.boundingBox = {
+        x:this.x, 
+        y:this.y,
+        width: 32,
+        height: 65,
+        offsetx:32,
+        offsety:24
+    }
+
+    this.visualBox = {
+        x:this.x, 
+        y:this.y,
+        width: 1300,
+        height: 1300,
+        offsetx:-645,
+        offsety:-650
+    }
+
+    this.attackBox = {
+        x:this.x, 
+        y:this.y,
+        width: 900,
+        height: 900,
+        offsetx:-440,
+        offsety:-450
+    }
+    this.followPoint = {x:0, y:0};
+    this.following = false;
     this.attacking = false;
     this.direction = "down";
     this.ctx = game.ctx;
-    this.radius = 20;
-    this.visualRadius = 350;
-    this.attackRadius = 300;
+
+    
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
     if (speed > maxSpeed) {
@@ -207,17 +227,25 @@ function RangeSkeleton(game, spritesheet, spawnX, spawnY, type, projectile) {
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
+    this.health = 100;
+    this.healthBar = new HealthBar(game, this, 46, -10);
     Entity.call(this, game, spawnX, spawnY);
 }
 
-RangeSkeleton.prototype = new Entity();
-RangeSkeleton.prototype.constructor = RangeSkeleton;
+RangeEnemy.prototype = new Entity();
+RangeEnemy.prototype.constructor = RangeEnemy;
 
-function addProjectile(that, x, y, type) {  
+RangeEnemy.prototype.center = function() {
+    var centerx = this.x + 64/2;
+    var centery= this.y + 64/2;
+    return {x:centerx, y:centery};
+}
+
+function addProjectile(that, x, y, type, shooter) {  
     var img;
     var height;
     var width;
-    var center = that.following.center();
+    var center = that.followPoint.center();
     if (type === "arrow") {
         img = that.game.assetManager.getAsset("./img/arrow.png")
         width = 31;
@@ -241,129 +269,188 @@ function addProjectile(that, x, y, type) {
     {//end Point
         x:center.x, 
         y:center.y
-    }, 5));//lifetime
+    }, 5, shooter, 15));//lifetime
 }
-RangeSkeleton.prototype.collide = function (other) {
+RangeEnemy.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
 };
 
-RangeSkeleton.prototype.collideLeft = function () {
+RangeEnemy.prototype.collideLeft = function () {
     return (this.x - this.radius) < 0;
 };
 
-RangeSkeleton.prototype.collideRight = function () {
+RangeEnemy.prototype.collideRight = function () {
     return (this.x + this.radius) > 800;
 };
 
-RangeSkeleton.prototype.collideTop = function () {
+RangeEnemy.prototype.collideTop = function () {
     return (this.y - this.radius) < 0;
 };
 
-RangeSkeleton.prototype.collideBottom = function () {
+RangeEnemy.prototype.collideBottom = function () {
     return (this.y + this.radius) > 650;
 };
 
-RangeSkeleton.prototype.update = function () {   
+RangeEnemy.prototype.update = function () {   
     Entity.prototype.update.call(this);
     
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
+    this.visualBox.x = this.x + this.visualBox.offsetx;
+    this.visualBox.y = this.y + this.visualBox.offsety;
+
+    this.attackBox.x = this.x + this.attackBox.offsetx;
+    this.attackBox.y = this.y + this.attackBox.offsety;
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-      /*  if (ent !== this && this.collide(ent)) {
-            var temp = { x: this.velocity.x, y: this.velocity.y };
-
-            var dist = distance(this, ent);
-            var delta = this.radius + ent.radius - dist;
-            var difX = (this.x - ent.x)/dist;
-            var difY = (this.y - ent.y)/dist;
-
-            this.x += difX * delta / 2;
-            this.y += difY * delta / 2;
-            ent.x -= difX * delta / 2;
-            ent.y -= difY * delta / 2;
-
-            this.velocity.x = ent.velocity.x * friction;
-            this.velocity.y = ent.velocity.y * friction;
-            ent.velocity.x = temp.x * friction;
-            ent.velocity.y = temp.y * friction;
-            this.x += this.velocity.x * this.game.clockTick;
-            this.y += this.velocity.y * this.game.clockTick;
-            ent.x += ent.velocity.x * this.game.clockTick;
-            ent.y += ent.velocity.y * this.game.clockTick;
-        }*/
-
-        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Player) {
-            if (this instanceof RangeSkeleton) {
-                this.following = ent;
-                if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.attackRadius })) {
+        if (ent instanceof Player) {
+            if (collide({boundingBox: this.visualBox}, ent)) {
+                this.following = true;
+                var dist = distance(this, ent);
+                this.followPoint = ent;
+                if (collide(ent, {boundingBox: this.attackBox})) {
                     this.attacking = true;
+                    if (collide(this, ent)) {
+                        console.log("Player collide");
+                        var temp = { x: this.velocity.x, y: this.velocity.y };
+        
+                        tempVelocityX = temp.x * friction;
+                        tempVelocityY = temp.y * friction;
+        
+                        ent.x += 20 * tempVelocityX * this.game.clockTick;
+                        ent.y += 20 * tempVelocityY * this.game.clockTick;
+                    }
                 } else {
                     this.attacking = false;
+                    var difX = (ent.x - this.x)/dist;
+                    var difY = (ent.y - this.y)/dist;
+                    this.velocity.x += difX * acceleration / (dist*dist);
+                    this.velocity.y += difY * acceleration / (dist * dist);
+                    var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+                    if (speed > maxSpeed) {
+                        var ratio = maxSpeed / speed;
+                        this.velocity.x *= ratio;
+                        this.velocity.y *= ratio;
+                    }
+                    
+                    this.x += this.velocity.x * this.game.clockTick;
+                    this.y += this.velocity.y * this.game.clockTick;
                 }
-            } 
                 shiftDirection(this, ent);
+            } else if (!collide({boundingBox: this.visualBox}, ent)) {
+                this.following = false;
+            } 
+    
+        } else if (ent instanceof RangeEnemy && ent !== this) {
+            if (collide(this, ent)) {
+                var temp = { x: this.velocity.x, y: this.velocity.y };
+
+                tempVelocityX = temp.x * friction;
+                tempVelocityY = temp.y * friction;
+    
+                ent.x += 20 * tempVelocityX * this.game.clockTick;
+                ent.y += 20 * tempVelocityY * this.game.clockTick;
+            }   
+        } else if(ent instanceof Background) {
+            LevelBoundingBoxCollsion(ent, this)
         }
+        
+    }
+    this.healthBar.update();
+
+    if (this.health < 1) {
+        this.dead = true;
+        this.attacking = false;
+        this.following = false;
     }
 }
 
 
 
-RangeSkeleton.prototype.draw = function () {
-    if(!this.attacking) {
-        this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-    }else {
+RangeEnemy.prototype.draw = function () {
+    if (this.attacking && !this.dead) {
         this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-       // this.attacking = false;
-    }
+    } else if (this.following&& !this.dead) {
+        this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    } else if (!this.attacking && !this.following && !this.dead) {
+        this.standingAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    } 
+
     
+    if (this.dead) {
+        this.DyingAnimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this);
+    }
+    this.healthBar.draw();
+    if (this.game.showOutlines) {
+        this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    }
     Entity.prototype.draw.call(this);
 }
 
 
-/*
-function collide(ent1, ent2) {
-    return distance(ent1, ent2) < ent1.radius + ent2.radius;
-}
-function collideLeft (entity) {
-    return (entity.x - entity.radius) < 650;
-}
-function collideRight(entity) {
-    return (entity.x + entity.radius) > 800;
-}
-function collideTop (entity) {
-    return (entity.y - entity.radius) < 0;
-}
-function collideBottom (entity) {
-    return (entity.y + entity.radius) > 650;
-}*/
 
+function collide(ent1, ent2) {
+    if ( !(ent1 instanceof Background || ent1 instanceof Crosshair)
+      && !(ent2 instanceof Background || ent2 instanceof Crosshair)) {
+        return (ent1.boundingBox.x < ent2.boundingBox.x + ent2.boundingBox.width
+            && ent1.boundingBox.x + ent1.boundingBox.width > ent2.boundingBox.x 
+            && ent1.boundingBox.y < ent2.boundingBox.y + ent2.boundingBox.height 
+            && ent1.boundingBox.height + ent1.boundingBox.y > ent2.boundingBox.y);
+    }
+    return false;
+}
 
 function Bunny(game, spritesheet) {
     this.walkAnimations = [];
+    this.deathAnimations = [];
+
     
-    this.walkAnimations["down"] = new Animation2
-(spritesheet, 0, 0, 48, 64, 0.1, 7, true, false);
-    this.walkAnimations["up"] = new Animation2
-(spritesheet, 0, 64, 48, 64, 0.1, 7, true, false);
-    this.walkAnimations["right"] = new Animation2
-(spritesheet, 0, 128, 48, 64, 0.1, 7, true, false);
-    this.walkAnimations["left"] = new Animation2
-(spritesheet, 0, 192, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["down"] = new Animation2(spritesheet, 0, 0, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["up"] = new Animation2(spritesheet, 0, 64, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["right"] = new Animation2(spritesheet, 0, 128, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["left"] = new Animation2(spritesheet, 0, 192, 48, 64, 0.1, 7, true, false);
+ 
+    this.deathAnimations["down"] = new Animation2(spritesheet, 288, 0, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["up"] = new Animation2(spritesheet, 288, 64, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["right"] = new Animation2(spritesheet, 288, 128, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, true);
     
     this.direction = "right";
     this.visualRadius = 800;
-    this.radius = 20;
-    this.runBack = false;
     this.ctx = game.ctx;
-    
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-    //this.speed = 100;
     if (speed > maxSpeed) {
         var ratio = maxSpeed / speed;
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
-    Entity.call(this, game, 0, 100);
+    Entity.call(this, game, 100, 1000);
+    
+    this.boundingBox = {
+        x:this.x, 
+        y:this.y,
+        width: 40,
+        height: 40,
+        offsetx:15,
+        offsety:32
+    }
+
+    this.visualBox = {
+        x:this.x, 
+        y:this.y,
+        width: 1500,
+        height: 1500,
+        offsetx:-700,
+        offsety:-850
+    }
+    this.dead = false;
+    this.health = 100;
+    this.healthBar = new HealthBar(game, this, 46, -10);
+
 }
 
 Bunny.prototype = new Entity();
@@ -391,37 +478,16 @@ Bunny.prototype.collideBottom = function () {
 
 Bunny.prototype.update = function () {
 
-    this.x += this.velocity.x * this.game.clockTick;
-    this.y += this.velocity.y * this.game.clockTick;
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
+    this.visualBox.x = this.x + this.visualBox.offsetx;
+    this.visualBox.y = this.y + this.visualBox.offsety;
 
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-        if (ent !== this && this.collide(ent)) {
-            var temp = { x: this.velocity.x, y: this.velocity.y };
-
+        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
             var dist = distance(this, ent);
-            var delta = this.radius + ent.radius - dist;
-            var difX = (this.x - ent.x)/dist;
-            var difY = (this.y - ent.y)/dist;
-
-            this.x += difX * delta / 2;
-            this.y += difY * delta / 2;
-            ent.x -= difX * delta / 2;
-            ent.y -= difY * delta / 2;
-
-            this.velocity.x = ent.velocity.x * friction;
-            this.velocity.y = ent.velocity.y * friction;
-            ent.velocity.x = temp.x * friction;
-            ent.velocity.y = temp.y * friction;
-            this.x += this.velocity.x * this.game.clockTick;
-            this.y += this.velocity.y * this.game.clockTick;
-            ent.x += ent.velocity.x * this.game.clockTick;
-            ent.y += ent.velocity.y * this.game.clockTick;
-        }
- 
-        if (ent != this && this.collide({ x: ent.x, y: ent.y, radius: this.visualRadius }) && ent instanceof Player ) {
-            var dist = distance(this, ent);
-            if (this instanceof Bunny) {
                 shiftDirection(this, ent);
                 var difX = (ent.x - this.x)/dist;
                 var difY = (ent.y - this.y)/dist;
@@ -433,18 +499,48 @@ Bunny.prototype.update = function () {
                     this.velocity.x *= ratio;
                     this.velocity.y *= ratio;
                 }
-            }
+                
+                if (ent instanceof Player && collide(this, ent)) {
+                    var temp = { x: this.velocity.x, y: this.velocity.y };
+
+                    tempVelocityX = temp.x * friction;
+                    tempVelocityY = temp.y * friction;
+                    
+                    ent.x += 20 * tempVelocityX * this.game.clockTick;
+                    ent.y += 20 * tempVelocityY * this.game.clockTick;
+                    
+                    ent.health -= 10;
+                }
+
+                this.x += this.velocity.x * this.game.clockTick;
+                this.y += this.velocity.y * this.game.clockTick;
+            
+        } else if (ent instanceof Background) {
+            LevelBoundingBoxCollsion(ent, this);
         }
     }
-    this.velocity.x -= (1 - friction) * this.game.clockTick * this.velocity.x;
-    this.velocity.y -= (1 - friction) * this.game.clockTick * this.velocity.y; 
 
+    if (this.health < 1) {
+        this.dead = true;
+    }
+
+    
+    this.healthBar.update();
     Entity.prototype.update.call(this);
 }
 
 Bunny.prototype.draw = function () {
-    this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+  
+    if(this.dead){
+        this.deathAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this);
+    } else {
+        this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    }
+    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     Entity.prototype.draw.call(this);
+    
+    this.healthBar.draw();
 }
 
 
@@ -452,3 +548,131 @@ Bunny.prototype.draw = function () {
 var friction = 1;
 var acceleration = 1000000;
 var maxSpeed = 100;
+
+
+// LINE/RECTANGLE
+function lineRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+
+    // check if the line has hit any of the rectangle's sides
+    // uses the Line/Line function below
+    var left =   lineLine(x1,y1,x2,y2, rx,ry,rx, ry+rh);
+    var right =  lineLine(x1,y1,x2,y2, rx+rw,ry, rx+rw,ry+rh);
+    var top =    lineLine(x1,y1,x2,y2, rx,ry, rx+rw,ry);
+    var bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
+    if(bottom){
+        bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
+    }
+  
+    // if ANY of the above are true, the line
+    // has hit the rectangle
+    if (left || right || top || bottom) {
+      return true;
+    }
+    return false;
+  }
+  
+  
+  // LINE/LINE
+//   function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+  
+//     // calculate the direction of the lines
+//     var uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+//     var uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+  
+//     // if uA and uB are between 0-1, lines are colliding
+//     if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+  
+  
+//       return true;
+//     }
+//     return false;
+//   }
+
+function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
+    var m1 = (y2-y1)/(x2-x1);
+    var m2 = (y4-y3)/(x4-x3);
+    //lines aren't parallel
+    if(m1!=0 && isFinite(m1) && m2 != 0 && isFinite(m2)){
+        if(m1!==m2 && m1!=-m2){
+            //point of intersection
+            var xi = (m1*x1-m2*x3-y1+y3)/(m1-m2);
+            var yi = m1*(xi-x1)+y1;
+            var xstart = x1;
+            var ystart = y1;
+            var xend = x2;
+            var yend = y2;
+            if(x1>x2){
+                xstart = x2;
+                xend = x1;
+            }
+            if(y1>y2){
+                ystart = y2;
+                yend = y1;
+            }
+            //check if intersection point lies in the range of the line segment
+            if(xstart<=xi && xi<=xend && ystart<=yi && yi<=yend){
+                return true;
+            } else {
+                return false;
+            }
+        } else if(y1-(m1*x1) === y3-(m2*x3)){
+            //lines are parallel and have same y-intercept, so they
+            //must be the same line
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        //both vertical
+        if(!isFinite(m1) && !isFinite(m2)){
+            //if they share any x values, they are intersecting
+            if(x1===x3)return true
+            else return false;
+        } else if(m1==0 && m2 == 0){
+            //both horizontal
+            if(y1===y3)return true
+            else return false;
+        } else if(!isFinite(m1) && m2===0){
+            //l1 vertical and l2 horizontal
+            return verticalHorizontal(x1, Math.min(y1, y2), Math.max(y1, y2), y3, Math.min(x3, x4), Math.max(x3, x4));
+        } else if(m1==0 && !isFinite(m2)){
+            //l2 vertical and l1 horizontal
+            return verticalHorizontal(x3, Math.min(y4, y3), Math.max(y4, y3), y1, Math.min(x2, x1), Math.max(x2, x1));
+        } else if(m1==0) {
+            //l1 horizontal and l2 diagonal
+            return horizontalDiagonal(y1, Math.min(x1, x2), Math.max(x1, x2), x3, y3, x4, y4);
+        } else if(m2==0){
+            //l2 horizontal and l1 diagonal
+            return horizontalDiagonal(y3, Math.min(x3, x4), Math.max(x3, x4), x1, y1, x2, y2);
+        } else if(!isFinite(m1)){
+            //l1 vertical and l2 diagonal
+            return verticalDiagonal(x1, Math.min(y1, y2), Math.max(y1, y2), x3, y3, x4, y4);
+        } else {
+            //l2 vertical and l1 diagonal
+            return verticalDiagonal(x3, Math.min(y3, y4), Math.max(y3, y4), x1, y1, x2, y2);
+        }
+    }
+}
+
+function verticalHorizontal(vx, y1, y2, hy, x1, x2){
+    if(x1<=vx && vx<=x2 && y1<= hy && hy<=y2) return true;
+    else return false;
+}
+
+function horizontalDiagonal(hy, x1, x2, x3, y3, x4, y4){
+    var starty = Math.min(y3,y4);
+    var endy = Math.max(y3,y4);
+    var m2 = (y4-y3)/(x4-x3);
+    var xi = (hy+(m2*x3)-y3)/m2;
+    if(starty<=hy && hy<= endy && x1<=xi && xi<=x2) return true;
+    else return false;
+}
+
+function verticalDiagonal(vx, y1, y2, x3, y3, x4, y4){
+    var startx = Math.min(x3,x4);
+    var endx = Math.max(x3,x4);
+    var m2 = (y4-y3)/(x4-x3);
+    var yi = (m2*vx) - (m2*x3) + y3;
+    if(startx<=vx && vx<= endx && y1<=yi & yi<=y2) return true;
+    else return false;
+}
