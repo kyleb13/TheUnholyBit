@@ -59,9 +59,9 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     this.velocity = { x: generateRandomNumber(this.startPoint.x , this.endPoint.x) , 
         y: generateRandomNumber(this.startPoint.y , this.endPoint.y)};
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-    if (speed > maxSpeed) {
+    if (speed > bossMaxSpeed) {
         
-        var ratio = maxSpeed / speed;
+        var ratio = bossMaxSpeed / speed;
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
@@ -308,8 +308,8 @@ shadowBoss.prototype.update = function () {
         this.velocity.x += difX * acceleration / (dist*dist);
         this.velocity.y += difY * acceleration / (dist * dist);
         var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-        if (speed > maxSpeed) {
-            var ratio = maxSpeed / speed;
+        if (speed > bossMaxSpeed) {
+            var ratio = bossMaxSpeed / speed;
             this.velocity.x *= ratio;
             this.velocity.y *= ratio;
         }
@@ -357,8 +357,8 @@ shadowBoss.prototype.update = function () {
                     this.velocity.x += difX * acceleration / (dist*dist);
                     this.velocity.y += difY * acceleration / (dist * dist);
                     var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                    if (speed > maxSpeed) {
-                        var ratio = maxSpeed / speed;
+                    if (speed > bossMaxSpeed) {
+                        var ratio = bossMaxSpeed / speed;
                         this.velocity.x *= ratio;
                         this.velocity.y *= ratio;
                     }
@@ -445,7 +445,7 @@ shadowBoss.prototype.draw = function () {
 
 var friction = 1;
 var acceleration = 1000000;
-var maxSpeed = 300;
+var bossMaxSpeed = 300;
 
 
 function projectile(image,x,y){
@@ -533,8 +533,8 @@ shadowBoss.prototype.update = function () {
                     this.velocity.x += difX * acceleration / (dist*dist);
                     this.velocity.y += difY * acceleration / (dist * dist);
                     var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                    if (speed > maxSpeed) {
-                        var ratio = maxSpeed / speed;
+                    if (speed > bossMaxSpeed) {
+                        var ratio = bossMaxSpeed / speed;
                         this.velocity.x *= ratio;
                         this.velocity.y *= ratio;
                     }

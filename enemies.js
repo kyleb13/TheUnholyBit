@@ -589,7 +589,7 @@ Bunny.prototype.draw = function () {
 // the "main" code begins here
 var friction = 1;
 var acceleration = 1000000;
-var maxSpeed = 250;
+var maxSpeed = 200;
 
 
 // LINE/RECTANGLE
