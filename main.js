@@ -179,7 +179,7 @@ AM.queueDownload("./img/arrowPile.png");
 AM.queueDownload("./img/heart.png");
 
 AM.queueDownload("./img/bunbun.png");
-AM.queueDownload("./img/napper.png");
+AM.queueDownload("./img/normalArcher.png");
 AM.queueDownload("./img/yap.png");
 AM.queueDownload("./img/arrowSkel.png");
 AM.queueDownload("./img/magicSkel.png");
@@ -213,7 +213,7 @@ AM.downloadAll(function () {
     var ArrowType = {x:0, y:1025, w:64, h:64, d:0.07, f:13, l:true, r:false};
     var MagicType = {x:0, y:0, w:64, h:64, d:0.08, f:7, l:true, r:false};
     gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"))); 
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/arrowSkel.png"), 1000, 950, ArrowType, "arrow"));
+    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), 1000, 950, ArrowType, "arrow"));
   // gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/magicSkel.png"), 1100, 950, MagicType, "magic"));
   /*  gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/HoodedRanger.png"), 200, 600, ArrowType, "arrow"));
     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), 100, 600, MagicType, "magic"));
@@ -223,3 +223,20 @@ AM.downloadAll(function () {
     // gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png")));
     console.log("All Done!");
 });
+
+
+
+enemySpawn.forEach((location) => {
+    
+var enemyPercentage = Math.random(); 
+if (enemyPercentage >= 0.0 && enemyPercentage <= 0.3) {
+    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
+} else if(enemyPercentage > 0.3 && enemyPercentage <= 6.0) {
+    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), location.x, location.y, MagicType, "magic"));
+} else if (enemyPercentage > 6.0 && enemyPercentage <=0.9) { 
+    gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x, location.y)); 
+} else {
+    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
+}
+
+})

@@ -62,7 +62,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
             {//end Point
                 x:that.game.pointerx, 
                 y:that.game.pointery
-            }, 5, "Player", 100));//lifetime
+            }, 5, "Player", 25));//lifetime
     });    
     this.radius  = {
         x: this.x,
@@ -239,7 +239,7 @@ Powerup.prototype.update = function() {
             if (collide({boundingBox: this.boundingBox}, ent)) {
                 this.removeFromWorld = true;
                 if (this.type === "ammo") {
-                    ent.ammo += 10;
+                    ent.ammo += 20;
                 } else if (this.type === "HP") {
                     if (ent.health + 15 > 100) {
                         ent.health = 100;

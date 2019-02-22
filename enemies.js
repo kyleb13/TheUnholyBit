@@ -331,7 +331,7 @@ RangeEnemy.prototype.update = function () {
 
                 let time = this.game.clockTick;
                 if (collide(ent, {boundingBox: this.attackBox})) {
-                    this.attacking = true;
+                  //  this.attacking = true;
                     if (collide(this, ent)) {
                         console.log("Player collide");
                         var temp = { x: this.velocity.x, y: this.velocity.y };
@@ -339,8 +339,8 @@ RangeEnemy.prototype.update = function () {
                         tempVelocityX = temp.x * friction;
                         tempVelocityY = temp.y * friction;
         
-                        ent.x += 20 * tempVelocityX * this.game.clockTick;
-                        ent.y += 20 * tempVelocityY * this.game.clockTick;
+                        ent.x -= 20 * tempVelocityX * this.game.clockTick;
+                        ent.y -= 20 * tempVelocityY * this.game.clockTick;
                     }
                 } else {
                     this.attacking = false;
@@ -430,7 +430,7 @@ function collide(ent1, ent2) {
     return false;
 }
 
-function Bunny(game, spritesheet) {
+function Bunny(game, spritesheet, x, y) {
     this.walkAnimations = [];
     this.deathAnimations = [];
 
@@ -457,7 +457,7 @@ function Bunny(game, spritesheet) {
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
-    Entity.call(this, game, 100, 1000);
+    Entity.call(this, game, x, y);
     
     this.boundingBox = {
         x:this.x, 
