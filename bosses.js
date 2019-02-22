@@ -448,10 +448,6 @@ var acceleration = 1000000;
 var bossMaxSpeed = 300;
 
 
-function projectile(image,x,y){
-
-
-}
 
 /////////////////////////////////////////////////////////////////
 /*
