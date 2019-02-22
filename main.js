@@ -266,7 +266,7 @@ AM.downloadAll(function () {
             gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
         }
     }
-
+    console.log("NEW!!!!!!!!!!!!1");
     for (var i = 0; i<data.powerUpSpawns.length; i ++) {
         var location = data.powerUpSpawns[i];
         if ( i < 3) {
