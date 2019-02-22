@@ -544,7 +544,7 @@ Bunny.prototype.update = function () {
 
                    this.x -= 10 * tempVelocityX * this.game.clockTick;
                    this.y -= 10 * tempVelocityY * this.game.clockTick;
-                    ent.health -= 10;
+                    ent.health -= 5;
                 }
                 if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
                     this.x += time * this.velocity.x;

@@ -24,8 +24,8 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
         offsetx:30,
         offsety:15
     }
-   // Entity.call(this, game, 925, 850);
-    Entity.call(this, game, 5600, 2797);
+   Entity.call(this, game, 925, 850);
+    // Entity.call(this, game, 5600, 2797);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -254,7 +254,7 @@ Powerup.prototype.update = function() {
             if (collide({boundingBox: this.boundingBox}, ent)) {
                 this.removeFromWorld = true;
                 if (this.type === "ammo") {
-                    ent.ammo += 10;
+                    ent.ammo += 20;
                 } else if (this.type === "HP") {
                     if (ent.health + 15 > 100) {
                         ent.health = 100;
@@ -279,9 +279,13 @@ Powerup.prototype.draw = function() {
 function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, damage){
     
 
-    var audio = new Audio('arrow_shooting.mp3');
-    audio.volume = 0.10; // 75%
-    audio.play();
+    var shootaudio = new Audio('arrow_shooting.mp3');
+    shootaudio.volume = 0.10; // 75%
+    if(!game.mute){
+        var shootaudio = new Audio('arrow_shooting.mp3');
+        shootaudio.volume = 0.10; // 75%
+        shootaudio.play();
+    }
     this.shooter = shooter;
     this.game = game;
     this.ctx = game.ctx;

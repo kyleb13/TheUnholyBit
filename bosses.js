@@ -134,7 +134,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                 {//end Point
                     x:(that.game.player.center()).x, 
                     y:(that.game.player.center()).y
-                }, generateRandomNumber(4 , 14), "Boss", 10));//lifetime   
+                }, generateRandomNumber(4 , 14), "Boss", 20));//lifetime   
 
                 that.game.addProjectile( 
                 new Projectile( that.game,
@@ -168,7 +168,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                     {//end Point
                         x:(that.game.player.center()).x - generateRandomNumber(1 , 10), 
                         y:(that.game.player.center()).y - generateRandomNumber(1 , 10)
-                    }, generateRandomNumber(3 , 10), "Boss", 10));//lifetime  
+                    }, generateRandomNumber(3 , 10), "Boss", 20));//lifetime  
 
                     that.game.addProjectile( 
                         new Projectile( that.game,
@@ -185,7 +185,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                         {//end Point
                             x:(that.game.player.center()).x + 100 , 
                             y:(that.game.player.center()).y , 
-                        }, generateRandomNumber(0 , 12), "Boss", 10));//lifetime 
+                        }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime 
                         
                         that.game.addProjectile( 
                             new Projectile( that.game,
@@ -202,7 +202,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                             {//end Point
                                 x:(that.game.player.center()).x +  50, 
                                 y:(that.game.player.center()).y  , 
-                            }, generateRandomNumber(0 , 10), "Boss", 10));//lifetime  
+                            }, generateRandomNumber(0 , 10), "Boss", 20));//lifetime  
 
                             that.game.addProjectile( 
                                 new Projectile( that.game,
@@ -219,7 +219,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                                 {//end Point
                                     x:(that.game.player.center()).x - 50 , 
                                     y:(that.game.player.center()).y , 
-                                }, generateRandomNumber(0 , 12), "Boss", 10));//lifetime  
+                                }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime  
 
                                 that.game.addProjectile( 
                                     new Projectile( that.game,
@@ -236,7 +236,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                                     {//end Point
                                         x:(that.game.player.center()).x - 100 , 
                                         y:(that.game.player.center()).y , 
-                                    }, generateRandomNumber(0 , 12), "Boss", 10));//lifetime  
+                                    }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime  
 
                                 
                 
@@ -401,12 +401,15 @@ shadowBoss.prototype.draw = function () {
         this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
        
     }
-    this.ctx.strokeStyle = "red";
-    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-    this.ctx.strokeStyle = "black";
-    this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
-    this.ctx.strokeStyle = "blue";
-    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    if (this.game.showOutlines) {
+        this.ctx.strokeStyle = "red";
+        this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+        this.ctx.strokeStyle = "black";
+        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+        this.ctx.strokeStyle = "blue";
+        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+        
+    }
     this.healthBar.draw();
     Entity.prototype.draw.call(this);
 }
@@ -442,7 +445,7 @@ shadowBoss.prototype.draw = function () {
 
 var friction = 1;
 var acceleration = 1000000;
-var maxSpeed = 100;
+var maxSpeed = 300;
 
 
 function projectile(image,x,y){

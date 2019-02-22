@@ -143,8 +143,9 @@ Background.prototype.draw = function () {
                    this.x, this.y);
     var that = this;
     this.ctx.font = "24px Arial";
-    this.ctx.fillStyle = "red";
-    this.ctx.fillText(`Control: W = up, S = down, D = right, A = left \n Shoot: Left Click`, 1000, 900);
+    this.ctx.fillStyle = "black";
+    this.ctx.fillText(`Shoot: Left Click, M = mute sounds`, 1000, 924);
+    this.ctx.fillText(`Control: W = up, S = down, D = right, A = left`, 1000, 900);
     if(this.game.showOutlines) {
         this.boundingBoxes.forEach((box) => {
             that.ctx.moveTo(box.p1.x, box.p1.y);
@@ -250,21 +251,30 @@ AM.downloadAll(function () {
     */
     // gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png")));
     var data = loadVillageData();
-   /* for(var i = 0; i<data.enemySpawns.length; i++){
+    for(var i = 0; i<data.enemySpawns.length; i++){
         var location = data.enemySpawns[i];
         var enemyPercentage = Math.random(); 
-        if (enemyPercentage >= 0.0 && enemyPercentage <= 0.4) {
+        if (enemyPercentage >= 0.0 && enemyPercentage <= 0.45) {
             gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
-        } else if(enemyPercentage > 0.4 && enemyPercentage <= 0.8) {
+        } else if(enemyPercentage > 0.45 && enemyPercentage <= 0.85) {
             gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), location.x, location.y, MagicType, "magic"));
-        } else if (enemyPercentage > 0.8 && enemyPercentage <= 1) { 
+        } else if (enemyPercentage > 0.85 && enemyPercentage <= 1) { 
             gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x, location.y)); 
             gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x+35, location.y)); 
             gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x+70, location.y)); 
         } else {
             gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
         }
-    }*/
+    }
+
+    for (var i = 0; i<data.powerUpSpawns.length; i ++) {
+        var location = data.powerUpSpawns[i];
+        if ( i < 3) {
+            gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "ammo"));
+        } else {
+            gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "HP"));
+        }
+    }
 	gameEngine.addEntity(new shadowBoss(gameEngine,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
 	    console.log("All Done!");
 });
