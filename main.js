@@ -250,7 +250,7 @@ AM.downloadAll(function () {
     */
     // gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png")));
     var data = loadVillageData();
-    for(var i = 0; i<data.enemySpawns.length; i++){
+   /* for(var i = 0; i<data.enemySpawns.length; i++){
         var location = data.enemySpawns[i];
         var enemyPercentage = Math.random(); 
         if (enemyPercentage >= 0.0 && enemyPercentage <= 0.4) {
@@ -264,7 +264,7 @@ AM.downloadAll(function () {
         } else {
             gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
         }
-    }
+    }*/
 	gameEngine.addEntity(new shadowBoss(gameEngine,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
 	    console.log("All Done!");
 });

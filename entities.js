@@ -24,8 +24,8 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
         offsetx:30,
         offsety:15
     }
-    Entity.call(this, game, 925, 850);
-    //Entity.call(this, game, 5600, 2797);
+   // Entity.call(this, game, 925, 850);
+    Entity.call(this, game, 5600, 2797);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
