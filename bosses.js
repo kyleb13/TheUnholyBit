@@ -134,7 +134,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                 {//end Point
                     x:(that.game.player.center()).x, 
                     y:(that.game.player.center()).y
-                }, generateRandomNumber(4 , 14), "Boss", 25));//lifetime   
+                }, generateRandomNumber(4 , 14), "Boss", 10));//lifetime   
 
                 that.game.addProjectile( 
                 new Projectile( that.game,
@@ -151,7 +151,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                 {//end Point
                     x:(that.game.player.center()).x + generateRandomNumber(1 , 10) , 
                     y:(that.game.player.center()).y + generateRandomNumber(1 , 10) , 
-                }, generateRandomNumber(2 , 12), "Boss", 20));//lifetime  
+                }, generateRandomNumber(2 , 12), "Boss", 10));//lifetime  
 
                 that.game.addProjectile( 
                     new Projectile( that.game,
@@ -168,7 +168,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                     {//end Point
                         x:(that.game.player.center()).x - generateRandomNumber(1 , 10), 
                         y:(that.game.player.center()).y - generateRandomNumber(1 , 10)
-                    }, generateRandomNumber(3 , 10), "Boss", 25));//lifetime  
+                    }, generateRandomNumber(3 , 10), "Boss", 10));//lifetime  
 
                     that.game.addProjectile( 
                         new Projectile( that.game,
@@ -185,7 +185,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                         {//end Point
                             x:(that.game.player.center()).x + 100 , 
                             y:(that.game.player.center()).y , 
-                        }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime 
+                        }, generateRandomNumber(0 , 12), "Boss", 10));//lifetime 
                         
                         that.game.addProjectile( 
                             new Projectile( that.game,
@@ -202,7 +202,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                             {//end Point
                                 x:(that.game.player.center()).x +  50, 
                                 y:(that.game.player.center()).y  , 
-                            }, generateRandomNumber(0 , 10), "Boss", 20));//lifetime  
+                            }, generateRandomNumber(0 , 10), "Boss", 10));//lifetime  
 
                             that.game.addProjectile( 
                                 new Projectile( that.game,
@@ -219,7 +219,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                                 {//end Point
                                     x:(that.game.player.center()).x - 50 , 
                                     y:(that.game.player.center()).y , 
-                                }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime  
+                                }, generateRandomNumber(0 , 12), "Boss", 10));//lifetime  
 
                                 that.game.addProjectile( 
                                     new Projectile( that.game,
@@ -236,7 +236,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                                     {//end Point
                                         x:(that.game.player.center()).x - 100 , 
                                         y:(that.game.player.center()).y , 
-                                    }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime  
+                                    }, generateRandomNumber(0 , 12), "Boss", 10));//lifetime  
 
                                 
                 
