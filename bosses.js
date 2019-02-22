@@ -126,7 +126,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                     width:26, 
                     height:17,
                     path:"./img/modball.png"
-                }, generateRandomNumber(350 , 900), //speed
+                }, 325, //speed
                 {//start point
                     x:x, 
                     y:y
@@ -143,7 +143,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                     width:26, 
                     height:17,
                     path:"./img/modball.png"
-                }, generateRandomNumber(400 , 800), //speed
+                }, 325, //speed
                 {//start point
                     x:x, 
                     y:y
@@ -160,7 +160,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                         width:26, 
                         height:17,
                         path:"./img/modball.png"
-                    }, generateRandomNumber(300 , 1000), //speed
+                    }, 325, //speed
                     {//start point
                         x:x, 
                         y:y
@@ -177,7 +177,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                             width:26, 
                             height:17,
                             path:"./img/modball.png"
-                        }, 300, //speed
+                        }, 325, //speed
                         {//start point
                             x:x + 100, 
                             y:y 
@@ -194,7 +194,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                                 width:26, 
                                 height:17,
                                 path:"./img/modball.png"
-                            }, 300, //speed
+                            }, 325, //speed
                             {//start point
                                 x:x + 50, 
                                 y:y
@@ -211,7 +211,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                                     width:26, 
                                     height:17,
                                     path:"./img/modball.png"
-                                }, 300, //speed
+                                }, 325, //speed
                                 {//start point
                                     x:x - 50, 
                                     y:y
@@ -228,7 +228,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                                         width:26, 
                                         height:17,
                                         path:"./img/modball.png"
-                                    }, 300, //speed
+                                    }, 325, //speed
                                     {//start point
                                         x:x - 100, 
                                         y:y
