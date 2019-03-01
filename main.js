@@ -249,14 +249,17 @@ AM.downloadAll(function () {
         }
     }
     console.log("NEW!!!!!!!!!!!!1");
-    for (var i = 0; i<data.powerUpSpawns.length; i ++) {
-        var location = data.powerUpSpawns[i];
-        if ( i < 3) {
-            gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "ammo"));
-        } else {
-            gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "HP"));
+    if (data.powerUpSpawns) {
+        for (var i = 0; i<data.powerUpSpawns.length; i ++) {
+            var location = data.powerUpSpawns[i];
+            if ( i < 3) {
+                gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "ammo"));
+            } else {
+                gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "HP"));
+            }
         }
     }
+    
 	gameEngine.addEntity(new shadowBoss(gameEngine,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
 	    console.log("All Done!");
 });

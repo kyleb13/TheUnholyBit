@@ -11,9 +11,9 @@ window.requestAnimFrame = (function () {
 
 var pointerLocked = false;
 
-var backgroundMusic = new Audio('./villageMusic.mp3');
-backgroundMusic.volume = 0.10; // 75%
-backgroundMusic.loop = true;
+var audio = new Audio('./villageMusic.mp3');
+audio.volume = 0.10; // 75%
+audio.loop = true;
 
 
 //function canvasLoaded(){
