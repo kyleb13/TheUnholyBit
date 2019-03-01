@@ -31,6 +31,7 @@ function GameEngine() {
     this.a = false;
     this.s = false;
     this.d = false;
+    this.mute = false;
     this.lclick = false;
     this.pointerx = 50;
     this.pointery = 50;
@@ -75,8 +76,7 @@ GameEngine.prototype.start = function (player, camera) {
             document.addEventListener("mousemove", mousePositionUpdate);
             that.pointerLocked = true;
             pointerLocked = true;
-            if (backgroundMusic.play)
-            backgroundMusic.play();
+            if (audio.play && !this.mute) audio.play();
 
         } else {
             document.removeEventListener("mousemove", mousePositionUpdate);
@@ -122,10 +122,23 @@ GameEngine.prototype.startInput = function () {
 
     this.ctx.canvas.addEventListener("keydown", (e) => {
         that.handleInputs(e.code, true);
+        if(e.code === "KeyM"){
+            console.log("in if");
+            console.log(e.code);
+            this.mute = !this.mute;
+            if(this.mute){
+                audio.pause();
+            } else {
+                audio.play();
+            }
+        }
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
         that.handleInputs(e.code, false);
     });
+    // this.ctx.canvas.addEventListener("keypress", (e) => {
+        
+    // });
 
 }
 
@@ -142,8 +155,8 @@ GameEngine.prototype.handleInputs = function(keycode, value){
             break;
         case "KeyD":
             this.d = value;
-            break;
-    }    
+            break;       
+    }   
 }
 
 GameEngine.prototype.addEntity = function (entity) {

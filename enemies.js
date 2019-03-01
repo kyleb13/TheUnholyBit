@@ -200,7 +200,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
     this.standingAnimations["left"] = new Animation2 (spritesheet, 0, 576, 64, 64, 0.1, 1, true, false);
     this.standingAnimations["down"] = new Animation2 (spritesheet, 0, 640, 64, 64, 0.1, 1, true, false);
     this.standingAnimations["right"] = new Animation2 (spritesheet, 0, 704, 64, 64, 0.1, 1, true, false);
-    
+
     this.DyingAnimation = new Animation2(spritesheet, 0, 1280, 64, 64, 0.1, 6, false, false);
 
     this.boundingBox = {
@@ -544,7 +544,7 @@ Bunny.prototype.update = function () {
 
                    this.x -= 10 * tempVelocityX * this.game.clockTick;
                    this.y -= 10 * tempVelocityY * this.game.clockTick;
-                    ent.health -= 10;
+                    ent.health -= 5;
                 }
                 if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
                     this.x += time * this.velocity.x;
@@ -589,7 +589,7 @@ Bunny.prototype.draw = function () {
 // the "main" code begins here
 var friction = 1;
 var acceleration = 1000000;
-var maxSpeed = 250;
+var maxSpeed = 150;
 
 
 // LINE/RECTANGLE

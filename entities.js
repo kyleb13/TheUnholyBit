@@ -27,7 +27,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
     //Entity.call(this, game, 925, 850);
     //Entity.call(this, game, 5600, 2797);
     /**  cave map */
-    Entity.call(this, game, 100, 300);
+    Entity.call(this, game, 3500, 1300);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -281,9 +281,13 @@ Powerup.prototype.draw = function() {
 function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, damage){
     
 
-    var audio = new Audio('arrow_shooting.mp3');
-    audio.volume = 0.10; // 75%
-    audio.play();
+    var shootaudio = new Audio('arrow_shooting.mp3');
+    shootaudio.volume = 0.10; // 75%
+    if(!game.mute){
+        var shootaudio = new Audio('arrow_shooting.mp3');
+        shootaudio.volume = 0.10; // 75%
+        shootaudio.play();
+    }
     this.shooter = shooter;
     this.game = game;
     this.ctx = game.ctx;

@@ -38,28 +38,12 @@ function shiftDirectionBoss(ent1, ent2) {
     } else {
         ent1.direction = "left"; 
     }
-    //console.log(`xdiff:${xdiff}, dir:${ent1.direction}`);
-    // //update direction character is pointing
-    // if(enemyY< centery){
-    //     if(centerx > enemyX && xdiff>ydiff){
-    //         ent1.direction = "left";
-    //     } else{
-    //         ent1.direction = "right";
-    //     }
-    // } else {
-    //     if(centerx > enemyX && xdiff>ydiff){
-    //         ent1.direction = "left";
-    //     }  else{
-    //         ent1.direction = "right";
-    //     }
-    // }
+   
 }
 
 
 function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     this.animation = new Animation(movementsheet,82,75,17,.09,17,true,2);
-    //this.RAanimation =  new Animation(attackRsheet,82,75,31,.1,31,true,2);
-    //this.LAanimation = new Animation(attackLsheet,82,75,31,.1,31,true,2);
     this.attackAnimations = [];
     this.attackAnimations["left"] = new Animation(attackLsheet,82,75,31,.08,31,true,2);
     this.attackAnimations["right"] = new Animation(attackRsheet,82,75,31,.08,31,true,2);
@@ -75,14 +59,17 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
     this.velocity = { x: generateRandomNumber(this.startPoint.x , this.endPoint.x) , 
         y: generateRandomNumber(this.startPoint.y , this.endPoint.y)};
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-    if (speed > maxSpeed) {
+    if (speed > bossMaxSpeed) {
         
-        var ratio = maxSpeed / speed;
+        var ratio = bossMaxSpeed / speed;
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
 
     this.boxes = true;
+
+    projectile = [];
+   
     
     this.boundingBox = {
         x:this.x, 
@@ -139,7 +126,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                     width:26, 
                     height:17,
                     path:"./img/modball.png"
-                }, 300, //speed
+                }, 325, //speed
                 {//start point
                     x:x, 
                     y:y
@@ -147,7 +134,7 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                 {//end Point
                     x:(that.game.player.center()).x, 
                     y:(that.game.player.center()).y
-                }, 5, "Boss", 25));//lifetime   
+                }, generateRandomNumber(4 , 14), "Boss", 20));//lifetime   
 
                 that.game.addProjectile( 
                 new Projectile( that.game,
@@ -156,15 +143,15 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                     width:26, 
                     height:17,
                     path:"./img/modball.png"
-                }, 300, //speed
+                }, 325, //speed
                 {//start point
                     x:x, 
                     y:y
                 }, 
                 {//end Point
-                    x:(that.game.player.center()).x +300, 
-                    y:(that.game.player.center()).y +200
-                }, 5, "Boss", 25));//lifetime  
+                    x:(that.game.player.center()).x + generateRandomNumber(1 , 10) , 
+                    y:(that.game.player.center()).y + generateRandomNumber(1 , 10) , 
+                }, generateRandomNumber(2 , 12), "Boss", 10));//lifetime  
 
                 that.game.addProjectile( 
                     new Projectile( that.game,
@@ -173,15 +160,88 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                         width:26, 
                         height:17,
                         path:"./img/modball.png"
-                    }, 300, //speed
+                    }, 325, //speed
                     {//start point
                         x:x, 
                         y:y
                     }, 
                     {//end Point
-                        x:(that.game.player.center()).x -200, 
-                        y:(that.game.player.center()).y -200
-                    }, 5, "Boss", 25));//lifetime  
+                        x:(that.game.player.center()).x - generateRandomNumber(1 , 10), 
+                        y:(that.game.player.center()).y - generateRandomNumber(1 , 10)
+                    }, generateRandomNumber(3 , 10), "Boss", 20));//lifetime  
+
+                    that.game.addProjectile( 
+                        new Projectile( that.game,
+                        {
+                            img:that.game.assetManager.getAsset("./img/modball.png"), 
+                            width:26, 
+                            height:17,
+                            path:"./img/modball.png"
+                        }, 325, //speed
+                        {//start point
+                            x:x + 100, 
+                            y:y 
+                        }, 
+                        {//end Point
+                            x:(that.game.player.center()).x + 100 , 
+                            y:(that.game.player.center()).y , 
+                        }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime 
+                        
+                        that.game.addProjectile( 
+                            new Projectile( that.game,
+                            {
+                                img:that.game.assetManager.getAsset("./img/modball.png"), 
+                                width:26, 
+                                height:17,
+                                path:"./img/modball.png"
+                            }, 325, //speed
+                            {//start point
+                                x:x + 50, 
+                                y:y
+                            }, 
+                            {//end Point
+                                x:(that.game.player.center()).x +  50, 
+                                y:(that.game.player.center()).y  , 
+                            }, generateRandomNumber(0 , 10), "Boss", 20));//lifetime  
+
+                            that.game.addProjectile( 
+                                new Projectile( that.game,
+                                {
+                                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                                    width:26, 
+                                    height:17,
+                                    path:"./img/modball.png"
+                                }, 325, //speed
+                                {//start point
+                                    x:x - 50, 
+                                    y:y
+                                }, 
+                                {//end Point
+                                    x:(that.game.player.center()).x - 50 , 
+                                    y:(that.game.player.center()).y , 
+                                }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime  
+
+                                that.game.addProjectile( 
+                                    new Projectile( that.game,
+                                    {
+                                        img:that.game.assetManager.getAsset("./img/modball.png"), 
+                                        width:26, 
+                                        height:17,
+                                        path:"./img/modball.png"
+                                    }, 325, //speed
+                                    {//start point
+                                        x:x - 100, 
+                                        y:y
+                                    }, 
+                                    {//end Point
+                                        x:(that.game.player.center()).x - 100 , 
+                                        y:(that.game.player.center()).y , 
+                                    }, generateRandomNumber(0 , 12), "Boss", 20));//lifetime  
+
+                                
+                
+            
+        
         });
     }
     this.health = 1000;
@@ -218,12 +278,23 @@ shadowBoss.prototype.update = function () {
     this.attackBox.y = this.y + this.attackBox.offsety;
 
     var ent = this.game.player;
+
+    if (collide(this, ent)) {
+        console.log("Player collide");
+        var temp = { x: this.velocity.x, y: this.velocity.y };
+
+        tempVelocityX = temp.x * friction;
+        tempVelocityY = temp.y * friction;
+
+        ent.x += 20 * tempVelocityX * this.game.clockTick;
+        ent.y += 20 * tempVelocityY * this.game.clockTick;
+    }
+
     if (collide({boundingBox: this.visualBox}, ent)) {
         this.following = true;
         var dist = distance(this, ent);
         this.followPoint = ent;
         if (collide(ent, {boundingBox: this.attackBox})) {
-        //if(dist <= this.attackVision){
             this.attack = true;
             this.following =false;
         }
@@ -237,8 +308,8 @@ shadowBoss.prototype.update = function () {
         this.velocity.x += difX * acceleration / (dist*dist);
         this.velocity.y += difY * acceleration / (dist * dist);
         var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-        if (speed > maxSpeed) {
-            var ratio = maxSpeed / speed;
+        if (speed > bossMaxSpeed) {
+            var ratio = bossMaxSpeed / speed;
             this.velocity.x *= ratio;
             this.velocity.y *= ratio;
         }
@@ -286,8 +357,8 @@ shadowBoss.prototype.update = function () {
                     this.velocity.x += difX * acceleration / (dist*dist);
                     this.velocity.y += difY * acceleration / (dist * dist);
                     var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                    if (speed > maxSpeed) {
-                        var ratio = maxSpeed / speed;
+                    if (speed > bossMaxSpeed) {
+                        var ratio = bossMaxSpeed / speed;
                         this.velocity.x *= ratio;
                         this.velocity.y *= ratio;
                     }
@@ -330,12 +401,15 @@ shadowBoss.prototype.draw = function () {
         this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
        
     }
-    this.ctx.strokeStyle = "red";
-    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-    this.ctx.strokeStyle = "black";
-    this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
-    this.ctx.strokeStyle = "blue";
-    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    if (this.game.showOutlines) {
+        this.ctx.strokeStyle = "red";
+        this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+        this.ctx.strokeStyle = "black";
+        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+        this.ctx.strokeStyle = "blue";
+        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+        
+    }
     this.healthBar.draw();
     Entity.prototype.draw.call(this);
 }
@@ -371,13 +445,9 @@ shadowBoss.prototype.draw = function () {
 
 var friction = 1;
 var acceleration = 1000000;
-var maxSpeed = 100;
+var bossMaxSpeed = 300;
 
 
-function projectile(image,x,y){
-
-
-}
 
 /////////////////////////////////////////////////////////////////
 /*
@@ -459,8 +529,8 @@ shadowBoss.prototype.update = function () {
                     this.velocity.x += difX * acceleration / (dist*dist);
                     this.velocity.y += difY * acceleration / (dist * dist);
                     var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                    if (speed > maxSpeed) {
-                        var ratio = maxSpeed / speed;
+                    if (speed > bossMaxSpeed) {
+                        var ratio = bossMaxSpeed / speed;
                         this.velocity.x *= ratio;
                         this.velocity.y *= ratio;
                     }
