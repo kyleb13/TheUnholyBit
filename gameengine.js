@@ -11,9 +11,9 @@ window.requestAnimFrame = (function () {
 
 var pointerLocked = false;
 
-var audio = new Audio('./villageMusic.mp3');
-audio.volume = 0.10; // 75%
-audio.loop = true;
+var backgroundMusic = new Audio('./villageMusic.mp3');
+backgroundMusic.volume = 0.10; // 75%
+backgroundMusic.loop = true;
 
 
 //function canvasLoaded(){
@@ -37,6 +37,7 @@ function GameEngine() {
     this.pointerLocked = false;
     this.showOutlines = true;
     //this.showOutlines = false;
+    this.muteBackgroundMusic = false;
     this.camera = null;
     this.player = null;
 }
@@ -74,8 +75,8 @@ GameEngine.prototype.start = function (player, camera) {
             document.addEventListener("mousemove", mousePositionUpdate);
             that.pointerLocked = true;
             pointerLocked = true;
-            if (audio.play)
-            audio.play();
+            if (backgroundMusic.play)
+            backgroundMusic.play();
 
         } else {
             document.removeEventListener("mousemove", mousePositionUpdate);
@@ -86,10 +87,15 @@ GameEngine.prototype.start = function (player, camera) {
             that.s = false;
             that.d = false;
             that.lclick = false;
-            audio.pause();
+            backgroundMusic.pause();
         }
     });
-    console.log("starting game");
+/*
+    document.getElementById("myBtn").addEventListener("click", function(){
+        this.style.backgroundColor = "red";
+      });
+      */
+      console.log("starting game");
     (function gameLoop() {
         that.loop();
         requestAnimFrame(gameLoop, that.ctx.canvas);

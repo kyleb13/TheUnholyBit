@@ -45,7 +45,7 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
     var dropType;
     if (itemPercentage > 0.5 && itemPercentage < 0.8) {
         dropType = "ammo";
-    } else if(itemPercentage < 0.8 && itemPercentage <= 1.0) {
+    } else if(itemPercentage > 0.8 && itemPercentage <= 1.0) {
         dropType = "HP";
     }
 
@@ -279,7 +279,7 @@ function addProjectile(that, x, y, type, shooter) {
         img, 
         width, 
         height
-    }, 300, //speed
+    }, 350, //speed
     {//start point
         x:x, 
         y:y
@@ -287,7 +287,7 @@ function addProjectile(that, x, y, type, shooter) {
     {//end Point
         x:center.x, 
         y:center.y
-    }, 5, shooter, 15));//lifetime
+    }, 5, shooter, 5));//lifetime
 }
 RangeEnemy.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
@@ -433,7 +433,7 @@ function collide(ent1, ent2) {
 function Bunny(game, spritesheet, x, y) {
     this.walkAnimations = [];
     this.deathAnimations = [];
-
+    this.maxSpeed = 175;
     
     this.walkAnimations["down"] = new Animation2(spritesheet, 0, 0, 48, 64, 0.1, 7, true, false);
     this.walkAnimations["up"] = new Animation2(spritesheet, 0, 64, 48, 64, 0.1, 7, true, false);
@@ -452,8 +452,8 @@ function Bunny(game, spritesheet, x, y) {
     this.moveRestrictions = {left:false, right:false, up:false, down:false};
     this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-    if (speed > maxSpeed) {
-        var ratio = maxSpeed / speed;
+    if (speed > this.maxSpeed) {
+        var ratio = this.maxSpeed / speed;
         this.velocity.x *= ratio;
         this.velocity.y *= ratio;
     }
@@ -526,8 +526,8 @@ Bunny.prototype.update = function () {
                 this.velocity.x += difX * acceleration / (dist*dist);
                 this.velocity.y += difY * acceleration / (dist * dist);
                 var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                if (speed > maxSpeed) {
-                    var ratio = maxSpeed / speed;
+                if (speed > this.maxSpeed) {
+                    var ratio = this.maxSpeed / speed;
                     this.velocity.x *= ratio;
                     this.velocity.y *= ratio;
                 }
@@ -575,8 +575,11 @@ Bunny.prototype.draw = function () {
     } else {
         this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     }
-    this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-    this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    if (this.game.showOutlines) {
+        
+        this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+    }
     Entity.prototype.draw.call(this);
     
     this.healthBar.draw();
@@ -586,7 +589,7 @@ Bunny.prototype.draw = function () {
 // the "main" code begins here
 var friction = 1;
 var acceleration = 1000000;
-var maxSpeed = 100;
+var maxSpeed = 250;
 
 
 // LINE/RECTANGLE

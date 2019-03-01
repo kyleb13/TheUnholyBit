@@ -6,9 +6,10 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
 
     this.ammo = 10;
     this.shootanimation.rowMode();
-    this.maxSpeed = 200;
+    this.maxSpeed = 250;
     this.xspeed = 0;
     this.yspeed = 0;
+    this.ammo = 200;
     this.health = 100;
     this.changeTimer = 0;
     this.ctx = game.ctx;
@@ -24,7 +25,9 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
         offsety:15
     }
     //Entity.call(this, game, 925, 850);
-    Entity.call(this, game, 300, 850);
+    //Entity.call(this, game, 5600, 2797);
+    /**  cave map */
+    Entity.call(this, game, 100, 300);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
@@ -49,12 +52,13 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
                 y += 42;
                 break;
         }
+        that.ammo -=1;
         that.game.addProjectile(new Projectile(that.game, 
             {
                 img:that.game.assetManager.getAsset("./img/arrow.png"), 
                 width:31, 
                 height:5
-            }, 350, //speed
+            }, 400, //speed
             {//start point
                 x:x, 
                 y:y
@@ -62,7 +66,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
             {//end Point
                 x:that.game.pointerx, 
                 y:that.game.pointery
-            }, 5, "Player", 25));//lifetime
+            }, 5, "Player", 35));//lifetime
     });    
     this.radius  = {
         x: this.x,
@@ -110,14 +114,25 @@ Player.prototype.update = function () {
         this.yspeed = 0;
 
         //update movement direction
-        if(this.game.w) this.yspeed -=200;
-        if(this.game.s) this.yspeed +=200;
-        if(this.game.a) this.xspeed -=200;
-        if(this.game.d) this.xspeed +=200;
+        // if(this.game.w) this.yspeed -=200;
+        // if(this.game.s) this.yspeed +=200;
+        // if(this.game.a) this.xspeed -=200;
+        // if(this.game.d) this.xspeed +=200;
+        // //slow down x and y if moving diagonally
+        // if(this.xspeed!==0 && this.yspeed !== 0){
+        //     this.xspeed = (this.xspeed/1.48);
+        //     this.yspeed = (this.yspeed/1.48);
+        // }
+        if(this.game.w) this.yspeed -=250;
+        if(this.game.s) this.yspeed +=250;
+        if(this.game.a) this.xspeed -=250;
+        if(this.game.d) this.xspeed +=250;
         //slow down x and y if moving diagonally
         if(this.xspeed!==0 && this.yspeed !== 0){
-            this.xspeed = (this.xspeed/1.48);
-            this.yspeed = (this.yspeed/1.48);
+            var speed = Math.sqrt(this.xspeed * this.xspeed + this.yspeed * this.yspeed);
+            var ratio = this.maxSpeed / speed;
+            this.xspeed *= ratio;
+            this.yspeed *= ratio;
         }
 
         if (!this.xspeed !== 0 || !this.yspeed !== 0) {
@@ -181,7 +196,9 @@ Player.prototype.draw = function () {
     if(this.game.showOutlines){
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
     }
-
+    this.ctx.font = "24px Arial";
+    this.ctx.fillStyle = "red";
+    this.ctx.fillText(`Ammo: ${this.ammo}`, this.x+550, this.y+300);
     if (this.dead) {
         this.deathanimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this); 
     }
@@ -275,7 +292,9 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     this.timer = 0;
     this.lifetime = lifetime;
     this.damage = damage;
-    
+    if(spritesheet.path && spritesheet.path === "./img/modball.png"){
+        console.log("ayyyy");
+    }
     this.boundingBox = {
         x:this.x, 
         y:this.y,
@@ -392,7 +411,7 @@ Projectile.prototype.update = function() {
                 if (this.shooter !== "Player" && ent instanceof Player && collide(this, ent)) {
                     this.handleCollision(ent);
                 } else if (this.shooter === "Player" 
-                                        && (ent instanceof Bunny || ent instanceof RangeEnemy)
+                                        && (ent instanceof Bunny || ent instanceof shadowBoss || ent instanceof RangeEnemy)
                                         && collide(this, ent)) {
                     this.handleCollision(ent);
                 } else if (ent instanceof Background) {
@@ -413,7 +432,8 @@ Projectile.prototype.draw = function(){
     var x = this.x - this.sheet.center.x;
     var y = this.y - this.sheet.center.y;
     this.ctx.drawImage(this.sheet.img, x, y);
-    this.ctx.drawImage(this.rotatedBoundingBox, x, y);
+    if(this.game.showOutlines) this.ctx.drawImage(this.rotatedBoundingBox, x, y);
+    
 
 }
 
@@ -454,8 +474,8 @@ function LevelBoundingBoxCollsion(background, ent) {
                     }
         
                 }
+            }
         }
-         }
     });
     return false;
 }
