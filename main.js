@@ -115,9 +115,11 @@ function Background(game, spritesheet) {
     this.game = game;
     this.ctx = game.ctx;
     //console.log(loadVillageData());
-    console.log("making background");
-    var data = loadVillageData();
-    this.boundingBoxes = data.boundingBoxes;
+    // console.log("making background");
+    // var data = loadVillageData();
+    var data = [];
+    // this.boundingBoxes = data.boundingBoxes;
+    this.boundingBoxes = [];
     // for(var i = 0; i<data.enemySpawns.length; i++){
     //     var location = data.enemySpawns[i];
     //     var enemyPercentage = Math.random(); 
@@ -193,9 +195,10 @@ Camera.prototype.draw = function() {
 }
 
 
-
+/*
 AM.queueDownload("./img/crosshair-export.png");
-AM.queueDownload("./img/villagemap.png");
+//AM.queueDownload("./img/villagemap.png");
+AM.queueDownload("./img/castlemap.png");
 AM.queueDownload("./img/charwalk.png");
 AM.queueDownload("./img/charstand.png");
 AM.queueDownload("./img/charshoot_loop.png");
@@ -220,61 +223,68 @@ AM.queueDownload("./img/movement.png");
 AM.queueDownload("./img/shadowLeft.png");
 AM.queueDownload("./img/shadowRight.png");
 AM.queueDownload("./img/modball.png");
-AM.queueDownload("./img/normalArcher.png");
-AM.downloadAll(function () {
-    var canvas = document.getElementById("gameWorld");
-    
-    var ctx = canvas.getContext("2d");
-    canvas.onclick = function() {
-        canvas.requestPointerLock();
-    };
-    var gameEngine = new GameEngine();
-    gameEngine.assetManager = AM;
-    
-    gameEngine.init(ctx);
+AM.queueDownload("./img/normalArcher.png");*/
 
-    var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"), AM.getAsset("./img/character_edited.png"));
-    var camera = new Camera(gameEngine, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
-   // var powerup = new Powerup (gameEngine, 400, 900,  AM.getAsset("./img/arrowPile.png"))
-   // gameEngine.addEntity(powerup);
-    gameEngine.start(player, camera);
-    gameEngine.crosshair = new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png"));
-    gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/villagemap.png")));
-    gameEngine.addEntity(player);
-    // gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"))); 
-    //gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), 1000, 950, ArrowType, "arrow"));
-  // gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/magicSkel.png"), 1100, 950, MagicType, "magic"));
-  /*  gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/HoodedRanger.png"), 200, 600, ArrowType, "arrow"));
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), 100, 600, MagicType, "magic"));
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightArcher.png"), 600, 600, ArrowType, "arrow"));
-    gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightMage.png"), 500, 600, MagicType, "magic"));
-    */
-    // gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png")));
-    var data = loadVillageData();
-    for(var i = 0; i<data.enemySpawns.length; i++){
-        var location = data.enemySpawns[i];
-        var enemyPercentage = Math.random(); 
-        if (enemyPercentage >= 0.0 && enemyPercentage <= 0.45) {
-            gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
-        } else if(enemyPercentage > 0.45 && enemyPercentage <= 0.85) {
-            gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), location.x, location.y, MagicType, "magic"));
-        } else if (enemyPercentage > 0.85 && enemyPercentage <= 1) { 
-            gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x, location.y)); 
-            gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x+35, location.y)); 
-            gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x+70, location.y)); 
-        } else {
-            gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
-        }
-    }
-    console.log("NEW!!!!!!!!!!!!1");
-    for (var i = 0; i<data.powerUpSpawns.length; i ++) {
-        var location = data.powerUpSpawns[i];
-        if ( i < 3) {
-            gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "ammo"));
-        } else {
-            gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "HP"));
-        }
-    }
-	gameEngine.addEntity(new shadowBoss(gameEngine,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
-	    console.log("All Done!");
-});
+// AM.downloadAll(function () {
+//     var canvas = document.getElementById("gameWorld");
+    
+//     var ctx = canvas.getContext("2d");
+//     canvas.onclick = function() {
+//         canvas.requestPointerLock();
+//     };
+//     var gameEngine = new GameEngine();
+//     gameEngine.assetManager = AM;
+    
+//     gameEngine.init(ctx);
+
+//     var player = new Player(gameEngine, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"), AM.getAsset("./img/character_edited.png"));
+//     var camera = new Camera(gameEngine, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
+//    // var powerup = new Powerup (gameEngine, 400, 900,  AM.getAsset("./img/arrowPile.png"))
+//    // gameEngine.addEntity(powerup);
+//     gameEngine.start(player, camera);
+//     gameEngine.crosshair = new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png"));
+//     // gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/villagemap.png")));
+//     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/castlemap.png")));
+//     gameEngine.addEntity(player);
+//     // gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"))); 
+//     //gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), 1000, 950, ArrowType, "arrow"));
+//   // gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/magicSkel.png"), 1100, 950, MagicType, "magic"));
+//   /*  gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/HoodedRanger.png"), 200, 600, ArrowType, "arrow"));
+//     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), 100, 600, MagicType, "magic"));
+//     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightArcher.png"), 600, 600, ArrowType, "arrow"));
+//     gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/KnightMage.png"), 500, 600, MagicType, "magic"));
+//     */
+//     // gameEngine.addEntity(new Crosshair(gameEngine, AM.getAsset("./img/crosshair-export.png")));
+//     // var data = loadVillageData();
+//     // for(var i = 0; i<data.enemySpawns.length; i++){
+//     //     var location = data.enemySpawns[i];
+//     //     var enemyPercentage = Math.random(); 
+//     //     if (enemyPercentage >= 0.0 && enemyPercentage <= 0.45) {
+//     //         gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
+//     //     } else if(enemyPercentage > 0.45 && enemyPercentage <= 0.85) {
+//     //         gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/MageGirl.png"), location.x, location.y, MagicType, "magic"));
+//     //     } else if (enemyPercentage > 0.85 && enemyPercentage <= 1) { 
+//     //         gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x, location.y)); 
+//     //         gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x+35, location.y)); 
+//     //         gameEngine.addEntity(new Bunny(gameEngine, AM.getAsset("./img/bunbun.png"), location.x+70, location.y)); 
+//     //     } else {
+//     //         gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
+//     //     }
+//     // }
+//     // console.log("NEW!!!!!!!!!!!!1");
+//     // for (var i = 0; i<data.powerUpSpawns.length; i ++) {
+//     //     var location = data.powerUpSpawns[i];
+//     //     if ( i < 3) {
+//     //         gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "ammo"));
+//     //     } else {
+//     //         gameEngine.addEntity(new Powerup(gameEngine, location.x, location.y, "HP"));
+//     //     }
+//     // }
+// 	// gameEngine.addEntity(new shadowBoss(gameEngine,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
+// 	//     console.log("All Done!");
+// });
+function oncanvasload(){
+    console.log("plz")
+    var sceneManager = new SceneManager();
+    sceneManager.loadVillageMap();
+}
