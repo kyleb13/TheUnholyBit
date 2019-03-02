@@ -87,7 +87,7 @@ GameEngine.prototype.start = function (player, camera) {
             that.s = false;
             that.d = false;
             that.lclick = false;
-            backgroundMusic.pause();
+            audio.pause();
         }
     });
 /*

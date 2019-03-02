@@ -27,7 +27,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
     //Entity.call(this, game, 925, 850);
     //Entity.call(this, game, 5600, 2797);
     /**  cave map */
-    Entity.call(this, game, 3500, 1300);
+    Entity.call(this, game, 1700, 1600);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
