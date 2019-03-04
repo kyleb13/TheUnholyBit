@@ -1,4 +1,4 @@
-var leveldata = 
+var villageLevelData = 
 `{
     "playerSpawn":{"x":800, "y":850},
     "powerUpSpawns": [
@@ -698,5 +698,5 @@ var leveldata =
 
 function loadVillageData(){
     console.log("loading level data");
-    return JSON.parse(leveldata);
+    return JSON.parse(villageLevelData  );
 }

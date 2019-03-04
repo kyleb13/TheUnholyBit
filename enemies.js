@@ -224,10 +224,10 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
     this.attackBox = {
         x:this.x, 
         y:this.y,
-        width: 900,
-        height: 900,
-        offsetx:-440,
-        offsety:-450
+        width: 1000,
+        height: 500,
+        offsetx:-500,
+        offsety:-210
     }
     this.followPoint = {x:0, y:0};
     this.following = false;
@@ -331,7 +331,7 @@ RangeEnemy.prototype.update = function () {
 
                 let time = this.game.clockTick;
                 if (collide(ent, {boundingBox: this.attackBox})) {
-                  //  this.attacking = true;
+                    this.attacking = true;
                     if (collide(this, ent)) {
                         console.log("Player collide");
                         var temp = { x: this.velocity.x, y: this.velocity.y };

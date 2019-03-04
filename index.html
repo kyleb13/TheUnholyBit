@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>Game Project Shell</title>
+    <script type="text/javascript" src="./scenemanager.js"></script>
     <script type="text/javascript" src="./leveldata/villagemap.js"></script>
     <script type="text/javascript" src="./leveldata/cavemap.js"></script>
     <script type="text/javascript" src="./gameengine.js"></script>
@@ -23,7 +24,7 @@
 <body>
     <p id="debug-out"></p>
     <p id="debug-out2"></p>
-    <p id="">
-    <canvas id="gameWorld" tabindex="1" width="1400" height="700" style="border: 1px solid brown; background: black"></canvas>
+    <canvas id="gameWorld" tabindex="1" width="1400" height="700" style="border: 1px solid brown; background: black" onload="oncanvasload()"></canvas>
+    <script>oncanvasload();</script>
 </body>
 </html>

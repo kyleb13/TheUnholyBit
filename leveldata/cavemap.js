@@ -1,4 +1,4 @@
-var leveldata = 
+var caveLevelData = 
 `{
     "playerSpawn":{"x":100, "y":300},
     "enemySpawns":[
@@ -313,5 +313,5 @@ var leveldata =
 
 function loadCaveData(){
     console.log("loading level data");
-    return JSON.parse(leveldata);
+    return JSON.parse(caveLevelData);
 }

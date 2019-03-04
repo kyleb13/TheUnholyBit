@@ -33,6 +33,7 @@ function GameEngine() {
     this.d = false;
     this.mute = false;
     this.lclick = false;
+    this.change = false;
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
@@ -131,6 +132,9 @@ GameEngine.prototype.startInput = function () {
             } else {
                 audio.play();
             }
+        }
+        if(e.code === "KeyN") {
+            sceneManager.loadCaveMap();
         }
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
