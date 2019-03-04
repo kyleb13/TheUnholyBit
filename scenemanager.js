@@ -6,20 +6,19 @@ function SceneManager(){
     canvas.onclick = function() {
         canvas.requestPointerLock();
     };
-
-    this.game = new GameEngine();
-}
-
-SceneManager.prototype.loadVillageMap = function(){
-    AM.queueDownload("./img/crosshair-export.png");
-    AM.queueDownload("./img/villagemap.png");
-    AM.queueDownload("./img/charwalk.png");
     AM.queueDownload("./img/charstand.png");
     AM.queueDownload("./img/charshoot_loop.png");
     AM.queueDownload("./img/character_edited.png");
     AM.queueDownload("./img/arrow.png");
+    AM.queueDownload("./img/charwalk.png");
+    AM.queueDownload("./img/crosshair-export.png");
     AM.queueDownload("./img/arrowPile.png");
     AM.queueDownload("./img/heart.png");
+    this.game = new GameEngine();
+}
+
+SceneManager.prototype.loadVillageMap = function(){
+    AM.queueDownload("./img/villagemap.png");
 
     AM.queueDownload("./img/bunbun.png");
     AM.queueDownload("./img/fireball.png");
@@ -35,13 +34,17 @@ SceneManager.prototype.loadVillageMap = function(){
         console.log("downloading");
         that.game.assetManager = AM;
         that.game.init(that.ctx);
-        that.game.addEntity(new Background(that.game, AM.getAsset("./img/villagemap.png")));
-        var player = new Player(that.game, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"), AM.getAsset("./img/character_edited.png"));
+        var data = loadVillageData();
+        that.game.addEntity(new Background(that.game, AM.getAsset("./img/villagemap.png"), data));
+        var player = new Player(that.game, AM.getAsset("./img/charwalk.png"), 
+            AM.getAsset("./img/charshoot_loop.png"), 
+            AM.getAsset("./img/charstand.png"), 
+            AM.getAsset("./img/character_edited.png"),
+            data.playerSpawn.x, data.playerSpawn.y);
         var camera = new Camera(that.game, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
         that.game.start(player, camera);
         that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
         that.game.addEntity(player);
-        var data = loadVillageData();
         for(var i = 0; i<data.enemySpawns.length; i++){
             var location = data.enemySpawns[i];
             var enemyPercentage = Math.random(); 
@@ -70,4 +73,28 @@ SceneManager.prototype.loadVillageMap = function(){
         console.log("All Done!");
     });
 
+}
+
+SceneManager.prototype.loadCastleMap = function(){
+    //AM.queueDownload("./img/.png");
+    AM.queueDownload("./img/castlemap.png");
+    AM.queueDownload("./img/KnightArcher.png");
+    AM.queueDownload("./img/KnightMage.png");
+    var that = this;
+    AM.downloadAll(function(){
+        //TODO: remove game initialization and call this function after boss from village is defeated
+        that.game.assetManager = AM;
+        that.game.init(that.ctx);
+        var data = loadCastleData();
+        that.game.addEntity(new Background(that.game, AM.getAsset("./img/castlemap.png"), data));
+        var player = new Player(that.game, AM.getAsset("./img/charwalk.png"), 
+            AM.getAsset("./img/charshoot_loop.png"), 
+            AM.getAsset("./img/charstand.png"), 
+            AM.getAsset("./img/character_edited.png"),
+            data.playerSpawn.x, data.playerSpawn.y);
+        var camera = new Camera(that.game, player, 6400, 6400);
+        that.game.start(player, camera);
+        that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
+        that.game.addEntity(player);
+    });
 }

@@ -107,7 +107,7 @@ Animation.prototype.isDone = function () {
     return (this.elapsedTime >= this.totalTime);
 }
 
-function Background(game, spritesheet) {
+function Background(game, spritesheet, data) {
     
     this.x = 0;
     this.y = 0;
@@ -116,23 +116,7 @@ function Background(game, spritesheet) {
     this.ctx = game.ctx;
     //console.log(loadVillageData());
     // console.log("making background");
-    // var data = loadVillageData();
-    var data = [];
-    // this.boundingBoxes = data.boundingBoxes;
-    this.boundingBoxes = [];
-    // for(var i = 0; i<data.enemySpawns.length; i++){
-    //     var location = data.enemySpawns[i];
-    //     var enemyPercentage = Math.random(); 
-    //     if (enemyPercentage >= 0.0 && enemyPercentage <= 0.3) {
-    //         game.addEntity(new RangeEnemy(game, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
-    //     } else if(enemyPercentage > 0.3 && enemyPercentage <= 6.0) {
-    //         game.addEntity(new RangeEnemy(game, AM.getAsset("./img/MageGirl.png"), location.x, location.y, MagicType, "magic"));
-    //     } else if (enemyPercentage > 6.0 && enemyPercentage <=0.9) { 
-    //         game.addEntity(new Bunny(game, AM.getAsset("./img/bunbun.png"), location.x, location.y)); 
-    //     } else {
-    //         game.addEntity(new RangeEnemy(game, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
-    //     }
-    // }
+    this.boundingBoxes = data.boundingBoxes;
     // data.enemySpawns.forEach((location) => {
 
         
@@ -167,18 +151,17 @@ Background.prototype.draw = function () {
 Background.prototype.update = function () {
 };
 
-function Camera(game, obj, background, width, height){
+function Camera(game, obj, width, height){
     this.game = game;
     this.ctx = game.ctx;
     //var center = obj.center();
     this.obj = obj;
-    this.background = background;
     this.worldWidth=width;
     this.worldHeight=height;
     this.frameWidth = this.ctx.canvas.width;
     this.frameHeight = this.ctx.canvas.height;
-    this.x =  0;
-    this.y = 0;
+    this.x =  obj.x;
+    this.y = obj.y;
     // console.log(`width ${this.frameWidth}, height ${this.frameHeight}`);
 }
 
@@ -190,7 +173,7 @@ Camera.prototype.update = function(){
 Camera.prototype.draw = function() {
     this.ctx.setTransform(1,0,0,1,0,0);
     var camX = -this.obj.x + this.ctx.canvas.width/2;
-    var camY = -this.obj.y + this.ctx.canvas.height/2
+    var camY = -this.obj.y + this.ctx.canvas.height/2;
     this.ctx.translate( camX, camY );	
 }
 
@@ -286,5 +269,6 @@ AM.queueDownload("./img/normalArcher.png");*/
 function oncanvasload(){
     console.log("plz")
     var sceneManager = new SceneManager();
-    sceneManager.loadVillageMap();
+    //sceneManager.loadVillageMap();
+    sceneManager.loadCastleMap();
 }

@@ -1,6 +1,6 @@
-function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
+function Player(game, walksheet, shootsheet, standsheet, wholesheet, px, py) {
     this.animation = new Animation(walksheet, 64, 64, 8, .12, 32, true, 1.5);
-    this.shootanimation = new Animation(shootsheet,64,64, 7, .025, 28, true, 1.5);
+    this.shootanimation = new Animation(shootsheet,64,64, 7, .027, 28, true, 1.5);
     this.standanimation = new Animation(standsheet, 64, 64, 1, .12, 4, true, 1.5);
     this.deathanimation =  new Animation2(wholesheet, 0, 1280, 64, 64, 0.1, 6, false, false);
 
@@ -24,7 +24,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
         offsetx:30,
         offsety:15
     }
-   Entity.call(this, game, 1480, 5300);
+   Entity.call(this, game, px, py);
     // Entity.call(this, game, 5600, 2797);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
@@ -64,7 +64,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
             {//end Point
                 x:that.game.pointerx, 
                 y:that.game.pointery
-            }, 5, "Player", 35));//lifetime
+            }, 5, "Player", 18));//lifetime
     });    
     this.radius  = {
         x: this.x,
@@ -487,8 +487,8 @@ Projectile.prototype.handleCollision = function(ent) {
         tempVelocityX = this.xspeed * friction;
         tempVelocityY = this.yspeed * friction;
         
-        ent.x += 7 * tempVelocityX * this.game.clockTick;   
-        ent.y += 7 * tempVelocityY * this.game.clockTick;
+        ent.x += 4 * tempVelocityX * this.game.clockTick;   
+        ent.y += 4 * tempVelocityY * this.game.clockTick;
         
         
     }   
