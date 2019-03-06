@@ -36,7 +36,7 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    // this.showOutlines = true;
+    // this.showOutlines = false;
     this.showOutlines = true;
     this.camera = null;
     this.player = null;
