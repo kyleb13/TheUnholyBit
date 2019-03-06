@@ -269,6 +269,6 @@ AM.queueDownload("./img/normalArcher.png");*/
 function oncanvasload(){
     console.log("plz")
     var sceneManager = new SceneManager();
-    //sceneManager.loadVillageMap();
+    // sceneManager.loadVillageMap();
     sceneManager.loadCastleMap();
 }
