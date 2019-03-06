@@ -8,18 +8,23 @@ function SceneManager(){
     };
 
     this.game = new GameEngine();
+    this.level;
 }
 
 SceneManager.prototype.loadVillageMap = function(){
+    this.level = "village";
     AM.queueDownload("./img/crosshair-export.png");
+    AM.queueDownload("./img/explosion.png");
     AM.queueDownload("./img/villagemap.png");
     AM.queueDownload("./img/charwalk.png");
+    AM.queueDownload("./img/char_power.png");
     AM.queueDownload("./img/charstand.png");
     AM.queueDownload("./img/charshoot_loop.png");
     AM.queueDownload("./img/character_edited.png");
     AM.queueDownload("./img/arrow.png");
     AM.queueDownload("./img/arrowPile.png");
     AM.queueDownload("./img/heart.png");
+    AM.queueDownload("./img/HoodedRanger.png");
 
     AM.queueDownload("./img/bunbun.png");
     AM.queueDownload("./img/fireball.png");
@@ -37,13 +42,16 @@ SceneManager.prototype.loadVillageMap = function(){
         that.game.init(that.ctx);
         var data = loadVillageData();
         that.game.addEntity(new Background(that.game, AM.getAsset("./img/villagemap.png"), data));
-        var player = new Player(that.game, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"), AM.getAsset("./img/character_edited.png"));
+        
+        var player = new Player(that.game, AM.getAsset("./img/charwalk.png"), AM.getAsset("./img/charshoot_loop.png"), AM.getAsset("./img/charstand.png"), AM.getAsset("./img/character_edited.png"), AM.getAsset("./img/char_power.png"));
         var camera = new Camera(that.game, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
         that.game.start(player, camera);
         that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
         that.game.addEntity(player);
+         that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/HoodedRanger.png"), 1000, 1000, ArrowType, "arrow", "HoodedArcher"));
+
         
-        
+        /*
         for(var i = 0; i<data.enemySpawns.length; i++){
             var location = data.enemySpawns[i];
             var enemyPercentage = Math.random(); 
@@ -70,15 +78,21 @@ SceneManager.prototype.loadVillageMap = function(){
                 }
             }
         }
-        
+        */
         that.game.addEntity(new shadowBoss(that.game,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
         console.log("All Done!");
     });
 
 }
 
+SceneManager.prototype.loadNextLevel = function() {
+    if (this.level === "village") {
+        this.loadCaveMap();
+    } 
+}
 
 SceneManager.prototype.loadCaveMap = function() {
+    this.level = "cave";
     this.game.entities = [];
     AM.queueDownload("./img/cavemap.png");
     AM.queueDownload("./img/HoodedRanger.png");
@@ -89,8 +103,36 @@ SceneManager.prototype.loadCaveMap = function() {
         that.game.player.x = 400;
         that.game.player.y = 400;
         that.game.addEntity(that.game.player);
-        that.game.crosshair.x = that.game.player.x;
-        that.game.crosshair.y =  that.game.player.y;
-
+        that.game.pointerx = that.game.player.x;
+        that.game.pointery =  that.game.player.y;
     });
 }
+/*
+AM.queueDownload("./img/crosshair-export.png");
+//AM.queueDownload("./img/villagemap.png");
+AM.queueDownload("./img/castlemap.png");
+AM.queueDownload("./img/charwalk.png");
+AM.queueDownload("./img/charstand.png");
+AM.queueDownload("./img/charshoot_loop.png");
+AM.queueDownload("./img/character_edited.png");
+AM.queueDownload("./img/arrow.png");
+AM.queueDownload("./img/arrowPile.png");
+AM.queueDownload("./img/heart.png");
+
+AM.queueDownload("./img/bunbun.png");
+AM.queueDownload("./img/normalArcher.png");
+AM.queueDownload("./img/yap.png");
+AM.queueDownload("./img/arrowSkel.png");
+AM.queueDownload("./img/magicSkel.png");
+AM.queueDownload("./img/fireball.png");
+
+AM.queueDownload("./img/HoodedRanger.png");
+AM.queueDownload("./img/MageGirl.png");
+
+AM.queueDownload("./img/KnightArcher.png");
+AM.queueDownload("./img/KnightMage.png");
+AM.queueDownload("./img/movement.png");
+AM.queueDownload("./img/shadowLeft.png");
+AM.queueDownload("./img/shadowRight.png");
+AM.queueDownload("./img/modball.png");
+AM.queueDownload("./img/normalArcher.png");*/

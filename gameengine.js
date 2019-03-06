@@ -33,6 +33,7 @@ function GameEngine() {
     this.d = false;
     this.mute = false;
     this.lclick = false;
+    this.pclick = false;
     this.change = false;
     this.pointerx = 50;
     this.pointery = 50;
@@ -135,6 +136,9 @@ GameEngine.prototype.startInput = function () {
         }
         if(e.code === "KeyN") {
             sceneManager.loadCaveMap();
+        } 
+        if (e.code === "KeyP") {
+            that.player.usingPU = true;
         }
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
@@ -159,7 +163,11 @@ GameEngine.prototype.handleInputs = function(keycode, value){
             break;
         case "KeyD":
             this.d = value;
-            break;       
+            break;   
+        case "KeyP":
+            this.player.usingPU = value;
+            break;   
+            
     }   
 }
 

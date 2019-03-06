@@ -152,14 +152,50 @@ function shiftDirection(ent1, ent2) {
     }
 }
 
+function HoodArcherAttack(x, y, that) {
+    
+        var x2= x;
+        var y2 = y;
+        var x3 = x;
+        var y3 = y;
 
+      switch(that.direction){
+                    case "up":
+                        x += 35;
+                        y -= 15;
+                        x2 -= 10;
+                        x3 += 10;
+                        break;
+                    case "left":
+                        y += 25;
+                        y2 -= 10;
+                        y3 += 10;
+                        break;
+                    case "right":
+                        y += 30;
+                        y2 -= 10;
+                        y3 += 10;
+                        x+=25;
+                        break;
+                    case "down":
+                        x +=30;
+                        y += 30;
+                        x2 -= 10;
+                        x3 += 10;
+                        break;
+                }
+                addProjectile(that, x, y, "arrow", "Enemy");
+                addProjectile(that, x2, y2, "arrow", "Enemy");
+                addProjectile(that, x3, y3, "arrow", "Enemy");
 
-function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
+}
+
+function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species) {
 
     this.walkAnimations = [];
     this.attackAnimations =[];
     this.standingAnimations = [];
-
+    this.species = species;
     this.walkAnimations["up"] = new Animation2 (spritesheet, 0, 512, 64, 64, 0.1, 8, true, false);
     this.walkAnimations["left"] = new Animation2 (spritesheet, 0, 576, 64, 64, 0.1, 8, true, false);
     this.walkAnimations["down"] = new Animation2 (spritesheet, 0, 640, 64, 64, 0.1, 8, true, false);
@@ -173,10 +209,15 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
     var that = this;
     
     for (var index in this.attackAnimations) {
+       
         this.attackAnimations[index].setCallbackOnFrame(6, {}, () => {
             var x = that.x;
             var y = that.y;
-            switch(that.direction){
+
+            if (this.species === "HoodedArcher") {
+              HoodArcherAttack(x, y, that)
+            } else {
+                    switch(that.direction){
                     case "up":
                         x += 35;
                         y -= 15;
@@ -193,8 +234,10 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, projectile,"Enemy");
-                });
+                addProjectile(that, x, y, projectile, "Enemy");
+            }
+            
+        });
     }
     this.standingAnimations["up"] = new Animation2 (spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
     this.standingAnimations["left"] = new Animation2 (spritesheet, 0, 576, 64, 64, 0.1, 1, true, false);
@@ -215,9 +258,9 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile) {
     this.visualBox = {
         x:this.x, 
         y:this.y,
-        width: 1300,
+        width: 1500,
         height: 1300,
-        offsetx:-645,
+        offsetx:-695,
         offsety:-650
     }
 
@@ -258,7 +301,7 @@ RangeEnemy.prototype.center = function() {
     return {x:centerx, y:centery};
 }
 
-function addProjectile(that, x, y, type, shooter) {  
+function addProjectile(that, x, y, type, shooter, damage) {  
     var img;
     var height;
     var width;
@@ -287,7 +330,7 @@ function addProjectile(that, x, y, type, shooter) {
     {//end Point
         x:center.x, 
         y:center.y
-    }, 5, shooter, 5));//lifetime
+    }, 5, shooter, damage));//lifetime
 }
 RangeEnemy.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
@@ -354,13 +397,6 @@ RangeEnemy.prototype.update = function () {
                         this.velocity.x *= ratio;
                         this.velocity.y *= ratio;
                     }
-                    /*
-                    if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
-                        this.x += time * this.velocity.x;
-                    }
-                    if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
-                        this.y += time * this.velocity.y;
-                    }*/
                     
                     this.x += this.velocity.x * this.game.clockTick;
                 this.y += this.velocity.y * this.game.clockTick;
@@ -370,16 +406,6 @@ RangeEnemy.prototype.update = function () {
                 this.following = false;
             } 
     
-        } else if (ent instanceof RangeEnemy && ent !== this) {
-            if (collide(this, ent)) {
-                var temp = { x: this.velocity.x, y: this.velocity.y };
-
-                tempVelocityX = temp.x * friction;
-                tempVelocityY = temp.y * friction;
-    
-                ent.x += 20 * tempVelocityX * this.game.clockTick;
-                ent.y += 20 * tempVelocityY * this.game.clockTick;
-            }   
         } else if(ent instanceof Background) {
             LevelBoundingBoxCollsion(ent, this)
         }
@@ -413,6 +439,7 @@ RangeEnemy.prototype.draw = function () {
     if (this.game.showOutlines) {
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
         this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     }
     Entity.prototype.draw.call(this);
 }
@@ -537,10 +564,7 @@ Bunny.prototype.update = function () {
 
                     tempVelocityX = temp.x * friction;
                     tempVelocityY = temp.y * friction;
-                    /*
-                    ent.x += 10 * tempVelocityX * this.game.clockTick;
-                    ent.y += 10 * tempVelocityY * this.game.clockTick;
-                    */
+                    
 
                    this.x -= 10 * tempVelocityX * this.game.clockTick;
                    this.y -= 10 * tempVelocityY * this.game.clockTick;
@@ -576,7 +600,6 @@ Bunny.prototype.draw = function () {
         this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
     }
     if (this.game.showOutlines) {
-        
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
         this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
     }
@@ -614,22 +637,6 @@ function lineRect(x1, y1, x2, y2, rx, ry, rw, rh) {
   }
   
   
-  // LINE/LINE
-//   function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
-  
-//     // calculate the direction of the lines
-//     var uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
-//     var uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
-  
-//     // if uA and uB are between 0-1, lines are colliding
-//     if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
-  
-  
-//       return true;
-//     }
-//     return false;
-//   }
-
 function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
     var m1 = (y2-y1)/(x2-x1);
     var m2 = (y4-y3)/(x4-x3);

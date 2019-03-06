@@ -1,11 +1,14 @@
-function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
+function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupsheet) {
     this.animation = new Animation(walksheet, 64, 64, 8, .12, 32, true, 1.5);
     this.shootanimation = new Animation(shootsheet,64,64, 7, .025, 28, true, 1.5);
     this.standanimation = new Animation(standsheet, 64, 64, 1, .12, 4, true, 1.5);
-    this.deathanimation =  new Animation2(wholesheet, 0, 1280, 64, 64, 0.1, 6, false, false);
-
-    this.ammo = 10;
+    this.deathanimation =  new Animation2(wholesheet, 0, 1280, 64, 64, 0.1, 6, false, false);  
+    this.powerupanimation = new Animation(powerupsheet, 64, 64, 7, .075, 28, true, 1.5);
+    this.usingPU = false;
     this.shootanimation.rowMode();
+    this.powerupanimation.rowMode();
+    
+    this.explosionanimation = new Animation(AM.getAsset("./img/explosion.png"), 200, 200, 9, .01, 81, false, 4);
     this.maxSpeed = 250;
     this.xspeed = 0;
     this.yspeed = 0;
@@ -25,7 +28,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
         offsety:15
     }
     Entity.call(this, game, 925, 850);
-    //Entity.call(this, game, 5600, 2797);
+    //Entity.call(this, game, 5600, 1800);
     /**  cave map */
    // Entity.call(this, game, 1700, 1600);
     var that = this;
@@ -74,6 +77,13 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet) {
         offsetx: 0,
         offsety: 53
     };
+    
+    this.explosionRange = {
+        x: this.x,
+        r: 400,
+        offsetx: 10,
+        offsety: 53
+    }
     this.healthBar = new HealthBar(game, this, 46, -10);
 }
 
@@ -108,21 +118,11 @@ Player.prototype.update = function () {
             this.movedir = 3;
         }
     }
-    if(!this.game.lclick && !this.shootanimation.active) {
+    if(!this.game.lclick && !this.shootanimation.active && !this.usingPU) {
         let time = this.game.clockTick;
         this.xspeed = 0;
         this.yspeed = 0;
 
-        //update movement direction
-        // if(this.game.w) this.yspeed -=200;
-        // if(this.game.s) this.yspeed +=200;
-        // if(this.game.a) this.xspeed -=200;
-        // if(this.game.d) this.xspeed +=200;
-        // //slow down x and y if moving diagonally
-        // if(this.xspeed!==0 && this.yspeed !== 0){
-        //     this.xspeed = (this.xspeed/1.48);
-        //     this.yspeed = (this.yspeed/1.48);
-        // }
         if(this.game.w) this.yspeed -=250;
         if(this.game.s) this.yspeed +=250;
         if(this.game.a) this.xspeed -=250;
@@ -150,6 +150,11 @@ Player.prototype.update = function () {
 
                 } else if(ent instanceof Background) {
                     LevelBoundingBoxCollsion(ent, this);
+                    if(ent.nextLevelBox) {
+                        
+                    handleNextLevelBoxEntry(this, ent.nextLevelBox)
+                
+                    }
                 }
             
             }
@@ -162,11 +167,23 @@ Player.prototype.update = function () {
                 this.game.pointery += this.game.player.yspeed * this.game.clockTick;
             }
         }
-    } else if(this.game.lclick){
-        // this.xspeed = 0;
-        // this.yspeed = 0;
-    }
 
+
+        
+     if(this.usingPU){
+           for (var i = 0; i < this.game.entities.length; i++) {
+                var ent = this.game.entities[i];
+            if ((ent instanceof Bunny || ent instanceof RangeEnemy) 
+                        && this.explosionDistance(ent) && !ent.removeFromWorld) {
+                            console.log("mabiiiiiiiinooooooogiiiiiiiiii");
+                            ent.health = 0;
+            }
+         }
+     }
+    
+        
+    } 
+    
 
     if(this.health < 1) {
         this.dead = true;
@@ -179,18 +196,22 @@ Player.prototype.update = function () {
 }
 
 Player.prototype.draw = function () {
-    if(this.game.lclick || this.shootanimation.active){
+    if(this.game.lclick || this.shootanimation.active && this.ammo > 0){
         this.shootanimation.loop = this.game.lclick?true:false;
         this.shootanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
     } else {
         if(this.xspeed!==0 || this.yspeed!==0){
-            if (!this.dead) {
+            if (!this.dead || !this.usingPU) {
              this.animation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
             }
-      }else {
-            if(!this.dead) {
+        } else {
+            if(this.usingPU || this.powerupanimation.active) { 
+                this.powerupanimation.loop = this.usingPU?true:false
+                this.powerupanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
+                this.explosionanimation.drawFrame(this.game.clockTick, this.ctx, this.x-365, this.y-379, 1.5, this);
+            }else if(!this.dead) {
               this.standanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
-            }
+            }  
         }
     }
     if(this.game.showOutlines){
@@ -214,6 +235,11 @@ Player.prototype.center = function() {
 }
 Player.prototype.insideOfRadius = function (other) {
     return distance(other, this) < (this.radius.r);
+}
+
+
+Player.prototype.explosionDistance = function (other) {
+    return distance(other, this) < (this.explosionRange.r);
 }
 
 function Powerup (game, x, y, type) {
@@ -280,9 +306,6 @@ Powerup.prototype.draw = function() {
 
 function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, damage){
     
-
-    var shootaudio = new Audio('arrow_shooting.mp3');
-    shootaudio.volume = 0.10; // 75%
     if(!game.mute){
         var shootaudio = new Audio('arrow_shooting.mp3');
         shootaudio.volume = 0.10; // 75%
@@ -337,6 +360,35 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     var temp = Entity.prototype.rotateAndCache(this.boundingBox, theta);
     this.rotatedBoundingBox = temp.img;
     Entity.call(this, game, start.x, start.y);
+}
+
+function handleNextLevelBoxEntry (ent, box) {
+     var hitboxlines = [
+        {x:ent.boundingBox.x, y:ent.boundingBox.y}, 
+        {x:ent.boundingBox.x, y:ent.boundingBox.y+ent.boundingBox.height},
+        {x:ent.boundingBox.x+ent.boundingBox.width, y:ent.boundingBox.y+ent.boundingBox.height},
+        {x:ent.boundingBox.x+ent.boundingBox.width, y:ent.boundingBox.y}
+    ];
+
+    var bl = [
+        {x:box.p1.x, y:box.p1.y}, 
+        {x:box.p2.x, y:box.p2.y},
+        {x:box.p3.x, y:box.p3.y},
+        {x:box.p4.x, y:box.p4.y}
+    ];
+
+    for(var a=1; a<=hitboxlines.length; a++){
+        var p1 = hitboxlines[a-1];
+        var p2 = hitboxlines[a%4];
+        var l = lineLine(p1.x, p1.y, p2.x, p2.y, bl[0].x, bl[0].y, bl[1].x, bl[1].y);
+        var d = lineLine(p1.x, p1.y, p2.x, p2.y, bl[1].x, bl[1].y, bl[2].x, bl[2].y);
+        var r = lineLine(p1.x, p1.y, p2.x, p2.y, bl[2].x, bl[2].y, bl[3].x, bl[3].y);
+        var u = lineLine(p1.x, p1.y, p2.x, p2.y, bl[3].x, bl[3].y, bl[0].x, bl[0].y);
+       
+       
+        if(l || r || d || u) sceneManager.loadNextLevel();
+        
+    }
 }
 
 function handleBoxCollision (ent, box){
