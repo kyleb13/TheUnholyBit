@@ -135,7 +135,6 @@ function shadowBoss(game,movementsheet,attackLsheet,attackRsheet) {
                     x:(that.game.player.center()).x, 
                     y:(that.game.player.center()).y
                 }, generateRandomNumber(4 , 14), "Boss", 20));//lifetime   
-
                 that.game.addProjectile( 
                 new Projectile( that.game,
                 {

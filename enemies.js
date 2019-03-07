@@ -152,8 +152,7 @@ function shiftDirection(ent1, ent2) {
     }
 }
 
-function HoodArcherAttack(x, y, that) {
-    
+function AdvancedAttacks(x, y, that) {
         var x2= x;
         var y2 = y;
         var x3 = x;
@@ -184,10 +183,17 @@ function HoodArcherAttack(x, y, that) {
                         x3 += 10;
                         break;
                 }
-                addProjectile(that, x, y, "arrow", "Enemy");
-                addProjectile(that, x2, y2, "arrow", "Enemy");
-                addProjectile(that, x3, y3, "arrow", "Enemy");
 
+                if (that.species === "HoodedArcher") {
+                    addProjectile(that, x, y, "arrow", "Enemy", 5);
+                    addProjectile(that, x2, y2, "arrow", "Enemy", 5);
+                    addProjectile(that, x3, y3, "arrow", "Enemy", 5);
+                } else {
+                    addProjectile(that, x, y, "magic", "Enemy", 5);
+                    addProjectile(that, x2, y2, "magic", "Enemy", 5);
+                    addProjectile(that, x3, y3, "magic", "Enemy", 5);
+                }
+                
 }
 
 function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species) {
@@ -207,15 +213,14 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
     this.attackAnimations["right"] = new Animation2 (spritesheet, type.x, type.y+192, type.w, type.h, type.d, type.f, type.l, type.r);
 
     var that = this;
-    
     for (var index in this.attackAnimations) {
        
         this.attackAnimations[index].setCallbackOnFrame(6, {}, () => {
             var x = that.x;
             var y = that.y;
 
-            if (this.species === "HoodedArcher") {
-              HoodArcherAttack(x, y, that)
+            if (that.species === "HoodedArcher" || that.species === "AdvMagic") {
+              AdvancedAttacks(x, y, that)
             } else {
                     switch(that.direction){
                     case "up":
@@ -234,7 +239,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, projectile, "Enemy");
+                addProjectile(that, x, y, projectile, "Enemy", 10);
             }
             
         });
@@ -306,12 +311,15 @@ function addProjectile(that, x, y, type, shooter, damage) {
     var height;
     var width;
     
+    var dmg = damage
     var center = that.followPoint.center();
     if (type === "arrow") {
         img = that.game.assetManager.getAsset("./img/arrow.png")
         width = 31;
         height = 5;
+        
     } else {
+        dmg += 5;
         img = that.game.assetManager.getAsset("./img/fireball.png")
         width = 26;
         height = 17;
@@ -330,7 +338,7 @@ function addProjectile(that, x, y, type, shooter, damage) {
     {//end Point
         x:center.x, 
         y:center.y
-    }, 5, shooter, damage));//lifetime
+    }, 5, shooter, dmg));//lifetime
 }
 RangeEnemy.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
@@ -376,7 +384,6 @@ RangeEnemy.prototype.update = function () {
                 if (collide(ent, {boundingBox: this.attackBox})) {
                     this.attacking = true;
                     if (collide(this, ent)) {
-                        console.log("Player collide");
                         var temp = { x: this.velocity.x, y: this.velocity.y };
         
                         tempVelocityX = temp.x * friction;

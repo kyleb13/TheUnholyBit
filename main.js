@@ -1,7 +1,7 @@
 var AM = new AssetManager();
 
 var ArrowType = {x:0, y:1025, w:64, h:64, d:0.09, f:13, l:true, r:false};
-var MagicType = {x:0, y:0, w:64, h:64, d:0.09, f:7, l:true, r:false};
+var MagicType = {x:0, y:0, w:64, h:64, d:0.17, f:7, l:true, r:false};
 
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
@@ -116,7 +116,6 @@ function Background(game, spritesheet, data) {
     this.ctx = game.ctx;
     this.boundingBoxes = data.boundingBoxes;
     this.nextLevelBox = data.nextLevelBox
-     console.log(this.boundingBoxes);
 
     this.ctx = game.ctx;
 };

@@ -48,10 +48,10 @@ SceneManager.prototype.loadVillageMap = function(){
         that.game.start(player, camera);
         that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
         that.game.addEntity(player);
-         that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/HoodedRanger.png"), 1000, 1000, ArrowType, "arrow", "HoodedArcher"));
+       //  that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/HoodedRanger.png"), 1000, 1000, ArrowType, "arrow", "HoodedArcher"));
 
         
-        /*
+        
         for(var i = 0; i<data.enemySpawns.length; i++){
             var location = data.enemySpawns[i];
             var enemyPercentage = Math.random(); 
@@ -78,7 +78,7 @@ SceneManager.prototype.loadVillageMap = function(){
                 }
             }
         }
-        */
+        
         that.game.addEntity(new shadowBoss(that.game,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
         console.log("All Done!");
     });
@@ -94,8 +94,12 @@ SceneManager.prototype.loadNextLevel = function() {
 SceneManager.prototype.loadCaveMap = function() {
     this.level = "cave";
     this.game.entities = [];
+   // AM.downloadQueue = [];
     AM.queueDownload("./img/cavemap.png");
     AM.queueDownload("./img/HoodedRanger.png");
+    AM.queueDownload("./img/magicSkel.png");
+    AM.queueDownload("./img/arrowSkel.png");
+    
     var that = this;
     AM.downloadAll(function (){
         var data = loadCaveData();
@@ -105,6 +109,33 @@ SceneManager.prototype.loadCaveMap = function() {
         that.game.addEntity(that.game.player);
         that.game.pointerx = that.game.player.x;
         that.game.pointery =  that.game.player.y;
+
+        
+        
+        for(var i = 0; i<data.enemySpawns.length; i++){
+            var location = data.enemySpawns[i];
+            var enemyPercentage = Math.random(); 
+            if (enemyPercentage >= 0.0 && enemyPercentage <= 0.45) {
+                that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/HoodedRanger.png"), location.x, location.y, ArrowType, "arrow", "HoodedArcher"));
+            } else if(enemyPercentage > 0.45 && enemyPercentage <= 0.85) {
+                that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/magicSkel.png"), location.x, location.y, MagicType, "magic", "AdvMagic"));
+            } else if (enemyPercentage > 0.85 && enemyPercentage <= 1) { 
+                that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/arrowSkel.png"), location.x, location.y, ArrowType, "arrow", "HoodedArcher"));
+            } else {
+                that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/magicSkel.png"), location.x, location.y, MagicType, "magic", "AdvMagic"));
+            }
+        }
+        if (data.powerUpSpawns) {
+            for (var i = 0; i<data.powerUpSpawns.length; i ++) {
+                var location = data.powerUpSpawns[i];
+                if ( i < 3) {
+                    that.game.addEntity(new Powerup(that.game, location.x, location.y, "ammo"));
+                } else {
+                    that.game.addEntity(new Powerup(that.game, location.x, location.y, "HP"));
+                }
+            }
+        }
+        
     });
 }
 /*
