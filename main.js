@@ -220,6 +220,16 @@ AM.queueDownload("./img/shadowLeft.png");
 AM.queueDownload("./img/shadowRight.png");
 AM.queueDownload("./img/modball.png");
 AM.queueDownload("./img/normalArcher.png");
+
+AM.queueDownload("./img/mage walking poses sheet.png");
+AM.queueDownload("./img/Mage spell casting sheet.png");
+AM.queueDownload("./img/mage fall down sheet.png");
+AM.queueDownload("./img/mage_attack1.png");
+AM.queueDownload("./img/mage_attack2.png");
+AM.queueDownload("./img/mage_attack3.png");
+AM.queueDownload("./img/carrot1.png");
+AM.queueDownload("./img/kingbun.png");
+
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
     
@@ -265,6 +275,8 @@ AM.downloadAll(function () {
             gameEngine.addEntity(new RangeEnemy(gameEngine, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
         }
     }*/
-	gameEngine.addEntity(new shadowBoss(gameEngine,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
+   // gameEngine.addEntity(new shadowBoss(gameEngine,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
+   // gameEngine.addEntity(new mage(gameEngine,AM.getAsset("./img/mage walking poses sheet.png"), AM.getAsset("./img/Mage spell casting sheet.png"),AM.getAsset("./img/mage fall down sheet.png")));
+    gameEngine.addEntity(new kingBunny(gameEngine, AM.getAsset("./img/kingbun.png"))); 
 	    console.log("All Done!");
 });
