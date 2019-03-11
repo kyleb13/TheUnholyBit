@@ -31,6 +31,7 @@ function GameEngine() {
     this.a = false;
     this.s = false;
     this.d = false;
+    this.p = false;
     this.mute = false;
     this.lclick = false;
     this.pclick = false;
@@ -39,7 +40,7 @@ function GameEngine() {
     this.pointery = 50;
     this.pointerLocked = false;
     this.showOutlines = true;
-    //this.showOutlines = false;
+  //  this.showOutlines = false;
     this.muteBackgroundMusic = false;
     this.camera = null;
     this.player = null;
@@ -125,8 +126,6 @@ GameEngine.prototype.startInput = function () {
     this.ctx.canvas.addEventListener("keydown", (e) => {
         that.handleInputs(e.code, true);
         if(e.code === "KeyM"){
-            console.log("in if");
-            console.log(e.code);
             this.mute = !this.mute;
             if(this.mute){
                 audio.pause();
@@ -135,11 +134,8 @@ GameEngine.prototype.startInput = function () {
             }
         }
         if(e.code === "KeyN") {
-            sceneManager.loadCaveMap();
+            sceneManager.loadNextLevel();
         } 
-        if (e.code === "KeyP") {
-            that.player.usingPU = true;
-        }
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
         that.handleInputs(e.code, false);
@@ -165,7 +161,7 @@ GameEngine.prototype.handleInputs = function(keycode, value){
             this.d = value;
             break;   
         case "KeyP":
-            this.player.usingPU = value;
+            this.p = value;
             break;   
             
     }   

@@ -24,13 +24,12 @@ var villageLevelData =
         }
     ],
 
-    "nextLevelBox":   {
-            "p1": {"x":5400, "y":1680},
-            "p2": {"x":5400, "y":1730},
-            "p3": {"x":5753, "y":1730},
-            "p4": {"x":5753, "y":1680}
-        }, 
-
+    "nextLevelBox":  {
+        "x": 5400, 
+        "y":1680,
+        "width":353,
+        "height":50
+    },
     "enemySpawns":[
         {
             "x":1000,

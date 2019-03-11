@@ -1,4 +1,4 @@
-
+var bossDead = false;
 function SceneManager(){
 
     var canvas = document.getElementById("gameWorld");
@@ -22,7 +22,9 @@ SceneManager.prototype.loadVillageMap = function(){
     AM.queueDownload("./img/charshoot_loop.png");
     AM.queueDownload("./img/character_edited.png");
     AM.queueDownload("./img/arrow.png");
+    AM.queueDownload("./img/enemyArrow.png");
     AM.queueDownload("./img/arrowPile.png");
+    AM.queueDownload("./img/stoneDirection.png");
     AM.queueDownload("./img/heart.png");
     AM.queueDownload("./img/HoodedRanger.png");
 
@@ -35,6 +37,17 @@ SceneManager.prototype.loadVillageMap = function(){
     AM.queueDownload("./img/shadowRight.png");
     AM.queueDownload("./img/modball.png");
     AM.queueDownload("./img/normalArcher.png");
+
+    
+    AM.queueDownload("./img/cavemap.png");
+    AM.queueDownload("./img/HoodedRanger.png");
+    AM.queueDownload("./img/magicSkel.png");
+    AM.queueDownload("./img/arrowSkel.png");
+
+
+    AM.queueDownload("./img/finalBossMap.png");
+    AM.queueDownload("./img/carrot.png");
+    AM.queueDownload("./img/bossBun-export.png");
     var that = this;
     AM.downloadAll(function (){
         console.log("downloading");
@@ -47,10 +60,7 @@ SceneManager.prototype.loadVillageMap = function(){
         var camera = new Camera(that.game, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
         that.game.start(player, camera);
         that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
-        that.game.addEntity(player);
-       //  that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/HoodedRanger.png"), 1000, 1000, ArrowType, "arrow", "HoodedArcher"));
-
-        
+        that.game.addEntity(player);    
         
         for(var i = 0; i<data.enemySpawns.length; i++){
             var location = data.enemySpawns[i];
@@ -88,27 +98,30 @@ SceneManager.prototype.loadVillageMap = function(){
 SceneManager.prototype.loadNextLevel = function() {
     if (this.level === "village") {
         this.loadCaveMap();
-    } 
+        console.log(this.level);
+    } else if (this.level === "cave") {
+        this.loadFinalMap();
+    }
 }
 
 SceneManager.prototype.loadCaveMap = function() {
     this.level = "cave";
     this.game.entities = [];
-   // AM.downloadQueue = [];
-    AM.queueDownload("./img/cavemap.png");
-    AM.queueDownload("./img/HoodedRanger.png");
-    AM.queueDownload("./img/magicSkel.png");
-    AM.queueDownload("./img/arrowSkel.png");
-    
+    audio.pause();
+    audio = new Audio('./caveMusic.mp3');
+    audio.volume = 0.10; // 75%
+    audio.loop = true;
+
     var that = this;
-    AM.downloadAll(function (){
-        var data = loadCaveData();
-        that.game.addEntity(new Background(that.game, AM.getAsset("./img/cavemap.png"), data));
-        that.game.player.x = 400;
-        that.game.player.y = 400;
-        that.game.addEntity(that.game.player);
-        that.game.pointerx = that.game.player.x;
-        that.game.pointery =  that.game.player.y;
+    var data = loadCaveData();
+    that.game.addEntity(new Background(that.game, AM.getAsset("./img/cavemap.png"), data));
+    that.game.player.x = 400;
+    that.game.player.y = 400;
+    /*that.game.player.x = 6000;
+    that.game.player.y = 900;*/
+    that.game.addEntity(that.game.player);
+    that.game.pointerx = that.game.player.x;
+    that.game.pointery =  that.game.player.y;
 
         
         
@@ -135,8 +148,31 @@ SceneManager.prototype.loadCaveMap = function() {
                 }
             }
         }
-        
-    });
+}
+
+SceneManager.prototype.loadFinalMap = function() {
+ this.level = "final";
+    this.game.entities = [];
+    audio.pause();
+    audio = new Audio('./finalMusic.mp3');
+    audio.volume = 0.10; // 75%
+    audio.loop = true;
+    var that = this;
+
+    var data = loadFinalMapData();
+    that.game.addEntity(new Background(that.game, AM.getAsset("./img/finalBossMap.png"), data));
+    that.game.player.x = 750;
+    that.game.player.y = 1200;
+
+    that.game.addEntity(that.game.player);
+    that.game.pointerx = that.game.player.x;
+    that.game.pointery =  that.game.player.y;
+    
+    
+    var location = data.enemySpawns[0];
+
+    that.game.addEntity(new FinalRabbitDestination(that.game, AM.getAsset("./img/bossBun-export.png"), location.x, location.y)); 
+         
 }
 /*
 AM.queueDownload("./img/crosshair-export.png");

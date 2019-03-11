@@ -34,6 +34,7 @@ Animation2.prototype.setCallbackOnFrame = function(frame,args,callback){
 
 Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
     var scaleBy = scaleBy || 1;
+
     this.elapsedTime += tick;
     var frame = this.currentFrame();
     if(this.callbackEnabled && frame === this.callbackFrame && !this.callbackDone){
@@ -127,8 +128,8 @@ Animation2.prototype.currentFrameRow = function () {
 function shiftDirection(ent1, ent2) {
     var enemyX = ent2.x;
     var enemyY = ent2.y;
-    var centerx = ent1.x;
-    var centery= ent1.y;
+    var centerx =ent1.x + ent1.walkAnimations["right"].frameWidth/2;
+    var centery= ent1.y + ent1.walkAnimations["right"].frameWidth/2;
     var xdiff = Math.abs(enemyX - centerx);
     var ydiff = Math.abs(enemyY - centery);
 
@@ -166,21 +167,25 @@ function AdvancedAttacks(x, y, that) {
                         x3 += 10;
                         break;
                     case "left":
-                        y += 25;
-                        y2 -= 10;
-                        y3 += 10;
+                        y += 55;
+                        y2 += 25;
+                        y3 += 40;
                         break;
                     case "right":
                         y += 30;
                         y2 -= 10;
                         y3 += 10;
                         x+=25;
+                        x2+=25;
+                        x3+=25;
                         break;
                     case "down":
                         x +=30;
-                        y += 30;
                         x2 -= 10;
                         x3 += 10;
+                        y += 30;
+                        y2 += 30;
+                        y3 += 30;
                         break;
                 }
 
@@ -189,9 +194,9 @@ function AdvancedAttacks(x, y, that) {
                     addProjectile(that, x2, y2, "arrow", "Enemy", 5);
                     addProjectile(that, x3, y3, "arrow", "Enemy", 5);
                 } else {
-                    addProjectile(that, x, y, "magic", "Enemy", 5);
-                    addProjectile(that, x2, y2, "magic", "Enemy", 5);
-                    addProjectile(that, x3, y3, "magic", "Enemy", 5);
+                    addProjectile(that, x, y, "magic", "Enemy", 10);
+                    addProjectile(that, x2, y2, "magic", "Enemy", 10);
+                    addProjectile(that, x3, y3, "magic", "Enemy", 10);
                 }
                 
 }
@@ -213,8 +218,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
     this.attackAnimations["right"] = new Animation2 (spritesheet, type.x, type.y+192, type.w, type.h, type.d, type.f, type.l, type.r);
 
     var that = this;
-    for (var index in this.attackAnimations) {
-       
+    for (var index in this.attackAnimations) {   
         this.attackAnimations[index].setCallbackOnFrame(6, {}, () => {
             var x = that.x;
             var y = that.y;
@@ -240,8 +244,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
                         break;
                 }
                 addProjectile(that, x, y, projectile, "Enemy", 10);
-            }
-            
+            }         
         });
     }
     this.standingAnimations["up"] = new Animation2 (spritesheet, 0, 512, 64, 64, 0.1, 1, true, false);
@@ -314,17 +317,20 @@ function addProjectile(that, x, y, type, shooter, damage) {
     var dmg = damage
     var center = that.followPoint.center();
     if (type === "arrow") {
-        img = that.game.assetManager.getAsset("./img/arrow.png")
+        img = that.game.assetManager.getAsset("./img/enemyArrow.png")
         width = 31;
         height = 5;
         
-    } else {
-        dmg += 5;
+    } else if (type === "magic") {
         img = that.game.assetManager.getAsset("./img/fireball.png")
         width = 26;
         height = 17;
         y = y + 20;
-    } 
+    } else if (type === "carrot") {
+        img = that.game.assetManager.getAsset("./img/carrot.png")
+        width = 49;
+        height = 28;
+    }
      that.game.addEntity(new Projectile(that.game, 
     {
         img, 
