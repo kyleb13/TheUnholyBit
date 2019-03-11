@@ -730,3 +730,142 @@ function FinalRabbitAttack(x, y, that) {
                     
 
 }
+
+function mage(game, spritesheet, x, y){
+    
+}
+
+mage.prototype = new Entity();
+mage.prototype.constructor = mage;
+
+mage.prototype.update = function () {
+    if (this.health < 1) {
+        this.isdead = true;
+        this.attacking = false;
+        this.following = false;
+    }
+
+    Entity.prototype.update.call(this);
+    
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
+    this.visualBox.x = this.x + this.visualBox.offsetx;
+    this.visualBox.y = this.y + this.visualBox.offsety;
+
+
+    this.attackBox.x = this.x + this.attackBox.offsetx;
+    this.attackBox.y = this.y + this.attackBox.offsety;
+
+    var ent = this.game.player;
+
+    if (collide(this, ent)) {
+        console.log("Player collide");
+        var temp = { x: this.velocity.x, y: this.velocity.y };
+
+        tempVelocityX = temp.x * friction;
+        tempVelocityY = temp.y * friction;
+
+        ent.x += 20 * tempVelocityX * this.game.clockTick;
+        ent.y += 20 * tempVelocityY * this.game.clockTick;
+    }
+
+    if (collide({boundingBox: this.visualBox}, ent)) {
+        this.following = true;
+        var dist = distance(this, ent);
+        this.followPoint = ent;
+        if (collide(ent, {boundingBox: this.attackBox})) {
+            this.attack = true;
+            this.following =false;
+        }
+    }else {
+        this.following = false;
+    }
+    if(this.following){
+        this.attack = false;
+        var difX = (ent.x - this.x)/dist;
+        var difY = (ent.y - this.y)/dist;
+        this.velocity.x += difX * acceleration / (dist*dist);
+        this.velocity.y += difY * acceleration / (dist * dist);
+        var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+        if (speed > maxSpeed) {
+            var ratio = maxSpeed / speed;
+            this.velocity.x *= ratio;
+            this.velocity.y *= ratio;
+        }
+        
+        this.x += this.velocity.x * this.game.clockTick;
+        this.y += this.velocity.y * this.game.clockTick;
+    }
+    shiftDirection(this, ent);
+
+    this.healthBar.update();
+}
+
+mage.prototype.draw = function () {
+
+    if (this.attack && !this.dead) {
+        this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    } else if (this.following&& !this.dead) {
+        this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    }
+
+    
+    for (var i = 0; i < this.game.entities.length; i++) {
+        var ent = this.game.entities[i];
+        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
+            this.attacking = false;
+            this.maxSpeed = 100;
+            var dist = distance(this, ent);
+            shiftDirection(this, ent);
+            if (collide(ent, {boundingBox: this.attackBox})) {
+                this.attacking = true;
+                this.maxSpeed = 50;
+                var difX = (ent.x - this.x)/dist;
+                var difY = (ent.y - this.y)/dist;
+                this.velocity.x += difX * acceleration  / (dist*dist);
+                this.velocity.y += difY * acceleration  / (dist * dist);
+                
+                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+                    if (speed > this.maxSpeed) {
+                    var ratio = this.maxSpeed / speed;
+                    this.velocity.x *= ratio;
+                    this.velocity.y *= ratio;
+                    }
+            } else {
+                var difX = (ent.x - this.x)/dist;
+                var difY = (ent.y - this.y)/dist;
+                this.velocity.x += difX * acceleration  / (dist*dist);
+                this.velocity.y += difY * acceleration  / (dist * dist);
+                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+                    if (speed > this.maxSpeed) {
+                    var ratio = this.maxSpeed / speed;
+                    this.velocity.x *= ratio;
+                    this.velocity.y *= ratio;
+                } 
+            }
+    
+            this.followPoint = ent;
+            let time = this.game.clockTick;
+           
+            if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
+                this.x += time * this.velocity.x;
+            }
+            if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
+                this.y += time * this.velocity.y;
+            }  
+        
+        } else if (ent instanceof Background) {
+            LevelBoundingBoxCollsion(ent, this);
+        }
+    }
+
+    if (this.health < 1) {
+        this.dead = true;
+    }
+
+    
+    this.healthBar.update();
+    Entity.prototype.update.call(this);
+
+}
