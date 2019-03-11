@@ -220,6 +220,7 @@ function Powerup (game, x, y, type) {
     this.ctx = game.ctx;
     this.x = x;
     this.y = y;
+    this.removeFromWorld = false;
     var spritesheet;
     if (type === "ammo") {
         spritesheet = game.assetManager.getAsset("./img/arrowPile.png");
@@ -240,8 +241,18 @@ function Powerup (game, x, y, type) {
             height: 32,
             offsetx:3,
             offsety:12
-        }
+        };
 
+    } else if(type === "SlowTime"){
+        spritesheet = AM.getAsset("./img/hourglass.png");
+        this.boundingBox = {
+            x:this.x, 
+            y:this.y,
+            width: 30,
+            height: 48,
+            offsetx:0,
+            offsety:0
+        };
     }
     this.sheet = spritesheet;
     Entity.call(this, game, x, y);
@@ -262,6 +273,8 @@ Powerup.prototype.update = function() {
                         ent.health += 15;
                     }
 
+                } else if(this.type === "SlowTime"){
+                    timeSlowed = true;
                 }
             }
 
@@ -339,10 +352,10 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
 
 function handleBoxCollision (ent, box){
     var hitboxlines = [
-        {x:ent.boundingBox.x, y:ent.boundingBox.y}, 
-        {x:ent.boundingBox.x, y:ent.boundingBox.y+ent.boundingBox.height},
-        {x:ent.boundingBox.x+ent.boundingBox.width, y:ent.boundingBox.y+ent.boundingBox.height},
-        {x:ent.boundingBox.x+ent.boundingBox.width, y:ent.boundingBox.y}
+            {x:ent.boundingBox.x, y:ent.boundingBox.y}, 
+            {x:ent.boundingBox.x, y:ent.boundingBox.y+ent.boundingBox.height},
+            {x:ent.boundingBox.x+ent.boundingBox.width, y:ent.boundingBox.y+ent.boundingBox.height},
+            {x:ent.boundingBox.x+ent.boundingBox.width, y:ent.boundingBox.y}
     ];
 
     var bl = [
@@ -441,40 +454,42 @@ Projectile.prototype.draw = function(){
 
 function LevelBoundingBoxCollsion(background, ent) {
     background.boundingBoxes.forEach((box) => {
-        var left = lineRect(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
-            ent.boundingBox.x, ent.boundingBox.y, 
-            ent.boundingBox.width, ent.boundingBox.height);
-        var bottom = lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
-            ent.boundingBox.x, ent.boundingBox.y,
-            ent.boundingBox.width, ent.boundingBox.height);
-        var right = lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
-            ent.boundingBox.x, ent.boundingBox.y,
-            ent.boundingBox.width, ent.boundingBox.height);
-        var top = lineRect(box.p4.x, box.p4.y, box.p1.x, box.p1.y,
-            ent.boundingBox.x, ent.boundingBox.y,
-            ent.boundingBox.width, ent.boundingBox.height);
-        if ( left|| bottom || right || top) {
-            if (ent instanceof Projectile) {
-                ent.handleCollision(background);
-            } else {
-                if (ent instanceof Player){
-                    handleBoxCollision(ent, box);
-                } else if (ent instanceof Bunny || ent instanceof RangeEnemy) {            
-                    //handleBoxCollision(ent, box);
-                    if (top) {
-                        ent.y -= 1;
-                        ent.velocity.y = -ent.velocity.y; 
-                    } if (right) {
-                        ent.x += 1;
-                        ent.velocity.x = -ent.velocity.x;
-                    } if (left) {
-                        ent.x -= 1;
-                        ent.velocity.x = -ent.velocity.x;
-                    } if(bottom) {
-                        ent.y += 1;
-                        ent.velocity.y = -ent.velocity.y
+        if(!(ent instanceof Projectile) || (ent instanceof Projectile && !box.halfHeight)){
+            var left = lineRect(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
+                ent.boundingBox.x, ent.boundingBox.y, 
+                ent.boundingBox.width, ent.boundingBox.height);
+            var bottom = lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
+                ent.boundingBox.x, ent.boundingBox.y,
+                ent.boundingBox.width, ent.boundingBox.height);
+            var right = lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
+                ent.boundingBox.x, ent.boundingBox.y,
+                ent.boundingBox.width, ent.boundingBox.height);
+            var top = lineRect(box.p4.x, box.p4.y, box.p1.x, box.p1.y,
+                ent.boundingBox.x, ent.boundingBox.y,
+                ent.boundingBox.width, ent.boundingBox.height);
+            if ( left|| bottom || right || top) {
+                if (ent instanceof Projectile) {
+                    ent.handleCollision(background);
+                } else {
+                    if (ent instanceof Player){
+                        handleBoxCollision(ent, box);
+                    } else if (ent instanceof Bunny || ent instanceof RangeEnemy) {            
+                        //handleBoxCollision(ent, box);
+                        if (top) {
+                            ent.y -= 1;
+                            ent.velocity.y = -ent.velocity.y; 
+                        } if (right) {
+                            ent.x += 1;
+                            ent.velocity.x = -ent.velocity.x;
+                        } if (left) {
+                            ent.x -= 1;
+                            ent.velocity.x = -ent.velocity.x;
+                        } if(bottom) {
+                            ent.y += 1;
+                            ent.velocity.y = -ent.velocity.y
+                        }
+            
                     }
-        
                 }
             }
         }

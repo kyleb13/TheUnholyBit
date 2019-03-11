@@ -601,9 +601,9 @@ function lineRect(x1, y1, x2, y2, rx, ry, rw, rh) {
     var right =  lineLine(x1,y1,x2,y2, rx+rw,ry, rx+rw,ry+rh);
     var top =    lineLine(x1,y1,x2,y2, rx,ry, rx+rw,ry);
     var bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
-    if(bottom){
-        bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
-    }
+    // if(bottom){
+    //     bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
+    // }
   
     // if ANY of the above are true, the line
     // has hit the rectangle
@@ -666,15 +666,19 @@ function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
         }
     } else {
         //both vertical
-        if(!isFinite(m1) && !isFinite(m2)){
+        /*if(!isFinite(m1) && !isFinite(m2)){
             //if they share any x values, they are intersecting
-            if(x1===x3)return true
+            var ymin = Math.min(y1, y2);
+            var ymax = Math.max(y1, y2);
+            if(x1===x3 && (y3>ymin && y3<ymax) || (y4>ymin && y4<ymax)) return true
             else return false;
         } else if(m1==0 && m2 == 0){
             //both horizontal
-            if(y1===y3)return true
+            var xmin = Math.min(x1, x2);
+            var xmax = Math.max(x1, x2);
+            if(y1===y3 && (x3>xmin && x3<xmax) || (x4>xmin && x4<xmax))return true
             else return false;
-        } else if(!isFinite(m1) && m2===0){
+        } else*/ if(!isFinite(m1) && m2===0){
             //l1 vertical and l2 horizontal
             return verticalHorizontal(x1, Math.min(y1, y2), Math.max(y1, y2), y3, Math.min(x3, x4), Math.max(x3, x4));
         } else if(m1==0 && !isFinite(m2)){

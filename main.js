@@ -160,6 +160,7 @@ function Camera(game, obj, width, height){
     this.worldHeight=height;
     this.frameWidth = this.ctx.canvas.width;
     this.frameHeight = this.ctx.canvas.height;
+    this.removeFromWorld = false;
     this.x =  obj.x;
     this.y = obj.y;
     // console.log(`width ${this.frameWidth}, height ${this.frameHeight}`);
@@ -267,7 +268,6 @@ AM.queueDownload("./img/normalArcher.png");*/
 // 	//     console.log("All Done!");
 // });
 function oncanvasload(){
-    console.log("plz")
     var sceneManager = new SceneManager();
     // sceneManager.loadVillageMap();
     sceneManager.loadCastleMap();

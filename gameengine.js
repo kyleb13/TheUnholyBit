@@ -10,7 +10,7 @@ window.requestAnimFrame = (function () {
 })();
 
 var pointerLocked = false;
-
+var timeSlowed = false;
 var audio = new Audio('./villageMusic.mp3');
 audio.volume = 0.10; // 75%
 audio.loop = true;
@@ -36,8 +36,8 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    // this.showOutlines = false;
-    this.showOutlines = true;
+    this.showOutlines = false;
+    // this.showOutlines = true;
     this.camera = null;
     this.player = null;
 }
@@ -176,6 +176,11 @@ GameEngine.prototype.draw = function () {
             this.projectiles[i].draw(this.ctx);
         }
     }
+    if(timeSlowed) {
+        this.ctx.globalAlpha = .2;
+        this.ctx.drawImage(AM.getAsset("./img/blue.png"), this.player.x-700, this.player.y-350);
+        this.ctx.globalAlpha = 1;
+    }
     this.ctx.restore();
 }
 
@@ -205,6 +210,7 @@ function Timer() {
     this.gameTime = 0;
     this.maxStep = 0.05;
     this.wallLastTimestamp = 0;
+    this.slowTimer = 0;
 }
 
 Timer.prototype.tick = function () {
@@ -215,7 +221,17 @@ Timer.prototype.tick = function () {
 
         var gameDelta = Math.min(wallDelta, this.maxStep);
         this.gameTime += gameDelta;
-        return gameDelta;
+        if(timeSlowed){
+            this.slowTimer += gameDelta;
+            if(this.slowTimer>=8) {
+                timeSlowed = false;
+                this.slowTimer = 0;
+            }
+            return gameDelta/2;
+        } else {
+            return gameDelta;
+        }
+        
     } else {
         return 0;
     }
