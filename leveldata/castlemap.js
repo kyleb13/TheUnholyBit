@@ -3,6 +3,12 @@ function loadCastleData(){
     var castledata = {
         playerSpawn:{x:1480, y:5300},
         // playerSpawn:{x:10900, y:3500},
+        nextLevelBox:{
+            x: 11050, 
+            y:1782,
+            width:52,
+            height:67
+        },
         enemySpawns:[
             {
                 x:2950,
