@@ -1,4 +1,4 @@
-var leveldata = 
+var villageLevelData = 
 `{
     "playerSpawn":{"x":800, "y":850},
     "powerUpSpawns": [
@@ -24,6 +24,12 @@ var leveldata =
         }
     ],
 
+    "nextLevelBox":  {
+        "x": 5400, 
+        "y":1680,
+        "width":353,
+        "height":50
+    },
     "enemySpawns":[
         {
             "x":1000,
@@ -257,7 +263,7 @@ var leveldata =
             "n":17,
             "p1": {"x":4440, "y":1230},
             "p2": {"x":4444, "y":1656},
-            "p3": {"x":6400, "y":1900},
+            "p3": {"x":6400, "y":1656},
             "p4": {"x":6400, "y":1230}
         },
         {
@@ -698,5 +704,5 @@ var leveldata =
 
 function loadVillageData(){
     console.log("loading level data");
-    return JSON.parse(leveldata);
+    return JSON.parse(villageLevelData  );
 }
