@@ -172,18 +172,19 @@ function AdvancedAttacks(x, y, that) {
                         y3 += 40;
                         break;
                     case "right":
+                    
+                        x+=25;
                         y += 30;
                         y2 -= 10;
                         y3 += 10;
-                        x+=25;
                         x2+=25;
                         x3+=25;
                         break;
                     case "down":
                         x +=30;
+                        y += 30;
                         x2 -= 10;
                         x3 += 10;
-                        y += 30;
                         y2 += 30;
                         y3 += 30;
                         break;
@@ -519,7 +520,7 @@ function Bunny(game, spritesheet, x, y) {
         offsety:-850
     }
     this.dead = false;
-    this.health = 100;
+    this.health = 80;
     this.healthBar = new HealthBar(game, this, 46, -10);
 
 }

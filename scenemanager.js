@@ -86,7 +86,7 @@ SceneManager.prototype.loadCastleMap = function(){
     this.level = "castle";
     this.game.entities = [];
     audio.pause();
-    audio = new Audio('./caveMusic.mp3');
+    audio = new Audio('./castlemusic.mp3');
     audio.volume = 0.10; // 75%
     audio.loop = true;
     var data = loadCastleData();
@@ -96,6 +96,7 @@ SceneManager.prototype.loadCastleMap = function(){
     /*this.game.player.x = 6000;
     this.game.player.y = 900;*/
     this.game.addEntity(this.game.player);
+    this.game.addEntity(new Powerup(this.game, 2500,5300,"SlowTime"));
     this.game.addEntity(new TrapDoor(this.game));
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;

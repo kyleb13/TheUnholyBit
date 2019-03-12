@@ -39,8 +39,8 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    this.showOutlines = true;
-//    this.showOutlines = false;
+    // this.showOutlines = true;
+   this.showOutlines = false;
     this.muteBackgroundMusic = false;
     this.camera = null;
     this.player = null;
@@ -105,6 +105,13 @@ GameEngine.prototype.start = function (player, camera) {
     })();
 }
 
+GameEngine.prototype.getBackground = function(){
+    for(var i = 0; i<entities.length; i++){
+        var ent = entities[i];
+        if(ent instanceof Background) return ent;
+    }
+}
+
 GameEngine.prototype.startInput = function () {
     console.log('Starting input');
     var that = this;
@@ -133,9 +140,9 @@ GameEngine.prototype.startInput = function () {
                 audio.play();
             }
         }
-        if(e.code === "KeyN") {
-            sceneManager.loadNextLevel();
-        } 
+        // if(e.code === "KeyN") {
+        //     sceneManager.loadNextLevel();
+        // } 
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
         that.handleInputs(e.code, false);
@@ -160,9 +167,9 @@ GameEngine.prototype.handleInputs = function(keycode, value){
         case "KeyD":
             this.d = value;
             break;   
-        case "KeyP":
-            this.p = value;
-            break;   
+        // case "KeyP":
+        //     this.p = value;
+        //     break;   
             
     }   
 }
@@ -238,7 +245,7 @@ Timer.prototype.tick = function () {
         this.gameTime += gameDelta;
         if(timeSlowed){
             this.slowTimer += gameDelta;
-            if(this.slowTimer>=8) {
+            if(this.slowTimer>=12) {
                 timeSlowed = false;
                 this.slowTimer = 0;
             }

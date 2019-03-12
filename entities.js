@@ -33,27 +33,48 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
         var y = that.y;
+        var x2= x;
+        var y2 = y;
+        var x3 = x;
+        var y3 = y;
         //change direction arrows come from based on
         //direction character is facing
         switch(that.movedir){
             case 0:
-                x += 42;
+                x += 50;
                 y -= 5;
+                x2 -= 10 - 50;
+                x3 += 10 + 50;
+              
                 break;
             case 1:
                 y += 44;
                 x +=8;
+                
+                y2 += 25;
+                y3 += 40;
                 break;
             case 2:
                 y += 75;
                 x+=40;
+                x2 -= 10 - 40;
+                x3 += 10 + 40;
+                y2 += 75;
+                y3 += 75;
+                
                 break;
             case 3:
                 x +=46;
                 y += 42;
+                y2 -= 10 -42;
+                y3 += 10 +42;
+                x2+=46;
+                x3+=46;
+                
                 break;
         }
         that.ammo -=1;
+        
         that.game.addProjectile(new Projectile(that.game, 
             {
                 img:that.game.assetManager.getAsset("./img/arrow.png"), 
@@ -67,7 +88,36 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
             {//end Point
                 x:that.game.pointerx, 
                 y:that.game.pointery
-            }, 5, "Player", /*18*/1000));//lifetime
+            }, 5, "Player", 18));//lifetime*/
+            // that.game.addProjectile(new Projectile(that.game, 
+            //     {
+            //         img:that.game.assetManager.getAsset("./img/arrow.png"), 
+            //         width:31, 
+            //         height:5
+            //     }, 400, //speed
+            //     {//start point
+            //         x:x2, 
+            //         y:y2
+            //     }, 
+            //     {//end Point
+            //         x:that.game.pointerx, 
+            //         y:that.game.pointery
+            //     }, 5, "Player", 18));//lifetime*/
+
+            //     that.game.addProjectile(new Projectile(that.game, 
+            //         {
+            //             img:that.game.assetManager.getAsset("./img/arrow.png"), 
+            //             width:31, 
+            //             height:5
+            //         }, 400, //speed
+            //         {//start point
+            //             x:x3, 
+            //             y:y3
+            //         }, 
+            //         {//end Point
+            //             x:that.game.pointerx, 
+            //             y:that.game.pointery
+            //         }, 5, "Player", 18));//lifetime*/
     });    
     this.radius  = {
         x: this.x,
@@ -120,6 +170,7 @@ Player.prototype.update = function () {
 
     if(!this.game.lclick && !this.shootanimation.active) {
         let time = this.game.clockTick;
+        if(timeSlowed) time *=2;
         this.xspeed = 0;
         this.yspeed = 0;
 
@@ -167,19 +218,17 @@ Player.prototype.update = function () {
                 this.game.pointery += this.game.player.yspeed * this.game.clockTick;
             }
         }
-
-
         
-     if(this.usingPU){
-         console.log("YAS!");    
-           for (var i = 0; i < this.game.entities.length; i++) {
-                var ent = this.game.entities[i];
-                if ((ent instanceof Bunny || ent instanceof RangeEnemy) 
-                            && this.explosionDistance(ent) && !ent.removeFromWorld) {
-                                ent.health = 0;
-                }
-         }
-     }
+        if(this.usingPU){
+            console.log("YAS!");    
+            for (var i = 0; i < this.game.entities.length; i++) {
+                    var ent = this.game.entities[i];
+                    if ((ent instanceof Bunny || ent instanceof RangeEnemy) 
+                                && this.explosionDistance(ent) && !ent.removeFromWorld) {
+                                    ent.health = 0;
+                    }
+            }
+        }
     
         
     } 
@@ -294,7 +343,7 @@ Powerup.prototype.update = function() {
             if (collide({boundingBox: this.boundingBox}, ent)) {
                 this.removeFromWorld = true;
                 if (this.type === "ammo") {
-                    ent.ammo += 20;
+                    ent.ammo += 30;
                 } else if (this.type === "HP") {
                     if (ent.health + 15 > 100) {
                         ent.health = 100;
