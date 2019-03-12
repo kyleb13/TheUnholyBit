@@ -257,7 +257,7 @@ function Powerup (game, x, y, type) {
         this.boundingBox = {
             x:this.x, 
             y:this.y,
-            width: 32,
+            width: 3,
             height: 16,
             offsetx:3,
             offsety:12
