@@ -593,7 +593,7 @@ function FinalRabbitAttack(x, y, that) {
                     y += that.attackAnimations["left"].frameHeight/2;
                     
                     x2 += that.attackAnimations["left"].frameWidth/2;
-                    y2 += that.attackAnimations["left"].frameHeight/2 + 30;
+                    y2 += that.attackAnimations["left"].frameHeight/2 + 40;
 
                     x3 += that.attackAnimations["left"].frameWidth/2;
                     y3 += that.attackAnimations["left"].frameHeight/2- 30;
@@ -728,5 +728,212 @@ function FinalRabbitAttack(x, y, that) {
                             y:that.followPoint.center().y- yOffset - 120
                         }, 5, "Boss", 20));//lifetime 
                     
+
+}
+
+function fanningShotPoints(start, end){
+    var slope = (end.y - start.y)/(end.x - start.x);
+    if(isFinite(slope) && slope != 0){
+        var normal = -slope; 
+    }
+
+}
+
+function mage(game, spritesheet, x, y){
+    
+    //this.walksheet = new Animation()
+    
+    this.health = 3000;
+    this.healthBar = new HealthBar(game, this, 46, -10);
+    Entity.call(this, game, x, y);
+    this.dead = false;
+    this.game = game;
+    this.levelBoxes = game.getBackground();
+    this.attacking = false;
+    this.ctx = game.ctx;
+    this.followPoint = {x: 0, y: 0};
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
+    this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
+    this.maxSpeed = 150;
+    var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
+    if (speed > this.maxSpeed) {
+        var ratio = this.maxSpeed / speed;
+        this.velocity.x *= ratio;
+        this.velocity.y *= ratio;
+    }
+    Entity.call(this, game, x, y);
+    this.boundingBox = {
+        x:this.x, 
+        y:this.y,
+        width: 230,
+        height: 230,
+        offsetx:70,
+        offsety:150
+    }
+
+    this.visualBox = {
+        x:this.x, 
+        y:this.y,
+        width: 2800,
+        height: 1600,
+        offsetx:0,
+        offsety:0
+    }
+
+    this.attackBox = {
+        x:this.x, 
+        y:this.y,
+        width: 1300,
+        height: 700,
+        offsetx:-600,
+        offsety:-30
+    }
+    this.dead = false;  
+    this.acceleration = 100;
+}
+
+mage.prototype = new Entity();
+mage.prototype.constructor = mage;
+
+mage.prototype.update = function () {
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
+    this.visualBox.x = this.x + this.visualBox.offsetx;
+    this.visualBox.y = this.y + this.visualBox.offsety;
+
+
+    this.attackBox.x = this.x + this.attackBox.offsetx;
+    this.attackBox.y = this.y + this.attackBox.offsety;
+
+    if (this.health < 1) {
+        console.log("D E D");
+        this.dead = true;
+    }
+
+    for (var i = 0; i < this.game.entities.length; i++) {
+        var ent = this.game.entities[i];
+        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
+            this.attacking = false;
+            this.maxSpeed = 100;
+            var dist = distance(this, ent);
+            shiftDirection(this, ent);
+            if (collide(ent, {boundingBox: this.attackBox})) {
+                this.attacking = true;
+                this.maxSpeed = 50;
+                var difX = (ent.x - this.x)/dist;
+                var difY = (ent.y - this.y)/dist;
+                this.velocity.x += difX * acceleration  / (dist*dist);
+                this.velocity.y += difY * acceleration  / (dist * dist);
+                
+                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+                    if (speed > this.maxSpeed) {
+                    var ratio = this.maxSpeed / speed;
+                    this.velocity.x *= ratio;
+                    this.velocity.y *= ratio;
+                    }
+            } else {
+                var difX = (ent.x - this.x)/dist;
+                var difY = (ent.y - this.y)/dist;
+                this.velocity.x += difX * acceleration  / (dist*dist);
+                this.velocity.y += difY * acceleration  / (dist * dist);
+                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+                    if (speed > this.maxSpeed) {
+                    var ratio = this.maxSpeed / speed;
+                    this.velocity.x *= ratio;
+                    this.velocity.y *= ratio;
+                } 
+            }
+    
+            this.followPoint = ent;
+            let time = this.game.clockTick;
+           
+            if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
+                this.x += time * this.velocity.x;
+            }
+            if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
+                this.y += time * this.velocity.y;
+            }  
+        
+        } else if (ent instanceof Background) {
+            LevelBoundingBoxCollsion(ent, this);
+        }
+    }
+
+    if (this.health < 1) {
+        this.dead = true;
+    }
+
+    
+    this.healthBar.update();
+    Entity.prototype.update.call(this);
+}
+
+mage.prototype.draw = function () {
+
+    if (this.attack && !this.dead) {
+        this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    } else if (this.following&& !this.dead) {
+        this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    }
+
+    
+    for (var i = 0; i < this.game.entities.length; i++) {
+        var ent = this.game.entities[i];
+        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
+            this.attacking = false;
+            this.maxSpeed = 100;
+            var dist = distance(this, ent);
+            shiftDirection(this, ent);
+            if (collide(ent, {boundingBox: this.attackBox})) {
+                this.attacking = true;
+                this.maxSpeed = 50;
+                var difX = (ent.x - this.x)/dist;
+                var difY = (ent.y - this.y)/dist;
+                this.velocity.x += difX * acceleration  / (dist*dist);
+                this.velocity.y += difY * acceleration  / (dist * dist);
+                
+                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+                    if (speed > this.maxSpeed) {
+                    var ratio = this.maxSpeed / speed;
+                    this.velocity.x *= ratio;
+                    this.velocity.y *= ratio;
+                    }
+            } else {
+                var difX = (ent.x - this.x)/dist;
+                var difY = (ent.y - this.y)/dist;
+                this.velocity.x += difX * acceleration  / (dist*dist);
+                this.velocity.y += difY * acceleration  / (dist * dist);
+                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+                    if (speed > this.maxSpeed) {
+                    var ratio = this.maxSpeed / speed;
+                    this.velocity.x *= ratio;
+                    this.velocity.y *= ratio;
+                } 
+            }
+    
+            this.followPoint = ent;
+            let time = this.game.clockTick;
+           
+            if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
+                this.x += time * this.velocity.x;
+            }
+            if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
+                this.y += time * this.velocity.y;
+            }  
+        
+        } else if (ent instanceof Background) {
+            LevelBoundingBoxCollsion(ent, this);
+        }
+    }
+
+    if (this.health < 1) {
+        this.dead = true;
+    }
+
+    
+    this.healthBar.update();
+    Entity.prototype.update.call(this);
 
 }

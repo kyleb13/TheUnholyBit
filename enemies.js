@@ -44,9 +44,9 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
 
     var itemPercentage = Math.random(); 
     var dropType;
-    if (itemPercentage > 0.5 && itemPercentage < 0.8) {
+    if (itemPercentage > 0.5 && itemPercentage < 0.75) {
         dropType = "ammo";
-    } else if(itemPercentage > 0.8 && itemPercentage <= 1.0) {
+    } else if(itemPercentage > 0.75 && itemPercentage <= 1.0) {
         dropType = "HP";
     }
 
@@ -172,18 +172,19 @@ function AdvancedAttacks(x, y, that) {
                         y3 += 40;
                         break;
                     case "right":
+                    
+                        x+=25;
                         y += 30;
                         y2 -= 10;
                         y3 += 10;
-                        x+=25;
                         x2+=25;
                         x3+=25;
                         break;
                     case "down":
                         x +=30;
+                        y += 30;
                         x2 -= 10;
                         x3 += 10;
-                        y += 30;
                         y2 += 30;
                         y3 += 30;
                         break;
@@ -202,7 +203,9 @@ function AdvancedAttacks(x, y, that) {
 }
 
 function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species) {
-
+    if(!spritesheet){
+        console.log("????");
+    }
     this.walkAnimations = [];
     this.attackAnimations =[];
     this.standingAnimations = [];
@@ -517,7 +520,7 @@ function Bunny(game, spritesheet, x, y) {
         offsety:-850
     }
     this.dead = false;
-    this.health = 100;
+    this.health = 80;
     this.healthBar = new HealthBar(game, this, 46, -10);
 
 }
@@ -637,9 +640,9 @@ function lineRect(x1, y1, x2, y2, rx, ry, rw, rh) {
     var right =  lineLine(x1,y1,x2,y2, rx+rw,ry, rx+rw,ry+rh);
     var top =    lineLine(x1,y1,x2,y2, rx,ry, rx+rw,ry);
     var bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
-    if(bottom){
-        bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
-    }
+    // if(bottom){
+    //     bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
+    // }
   
     // if ANY of the above are true, the line
     // has hit the rectangle
@@ -686,15 +689,19 @@ function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
         }
     } else {
         //both vertical
-        if(!isFinite(m1) && !isFinite(m2)){
+        /*if(!isFinite(m1) && !isFinite(m2)){
             //if they share any x values, they are intersecting
-            if(x1===x3)return true
+            var ymin = Math.min(y1, y2);
+            var ymax = Math.max(y1, y2);
+            if(x1===x3 && (y3>ymin && y3<ymax) || (y4>ymin && y4<ymax)) return true
             else return false;
         } else if(m1==0 && m2 == 0){
             //both horizontal
-            if(y1===y3)return true
+            var xmin = Math.min(x1, x2);
+            var xmax = Math.max(x1, x2);
+            if(y1===y3 && (x3>xmin && x3<xmax) || (x4>xmin && x4<xmax))return true
             else return false;
-        } else if(!isFinite(m1) && m2===0){
+        } else*/ if(!isFinite(m1) && m2===0){
             //l1 vertical and l2 horizontal
             return verticalHorizontal(x1, Math.min(y1, y2), Math.max(y1, y2), y3, Math.min(x3, x4), Math.max(x3, x4));
         } else if(m1==0 && !isFinite(m2)){

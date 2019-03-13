@@ -157,18 +157,18 @@ Background.prototype.draw = function () {
 Background.prototype.update = function () {
 };
 
-function Camera(game, obj, background, width, height){
+function Camera(game, obj, width, height){
     this.game = game;
     this.ctx = game.ctx;
     //var center = obj.center();
     this.obj = obj;
-    this.background = background;
     this.worldWidth=width;
     this.worldHeight=height;
     this.frameWidth = this.ctx.canvas.width;
     this.frameHeight = this.ctx.canvas.height;
-    this.x =  0;
-    this.y = 0;
+    this.removeFromWorld = false;
+    this.x =  obj.x;
+    this.y = obj.y;
     // console.log(`width ${this.frameWidth}, height ${this.frameHeight}`);
 }
 
@@ -180,7 +180,7 @@ Camera.prototype.update = function(){
 Camera.prototype.draw = function() {
     this.ctx.setTransform(1,0,0,1,0,0);
     var camX = -this.obj.x + this.ctx.canvas.width/2;
-    var camY = -this.obj.y + this.ctx.canvas.height/2
+    var camY = -this.obj.y + this.ctx.canvas.height/2;
     this.ctx.translate( camX, camY );	
 }
 
@@ -188,7 +188,6 @@ var sceneManager;
   
 
 function oncanvasload(){
-    console.log("plz");
     sceneManager = new SceneManager();
     sceneManager.loadVillageMap();
 }
