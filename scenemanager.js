@@ -9,7 +9,7 @@ var assets = [
     "modball.png",          "normalArcher.png",     "cavemap.png",          "hourglass.png",
     "magicSkel.png",        "arrowSkel.png",        "finalBossMap.png",     "carrot.png",
     "bossBun-export.png",   "castlemap.png",        "KnightArcher.png",     "KnightMage.png",
-    "blue.png"
+    "blue.png",             "officialLogo.png",     "completeGame.png"
 ];
 function SceneManager(){
 
@@ -25,60 +25,52 @@ function SceneManager(){
 
     this.game = new GameEngine();
     this.level;
+    
+    this.game.assetManager = AM;
+    this.game.init(this.ctx);
+    bossDead = false;
 }
 
 SceneManager.prototype.loadVillageMap = function(){
     this.level = "village";
     var that = this;
-    AM.downloadAll(function (){
-        console.log("downloading");
-        that.game.assetManager = AM;
-        that.game.init(that.ctx);
-        var data = loadVillageData();
-        that.game.addEntity(new Background(that.game, AM.getAsset("./img/villagemap.png"), data));
-        
-        var player = new Player(that.game, 
-            AM.getAsset("./img/charwalk.png"), 
-            AM.getAsset("./img/charshoot_loop.png"), 
-            AM.getAsset("./img/charstand.png"), 
-            AM.getAsset("./img/character_edited.png"), 
-            AM.getAsset("./img/char_power.png"),
-            data.playerSpawn.x, data.playerSpawn.y);
-        var camera = new Camera(that.game, player, AM.getAsset("./img/villagemap.png"), 6400, 6400);
-        that.game.start(player, camera);
-        that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
-        that.game.addEntity(player);    
-        
-        for(var i = 0; i<data.enemySpawns.length; i++){
-            var location = data.enemySpawns[i];
-            var enemyPercentage = Math.random(); 
-            if (enemyPercentage >= 0.0 && enemyPercentage <= 0.45) {
-                that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
-            } else if(enemyPercentage > 0.45 && enemyPercentage <= 0.85) {
-                that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/MageGirl.png"), location.x, location.y, MagicType, "magic"));
-            } else if (enemyPercentage > 0.85 && enemyPercentage <= 1) { 
-                that.game.addEntity(new Bunny(that.game, AM.getAsset("./img/bunbun.png"), location.x, location.y)); 
-                that.game.addEntity(new Bunny(that.game, AM.getAsset("./img/bunbun.png"), location.x+35, location.y)); 
-                that.game.addEntity(new Bunny(that.game, AM.getAsset("./img/bunbun.png"), location.x+70, location.y)); 
+    this.game.entities = [];
+    var data = loadVillageData();
+    that.game.addEntity(new Background(that.game, AM.getAsset("./img/villagemap.png"), data));
+    
+    this.game.player.x = data.playerSpawn.x;
+    this.game.player.y = data.playerSpawn.y;
+    this.game.player.ammo = 200;
+    this.game.addEntity(this.game.player);
+    for(var i = 0; i<data.enemySpawns.length; i++){
+        var location = data.enemySpawns[i];
+        var enemyPercentage = Math.random(); 
+        if (enemyPercentage >= 0.0 && enemyPercentage <= 0.45) {
+            that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
+        } else if(enemyPercentage > 0.45 && enemyPercentage <= 0.85) {
+            that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/MageGirl.png"), location.x, location.y, MagicType, "magic"));
+        } else if (enemyPercentage > 0.85 && enemyPercentage <= 1) { 
+            that.game.addEntity(new Bunny(that.game, AM.getAsset("./img/bunbun.png"), location.x, location.y)); 
+            that.game.addEntity(new Bunny(that.game, AM.getAsset("./img/bunbun.png"), location.x+35, location.y)); 
+            that.game.addEntity(new Bunny(that.game, AM.getAsset("./img/bunbun.png"), location.x+70, location.y)); 
+        } else {
+            that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
+        }
+    }
+    if (data.powerUpSpawns) {
+        for (var i = 0; i<data.powerUpSpawns.length; i ++) {
+            var location = data.powerUpSpawns[i];
+            if ( i < 3) {
+                that.game.addEntity(new Powerup(that.game, location.x, location.y, "ammo"));
             } else {
-                that.game.addEntity(new RangeEnemy(that.game, AM.getAsset("./img/normalArcher.png"), location.x, location.y, ArrowType, "arrow"));
+                that.game.addEntity(new Powerup(that.game, location.x, location.y, "HP"));
             }
         }
-        console.log("NEW!!!!!!!!!!!!1");
-        if (data.powerUpSpawns) {
-            for (var i = 0; i<data.powerUpSpawns.length; i ++) {
-                var location = data.powerUpSpawns[i];
-                if ( i < 3) {
-                    that.game.addEntity(new Powerup(that.game, location.x, location.y, "ammo"));
-                } else {
-                    that.game.addEntity(new Powerup(that.game, location.x, location.y, "HP"));
-                }
-            }
-        }
-        
-        that.game.addEntity(new shadowBoss(that.game,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
-        console.log("All Done!");
-    });
+    }
+    
+    that.game.addEntity(new shadowBoss(that.game,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
+    console.log("All Done!");
+
 
 }
 
@@ -128,7 +120,9 @@ SceneManager.prototype.loadCastleMap = function(){
 }
 
 SceneManager.prototype.loadNextLevel = function() {
-    if (this.level === "village") {
+    if (this.level === "menu") {
+        this.loadVillageMap();
+    } else if (this.level === "village") {
         this.loadCastleMap();
         console.log(this.level);
     } else if (this.level === "castle") {
@@ -202,6 +196,48 @@ SceneManager.prototype.loadFinalMap = function() {
 
     this.game.addEntity(new FinalRabbitDestination(this.game, AM.getAsset("./img/bossBun-export.png"), location.x, location.y)); 
          
+}
+
+SceneManager.prototype.loadMenu = function() {
+    var that = this;
+    this.level = "menu";
+    AM.downloadAll(function (){
+        console.log("downloading");
+        that.game.assetManager = AM;
+        that.game.init(that.ctx);
+        var data = loadMenuData();
+        that.game.addEntity(new Background(that.game, AM.getAsset("./img/officialLogo.png"), data));
+        var player = new Player(that.game, 
+            AM.getAsset("./img/charwalk.png"), 
+            AM.getAsset("./img/charshoot_loop.png"), 
+            AM.getAsset("./img/charstand.png"), 
+            AM.getAsset("./img/character_edited.png"), 
+            AM.getAsset("./img/char_power.png"),
+            data.playerSpawn.x, data.playerSpawn.y);
+        var camera = new Camera(that.game, player, AM.getAsset("./img/officialLogo.png"), 6400, 6400);
+        that.game.start(player, camera);
+        that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
+        that.game.addEntity(player);    
+        that.game.addEntity(new menuItem(that.game, 590, 600, "Start Game"));
+      //  
+
+    
+    });
+}
+
+SceneManager.prototype.loadComplete = function() {
+    
+    this.level = "complete";
+    
+    this.game.entities = [];
+    this.game.projectiles = [];
+    
+    var data = loadMenuData();
+    that.game.addEntity(new Background(that.game, AM.getAsset("./img/completeGame.png"), data));
+    this.game.player.x = data.playerSpawn.x;
+    this.game.player.y = data.playerSpawn.y;
+
+    that.game.addEntity(new menuItem(that.game, 590, 600, "Replay ?"));
 }
 /*
 AM.queueDownload("./img/crosshair-export.png");

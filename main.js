@@ -114,9 +114,11 @@ function Background(game, spritesheet, data) {
     this.spritesheet = spritesheet;
     this.game = game;
     this.ctx = game.ctx;
-    this.boundingBoxes = data.boundingBoxes;
-    this.nextLevelBox = data.nextLevelBox
-
+    if (data) {
+        this.boundingBoxes = data.boundingBoxes;
+        this.nextLevelBox = data.nextLevelBox    
+    }
+    
     this.ctx = game.ctx;
 };
 
@@ -124,13 +126,6 @@ Background.prototype.draw = function () {
     this.ctx.drawImage(this.spritesheet,
                    this.x, this.y);
     var that = this;
-
-    if (this.spritesheet === AM.getAsset("./img/villagemap.png")) {
-        this.ctx.font = "24px Arial";
-        this.ctx.fillStyle = "black";
-        this.ctx.fillText(`Shoot: Left Click, M = mute sounds`, 1000, 924);
-        this.ctx.fillText(`Control: W = up, S = down, D = right, A = left`, 1000, 900);
-    }
     if(this.game.showOutlines) {
         this.boundingBoxes.forEach((box) => {
             that.ctx.moveTo(box.p1.x, box.p1.y);
@@ -189,5 +184,6 @@ var sceneManager;
 
 function oncanvasload(){
     sceneManager = new SceneManager();
-    sceneManager.loadVillageMap();
+    //sceneManager.loadVillageMap();
+    sceneManager.loadMenu();
 }

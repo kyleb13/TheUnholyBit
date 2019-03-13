@@ -89,6 +89,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                 x:that.game.pointerx, 
                 y:that.game.pointery
             }, 5, "Player", 18));//lifetime*/
+            /*
             //triple shot
             that.game.addProjectile(new Projectile(that.game, 
                 {
@@ -103,7 +104,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                 {//end Point
                     x:that.game.pointerx, 
                     y:that.game.pointery
-                }, 5, "Player", 18));//lifetime*/
+                }, 5, "Player", 18));//lifetime
 
                 that.game.addProjectile(new Projectile(that.game, 
                     {
@@ -118,7 +119,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                     {//end Point
                         x:that.game.pointerx, 
                         y:that.game.pointery
-                    }, 5, "Player", 18));//lifetime*/
+                    }, 5, "Player", 18)); //lifetime*/
     });    
     this.radius  = {
         x: this.x,
@@ -610,7 +611,8 @@ function LevelBoundingBoxCollsion(background, ent) {
                 } else {
                     if (ent instanceof Player){
                         handleBoxCollision(ent, box);
-                    } else if (ent instanceof Bunny || ent instanceof RangeEnemy) {            
+                    } else if (ent instanceof Bunny || ent instanceof RangeEnemy
+                         || ent instanceof FinalRabbitDestination || ent instanceof shadowBoss) {            
                         //handleBoxCollision(ent, box);
                         if (top) {
                             ent.y -= 1;
