@@ -593,7 +593,7 @@ function FinalRabbitAttack(x, y, that) {
                     y += that.attackAnimations["left"].frameHeight/2;
                     
                     x2 += that.attackAnimations["left"].frameWidth/2;
-                    y2 += that.attackAnimations["left"].frameHeight/2 + 30;
+                    y2 += that.attackAnimations["left"].frameHeight/2 + 40;
 
                     x3 += that.attackAnimations["left"].frameWidth/2;
                     y3 += that.attackAnimations["left"].frameHeight/2- 30;
@@ -728,6 +728,14 @@ function FinalRabbitAttack(x, y, that) {
                             y:that.followPoint.center().y- yOffset - 120
                         }, 5, "Boss", 20));//lifetime 
                     
+
+}
+
+function fanningShotPoints(start, end){
+    var slope = (end.y - start.y)/(end.x - start.x);
+    if(isFinite(slope) && slope != 0){
+        var normal = -slope; 
+    }
 
 }
 

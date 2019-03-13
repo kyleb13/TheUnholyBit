@@ -89,35 +89,36 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                 x:that.game.pointerx, 
                 y:that.game.pointery
             }, 5, "Player", 18));//lifetime*/
-            // that.game.addProjectile(new Projectile(that.game, 
-            //     {
-            //         img:that.game.assetManager.getAsset("./img/arrow.png"), 
-            //         width:31, 
-            //         height:5
-            //     }, 400, //speed
-            //     {//start point
-            //         x:x2, 
-            //         y:y2
-            //     }, 
-            //     {//end Point
-            //         x:that.game.pointerx, 
-            //         y:that.game.pointery
-            //     }, 5, "Player", 18));//lifetime*/
+            //triple shot
+            that.game.addProjectile(new Projectile(that.game, 
+                {
+                    img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                    width:31, 
+                    height:5
+                }, 400, //speed
+                {//start point
+                    x:x2, 
+                    y:y2
+                }, 
+                {//end Point
+                    x:that.game.pointerx, 
+                    y:that.game.pointery
+                }, 5, "Player", 18));//lifetime*/
 
-            //     that.game.addProjectile(new Projectile(that.game, 
-            //         {
-            //             img:that.game.assetManager.getAsset("./img/arrow.png"), 
-            //             width:31, 
-            //             height:5
-            //         }, 400, //speed
-            //         {//start point
-            //             x:x3, 
-            //             y:y3
-            //         }, 
-            //         {//end Point
-            //             x:that.game.pointerx, 
-            //             y:that.game.pointery
-            //         }, 5, "Player", 18));//lifetime*/
+                that.game.addProjectile(new Projectile(that.game, 
+                    {
+                        img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                        width:31, 
+                        height:5
+                    }, 400, //speed
+                    {//start point
+                        x:x3, 
+                        y:y3
+                    }, 
+                    {//end Point
+                        x:that.game.pointerx, 
+                        y:that.game.pointery
+                    }, 5, "Player", 18));//lifetime*/
     });    
     this.radius  = {
         x: this.x,
@@ -427,7 +428,7 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
             x:this.x, 
             y:this.y,
             width: 49,
-            height: 10,
+            height: 5,
             offsetx:0,
             offsety:0
         }

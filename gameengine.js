@@ -140,9 +140,9 @@ GameEngine.prototype.startInput = function () {
                 audio.play();
             }
         }
-        // if(e.code === "KeyN") {
-        //     sceneManager.loadNextLevel();
-        // } 
+        if(e.code === "KeyN") {
+            sceneManager.loadNextLevel();
+        } 
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
         that.handleInputs(e.code, false);
@@ -167,9 +167,9 @@ GameEngine.prototype.handleInputs = function(keycode, value){
         case "KeyD":
             this.d = value;
             break;   
-        // case "KeyP":
-        //     this.p = value;
-        //     break;   
+        case "KeyP":
+            this.p = value;
+            break;   
             
     }   
 }

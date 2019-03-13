@@ -44,9 +44,9 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
 
     var itemPercentage = Math.random(); 
     var dropType;
-    if (itemPercentage > 0.5 && itemPercentage < 0.8) {
+    if (itemPercentage > 0.5 && itemPercentage < 0.75) {
         dropType = "ammo";
-    } else if(itemPercentage > 0.8 && itemPercentage <= 1.0) {
+    } else if(itemPercentage > 0.75 && itemPercentage <= 1.0) {
         dropType = "HP";
     }
 
