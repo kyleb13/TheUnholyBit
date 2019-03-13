@@ -106,8 +106,8 @@ GameEngine.prototype.start = function (player, camera) {
 }
 
 GameEngine.prototype.getBackground = function(){
-    for(var i = 0; i<entities.length; i++){
-        var ent = entities[i];
+    for(var i = 0; i<this.entities.length; i++){
+        var ent = this.entities[i];
         if(ent instanceof Background) return ent;
     }
 }

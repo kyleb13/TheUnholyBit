@@ -9,7 +9,8 @@ var assets = [
     "modball.png",          "normalArcher.png",     "cavemap.png",          "hourglass.png",
     "magicSkel.png",        "arrowSkel.png",        "finalBossMap.png",     "carrot.png",
     "bossBun-export.png",   "castlemap.png",        "KnightArcher.png",     "KnightMage.png",
-    "blue.png"
+    "blue.png",             "mageWalk-export.png",  "mageAttack-export.png","mageDying-export.png",
+    "big_modball.png"
 ];
 function SceneManager(){
 
@@ -97,6 +98,7 @@ SceneManager.prototype.loadCastleMap = function(){
     this.game.player.y = 900;*/
     this.game.addEntity(this.game.player);
     this.game.addEntity(new Powerup(this.game, 2500,5300,"SlowTime"));
+    this.game.addEntity(new mage(this.game, 10900, 2400));
     this.game.addEntity(new TrapDoor(this.game));
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;
