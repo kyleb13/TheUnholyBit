@@ -405,46 +405,9 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     var y;
     var width;
     var height;
-    if (spritesheet.img === game.assetManager.getAsset('./img/enemyArrow.png') 
-        || spritesheet.img === game.assetManager.getAsset('./img/arrow.png')) {
-        shootaudio = new Audio('arrow_shooting.mp3');
-        x = this.x + 3;
-        y = this.y + 12;
-        width = 31;
-        height = 4;
-    
-    } else if (spritesheet.img === game.assetManager.getAsset('./img/fireball.png') 
-    || spritesheet.img === game.assetManager.getAsset('./img/modball.png')) {
-        shootaudio = new Audio('fireball_shooting.mp3');
-        x = this.x;
-        y = this.y;
-        width = 26;
-        height = 17;
-    } else  if(spritesheet.img === game.assetManager.getAsset("./img/big_modball.png")){
-        shootaudio = new Audio('fireball_shooting.mp3');
-        x = this.x;
-        y = this.y;
-        width = 175;
-        height = 175;
-    } else{
-        shootaudio = new Audio('carrot_shooting.mp3');
-        x = this.x;
-        y = this.y;
-        width = 49;
-        height = 5;
-    }
-
-    this.boundingBox = {
-        p1:{x:x, y:y},
-        p2:{x:x, y:y + height},
-        p3:{x:x+width, y:y + height},
-        p4:{x:x+width, y:y},
-    }
+    var offx;
+    var offy;
         
-    if(!game.mute){
-        shootaudio.volume = 0.10; // 75%
-        shootaudio.play();
-    }
     this.shooter = shooter;
     this.game = game;
     this.ctx = game.ctx;
@@ -488,21 +451,68 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
        /* console.log("Xspeed: " + this.xspeed);
         console.log("Yspeed: " + this.yspeed);*/
     }
+    Entity.call(this, game, start.x, start.y);
 
+    if (spritesheet.img === game.assetManager.getAsset('./img/enemyArrow.png') 
+        || spritesheet.img === game.assetManager.getAsset('./img/arrow.png')) {
+        shootaudio = new Audio('arrow_shooting.mp3');
+        x = this.x + 3;
+        y = this.y + 12;
+        width = 31;
+        height = 4;
+        offx = 3;
+        offy = 12;
+    
+    } else if (spritesheet.img === game.assetManager.getAsset('./img/fireball.png') 
+    || spritesheet.img === game.assetManager.getAsset('./img/modball.png')) {
+        shootaudio = new Audio('fireball_shooting.mp3');
+        x = this.x;
+        y = this.y;
+        width = 26;
+        height = 17;
+        offx = 0;
+        offy = 0;
+    } else  if(spritesheet.img === game.assetManager.getAsset("./img/big_modball.png")){
+        shootaudio = new Audio('fireball_shooting.mp3');
+        x = this.x;
+        y = this.y;
+        width = 175;
+        height = 175;
+        offx = 0;
+        offy = 0;
+    } else{
+        shootaudio = new Audio('carrot_shooting.mp3');
+        x = this.x;
+        y = this.y;
+        width = 49;
+        height = 5;
+        offx = 0;
+        offy = 0;
+    }
+
+    this.boundingBox = {
+        p1:{x:x, y:y},
+        p2:{x:x, y:y + height},
+        p3:{x:x+width, y:y + height},
+        p4:{x:x+width, y:y},
+        offsetx:offx,
+        offsety:offy
+    }
+    if(!game.mute){
+        shootaudio.volume = 0.10; // 75%
+        shootaudio.play();
+    }
 
     this.sheet = Entity.prototype.rotateAndCache(spritesheet, theta);
     var temp = Entity.prototype.rotateAndCache(this.boundingBox, theta);
     this.rotatedBoundingBox = temp.img;
-    Entity.call(this, game, start.x, start.y);
+    rotateBoundingBox(this, theta);
 }
 
 Projectile.prototype = new Entity();
 Projectile.prototype.constructor = Projectile;
 
 Projectile.prototype.update = function() {
-    
-    this.boundingBox.x = this.x + this.boundingBox.offsetx;
-    this.boundingBox.y = this.y + this.boundingBox.offsety;
 
     let time = this.game.clockTick;
     this.timer += time;
@@ -515,7 +525,7 @@ Projectile.prototype.update = function() {
                 } else if (this.shooter === "Player" 
                                         && (ent instanceof Bunny || ent instanceof shadowBoss 
                                             || ent instanceof RangeEnemy || ent instanceof FinalRabbitDestination
-                                            || ent instanceof mage)
+                                            || ent instanceof mage || ent instanceof menuItem)
                                         && projectileCollide(this, ent)) {
                     this.handleCollision(ent);
                 } else if (ent instanceof Background) {
@@ -523,9 +533,15 @@ Projectile.prototype.update = function() {
                 }
             }
         }
-        this.x += time * this.xspeed;
-        this.y += time * this.yspeed;
-
+        var dx = time*this.xspeed;
+        var dy = time*this.yspeed;
+        this.x += dx;
+        this.y += dy;
+        var box = this.boundingBox;
+        box.p1 = {x:box.p1.x + dx, y:box.p1.y + dy};
+        box.p2 = {x:box.p2.x + dx, y:box.p2.y + dy};
+        box.p3 = {x:box.p3.x + dx, y:box.p3.y + dy};
+        box.p4 = {x:box.p4.x + dx, y:box.p4.y + dy};
 
     } else {
         this.removeFromWorld = true;
@@ -536,29 +552,54 @@ Projectile.prototype.draw = function(){
     var x = this.x - this.sheet.center.x;
     var y = this.y - this.sheet.center.y;
     this.ctx.drawImage(this.sheet.img, x, y);
-    /*if(this.game.showOutlines)*/ //this.ctx.drawImage(this.rotatedBoundingBox, x, y);
-    var box = this.boundingBox;
-    this.ctx.moveTo(box.p1.x, box.p1.y);
-    this.ctx.lineTo(box.p2.x, box.p2.y);
-    this.ctx.lineTo(box.p3.x, box.p3.y);
-    this.ctx.lineTo(box.p4.x, box.p4.y);
-    this.ctx.lineTo(box.p1.x, box.p1.y);
-    this.ctx.stroke();
+    if(this.game.showOutlines) this.ctx.drawImage(this.rotatedBoundingBox, x, y);
+    // var box = this.boundingBox;
+    // this.ctx.strokeStyle = "red";
+    // this.ctx.moveTo(box.p1.x, box.p1.y);
+    // this.ctx.lineTo(box.p2.x, box.p2.y);
+    // this.ctx.lineTo(box.p3.x, box.p3.y);
+    // this.ctx.lineTo(box.p4.x, box.p4.y);
+    // this.ctx.lineTo(box.p1.x, box.p1.y);
+    // this.ctx.stroke();
+    // this.ctx.strokeRect(this.x, this.y, 2, 2);
     
 
 }
 
 function rotateBoundingBox(proj, theta){
-    var sin = Math.sin(theta);
-    var cos = Math.cos(theta);
+    var sin = Math.sin(-theta);
+    var cos = Math.cos(-theta);
     var bb = proj.boundingBox;
-    bb.p1 = {x:bb.p1.x*cos + bb.p1.y*(-sin) , y:bb.p1.x*sin + bb.p1.x*cos};
-    bb.p2 = {x:bb.p2.x*cos + bb.p2.y*(-sin) , y:bb.p2.x*sin + bb.p2.x*cos};
-    bb.p3 = {x:bb.p3.x*cos + bb.p3.y*(-sin) , y:bb.p3.x*sin + bb.p3.x*cos};
-    bb.p4 = {x:bb.p4.x*cos + bb.p4.y*(-sin) , y:bb.p4.x*sin + bb.p4.x*cos};
+    var cx = bb.p1.x + (bb.p4.x - bb.p1.x)/2;
+    var cy = bb.p1.y + (bb.p2.y - bb.p1.y)/2; 
+    var x1 = bb.p1.x - cx;
+    var x2 = bb.p4.x - cx;
+    var y1 = bb.p1.y - cy;
+    var y2 = bb.p2.y - cy;
+    //move to origin, rotate, translate to projectile xy
+    bb.p1 = {x:x1*cos + y1*(-sin) +proj.x , y:x1*sin + y1*cos +proj.y};
+    bb.p2 = {x:x1*cos + y2*(-sin) +proj.x , y:x1*sin + y2*cos +proj.y};
+    bb.p3 = {x:x2*cos + y2*(-sin) +proj.x , y:x2*sin + y2*cos +proj.y};
+    bb.p4 = {x:x2*cos + y1*(-sin) +proj.x , y:x2*sin + y1*cos +proj.y};
+
 
 }
 
+// function xyDist(p1, p2){
+//     var x1 = math.min(p1.x, p2.x);
+//     var x2 = math.max(p1.x, p2.x);
+//     var y1 = math.min(p1.y, p2.y);
+//     var y2 = math.max(p1.y, p2.y);
+//     return {x:(x2-x1), y:(y2-y1)};
+// }
+
+// function midpoint(p1, p2){
+//     var x1 = math.min(p1.x, p2.x);
+//     var x2 = math.max(p1.x, p2.x);
+//     var y1 = math.min(p1.y, p2.y);
+//     var y2 = math.max(p1.y, p2.y);
+//     return {x:x1 + (x2-x1)/2, y:y1 + (y2-y1)/2};
+// }
 function projectileCollide(me, ent) {
     if ( !(me instanceof Background || me instanceof Crosshair)
       && !(ent instanceof Background || ent instanceof Crosshair)) {
@@ -579,6 +620,38 @@ function projectileCollide(me, ent) {
             ent.boundingBox.x, ent.boundingBox.y,
             ent.boundingBox.width, ent.boundingBox.height);
         if(top) return true;
+    }
+    return false;
+}
+
+function projectileLevelCollision(box, proj) {
+    var pbox = proj.boundingBox;
+    if(!box.halfHeight){
+        var blist = [{s:box.p1, e:box.p2}, {s:box.p2, e:box.p3}, {s:box.p3, e:box.p4}, {s:box.p4, e:box.p1}];
+        for(var i = 0; i<blist.length; i++){
+            var line = blist[i];
+            var l = lineLine(pbox.p1.x, pbox.p1.y, pbox.p2.x, pbox.p2.y, line.s.x, line.s.y, line.e.x, line.e.y);
+            // if(l){
+            //     console.log("left");
+            //     lineLine(line.s.x, line.s.y, line.e.x, line.e.y, pbox.p1.x, pbox.p1.y, pbox.p2.x, pbox.p2.y);
+            // }
+            var d = lineLine(pbox.p2.x, pbox.p2.y, pbox.p3.x, pbox.p3.y, line.s.x, line.s.y, line.e.x, line.e.y);
+            // if(d){
+            //     console.log("down");
+            //     lineLine(line.s.x, line.s.y, line.e.x, line.e.y, pbox.p2.x, pbox.p2.y, pbox.p3.x, pbox.p3.y);
+            // }
+            var r = lineLine(pbox.p3.x, pbox.p3.y, pbox.p4.x, pbox.p4.y, line.s.x, line.s.y, line.e.x, line.e.y);
+            // if(r){
+            //     console.log("right");
+            //     lineLine(line.s.x, line.s.y, line.e.x, line.e.y, pbox.p2.x, pbox.p2.y, pbox.p3.x, pbox.p3.y);
+            // }
+            var u = lineLine(pbox.p4.x, pbox.p4.y, pbox.p1.x, pbox.p1.y, line.s.x, line.s.y, line.e.x, line.e.y);
+            // if(l){
+            //     console.log("up");
+            //     lineLine(line.s.x, line.s.y, line.e.x, line.e.y, pbox.p4.x, pbox.p4.y, pbox.p1.x, pbox.p1.y);
+            // }
+            if(l || d || r || u) return true;
+        }
     }
     return false;
 }
@@ -645,7 +718,7 @@ function handleBoxCollision (ent, box){
 
 function LevelBoundingBoxCollsion(background, ent) {
     background.boundingBoxes.forEach((box) => {
-        if(!(ent instanceof Projectile) || (ent instanceof Projectile && !box.halfHeight)){
+        if(!(ent instanceof Projectile) /*|| (ent instanceof Projectile && !box.halfHeight)*/){
             var left = lineRect(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
                 ent.boundingBox.x, ent.boundingBox.y, 
                 ent.boundingBox.width, ent.boundingBox.height);
@@ -659,31 +732,30 @@ function LevelBoundingBoxCollsion(background, ent) {
                 ent.boundingBox.x, ent.boundingBox.y,
                 ent.boundingBox.width, ent.boundingBox.height);
             if ( left|| bottom || right || top) {
-                if (ent instanceof Projectile) {
-                    ent.handleCollision(background);
-                } else {
-                    if (ent instanceof Player){
-                        handleBoxCollision(ent, box);
-                    } else if (ent instanceof Bunny || ent instanceof RangeEnemy
-                         || ent instanceof FinalRabbitDestination || ent instanceof shadowBoss) {            
-                        //handleBoxCollision(ent, box);
-                        if (top) {
-                            ent.y -= 1;
-                            ent.velocity.y = -ent.velocity.y; 
-                        } if (right) {
-                            ent.x += 1;
-                            ent.velocity.x = -ent.velocity.x;
-                        } if (left) {
-                            ent.x -= 1;
-                            ent.velocity.x = -ent.velocity.x;
-                        } if(bottom) {
-                            ent.y += 1;
-                            ent.velocity.y = -ent.velocity.y
-                        }
-            
+                if (ent instanceof Player){
+                    handleBoxCollision(ent, box);
+                } else if (ent instanceof Bunny || ent instanceof RangeEnemy
+                        || ent instanceof FinalRabbitDestination || ent instanceof shadowBoss) {            
+                    //handleBoxCollision(ent, box);
+                    if (top) {
+                        ent.y -= 1;
+                        ent.velocity.y = -ent.velocity.y; 
+                    } if (right) {
+                        ent.x += 1;
+                        ent.velocity.x = -ent.velocity.x;
+                    } if (left) {
+                        ent.x -= 1;
+                        ent.velocity.x = -ent.velocity.x;
+                    } if(bottom) {
+                        ent.y += 1;
+                        ent.velocity.y = -ent.velocity.y
                     }
+        
                 }
+                
             }
+        } else if(projectileLevelCollision(box, ent)){
+            ent.removeFromWorld = true;
         }
     });
     return false;
@@ -703,6 +775,8 @@ Projectile.prototype.handleCollision = function(ent) {
     if(ent.health){
         ent.health = ent.health - this.damage;
     }
+
+    if(ent instanceof menuItem) ent.doAThing();
     
     this.removeFromWorld = true;
 }

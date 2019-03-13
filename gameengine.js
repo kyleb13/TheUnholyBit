@@ -12,7 +12,8 @@ window.requestAnimFrame = (function () {
 var pointerLocked = false;
 var timeSlowed = false;
 var audio = new Audio('./villageMusic.mp3');
-audio.volume = 0.10; // 75%
+//audio.volume = 0.10; // 75%
+audio.volume = 0;
 audio.loop = true;
 
 
@@ -53,7 +54,7 @@ GameEngine.prototype.init = function (ctx) {
     this.rect = this.ctx.canvas.getBoundingClientRect();
     this.timer = new Timer();
     this.startInput();
-    console.log('game initialized');
+    //console.log('game initialized');
 }
 
 GameEngine.prototype.start = function (player, camera) {

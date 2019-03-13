@@ -662,20 +662,18 @@ function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
             //point of intersection
             var xi = (m1*x1-m2*x3-y1+y3)/(m1-m2);
             var yi = m1*(xi-x1)+y1;
-            var xstart = x1;
-            var ystart = y1;
-            var xend = x2;
-            var yend = y2;
-            if(x1>x2){
-                xstart = x2;
-                xend = x1;
-            }
-            if(y1>y2){
-                ystart = y2;
-                yend = y1;
-            }
+            var xstart = Math.min(x1, x2);
+            var ystart = Math.min(y1, y2);
+            var xend = Math.max(x1, x2);
+            var yend = Math.max(y1, y2);
+            var xs2 = Math.min(x3, x4);
+            var ys2 = Math.min(y3, y4);
+            var xe2 = Math.max(x3, x4);
+            var ye2 = Math.max(y3, y4);
+
             //check if intersection point lies in the range of the line segment
-            if(xstart<=xi && xi<=xend && ystart<=yi && yi<=yend){
+            if(xstart<=xi && xi<=xend && ystart<=yi && yi<=yend
+                && xs2<=xi && xi<=xe2 && ys2<=yi && yi<=ye2){
                 return true;
             } else {
                 return false;

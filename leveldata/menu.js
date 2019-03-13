@@ -56,16 +56,22 @@ function menuItem (game, x, y, name) {
 }
 
 menuItem.prototype.update = function() {
-        for (var i = 0; i < this.game.projectiles.length; i++) {
-            var ent = this.game.projectiles[i];
-            if (collide(this, ent)) {
-                sceneManager.loadNextLevel();
-                ent.removeFromWorld = true; 
-            } 
+        // for (var i = 0; i < this.game.projectiles.length; i++) {
+        //     var ent = this.game.projectiles[i];
+        //     if (collide(this, ent)) {
+        //         sceneManager.loadNextLevel();
+        //         ent.removeFromWorld = true; 
+        //     } 
 
-        }
+        // }
 
 }
+
+menuItem.prototype.doAThing = function() {
+    sceneManager.loadNextLevel();
+    this.removeFromWorld = true;
+}
+
 menuItem.prototype.draw = function() {
     
     this.ctx.fillStyle = "white";
