@@ -482,7 +482,7 @@ FinalRabbitDestination.prototype.update = function () {
 
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
+        if (ent instanceof Player && collide(ent, {boundingBox: this.visualBox })) {
             this.attacking = false;
             this.maxSpeed = 100;
             var dist = distance(this, ent);
@@ -739,16 +739,48 @@ function fanningShotPoints(start, end){
 
 }
 
-function mage(game, spritesheet, x, y){
-    
-    //this.walksheet = new Animation()
-    
-    this.health = 3000;
-    this.healthBar = new HealthBar(game, this, 46, -10);
+function mage(game, x, y){
+    //function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale)
+    // this.walkAnimation = new Animation(AM.getAsset("./img/mageWalk-export.png"), 64, 64, 8, .12, 32, true, 1);
+    this.attackAnimation = new Animation(AM.getAsset("./img/mageAttack-export.png"), 192, 192, 7, .12, 28, true, 1);
+    this.deathAnimation = new Animation(AM.getAsset("./img/mageDying-export.png"), 192, 192, 6, .12, 6, false, 1);
+    this.walkAnimation = new Animation(AM.getAsset("./img/mageWalk-export.png"), 192, 192, 8, .12, 32, true, 1);
+    this.walkAnimation.rowMode();
+    this.attackAnimation.rowMode();
+
+    var that = this;
+    this.deathAnimation.setCallbackOnFrame(6, [], function(){
+        that.removeFromWorld = true;
+    });
+
+    this.attackAnimation.setCallbackOnFrame(6, [], function() {
+        var x = that.x + 96;
+        var y = that.y + 96;
+        that.game.addProjectile( 
+            new Projectile(that.game,
+            {
+                img:that.game.assetManager.getAsset("./img/big_modball.png"), 
+                width: 175,
+                height: 175
+            }, 225, //speed
+            {//start point
+                x:x-96, 
+                y:y-96
+            }, 
+            {//end Point
+                x:that.followPoint.center().x, 
+                y:that.followPoint.center().y , 
+            }, 5, "Boss", 20));//lifetime  
+    });
+
+
+    this.movedir = 2;
+    this.health = 2000;
+    this.healthBar = new HealthBar(game, this, 66, -10);
     Entity.call(this, game, x, y);
     this.dead = false;
     this.game = game;
-    this.levelBoxes = game.getBackground();
+    this.levelBoxes = game.getBackground().boundingBoxes;
     this.attacking = false;
     this.ctx = game.ctx;
     this.followPoint = {x: 0, y: 0};
@@ -765,10 +797,10 @@ function mage(game, spritesheet, x, y){
     this.boundingBox = {
         x:this.x, 
         y:this.y,
-        width: 230,
-        height: 230,
-        offsetx:70,
-        offsety:150
+        width: 96,
+        height: 152,
+        offsetx:48,
+        offsety:30
     }
 
     this.visualBox = {
@@ -776,19 +808,20 @@ function mage(game, spritesheet, x, y){
         y:this.y,
         width: 2800,
         height: 1600,
-        offsetx:0,
-        offsety:0
+        offsetx:-1400,
+        offsety:-800
     }
 
     this.attackBox = {
-        x:this.x, 
-        y:this.y,
-        width: 1300,
-        height: 700,
-        offsetx:-600,
-        offsety:-30
+        x:this.x + 96, 
+        y:this.y + 96,
+        width: 1400,
+        height: 796,
+        offsetx:-560,
+        offsety:-250
     }
     this.dead = false;  
+    this.removeFromWorld = false;
     this.acceleration = 100;
 }
 
@@ -807,64 +840,63 @@ mage.prototype.update = function () {
     this.attackBox.x = this.x + this.attackBox.offsetx;
     this.attackBox.y = this.y + this.attackBox.offsety;
 
-    if (this.health < 1) {
-        console.log("D E D");
+    if(this.health <= 0) {
         this.dead = true;
     }
+    var centerx = this.x + 96;
+    var centery= this.y + 96;
+    var px = this.game.player.x;
+    var py = this.game.player.y;
+    var xdiff = Math.abs(px - centerx);
+    var ydiff = Math.abs(py - centery);
+    var ent = this.game.player;
+    if (collide(ent, {boundingBox: this.visualBox }) ) {
+        this.attacking = false;
+        this.maxSpeed = 100;
+        var dist = distance(this, ent);
+        if (collide(ent, {boundingBox: this.attackBox})) {
+            this.attacking = true;
+        }
+        var difX = (ent.x - this.x)/dist;
+        var difY = (ent.y - this.y)/dist;
+        this.velocity.x += difX * acceleration  / (dist*dist);
+        this.velocity.y += difY * acceleration  / (dist * dist);
+        var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+        if (speed > this.maxSpeed) {
+            var ratio = this.maxSpeed / speed;
+            this.velocity.x *= ratio;
+            this.velocity.y *= ratio;
+        }
 
-    for (var i = 0; i < this.game.entities.length; i++) {
-        var ent = this.game.entities[i];
-        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
-            this.attacking = false;
-            this.maxSpeed = 100;
-            var dist = distance(this, ent);
-            shiftDirection(this, ent);
-            if (collide(ent, {boundingBox: this.attackBox})) {
-                this.attacking = true;
-                this.maxSpeed = 50;
-                var difX = (ent.x - this.x)/dist;
-                var difY = (ent.y - this.y)/dist;
-                this.velocity.x += difX * acceleration  / (dist*dist);
-                this.velocity.y += difY * acceleration  / (dist * dist);
-                
-                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                    if (speed > this.maxSpeed) {
-                    var ratio = this.maxSpeed / speed;
-                    this.velocity.x *= ratio;
-                    this.velocity.y *= ratio;
-                    }
-            } else {
-                var difX = (ent.x - this.x)/dist;
-                var difY = (ent.y - this.y)/dist;
-                this.velocity.x += difX * acceleration  / (dist*dist);
-                this.velocity.y += difY * acceleration  / (dist * dist);
-                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                    if (speed > this.maxSpeed) {
-                    var ratio = this.maxSpeed / speed;
-                    this.velocity.x *= ratio;
-                    this.velocity.y *= ratio;
-                } 
-            }
-    
-            this.followPoint = ent;
-            let time = this.game.clockTick;
-           
+        this.followPoint = ent;
+        let time = this.game.clockTick;
+        if(!this.attacking){
             if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
                 this.x += time * this.velocity.x;
             }
             if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
                 this.y += time * this.velocity.y;
-            }  
-        
-        } else if (ent instanceof Background) {
-            LevelBoundingBoxCollsion(ent, this);
+            }
         }
     }
-
-    if (this.health < 1) {
-        this.dead = true;
+    
+    if(centery > py){
+        if(centerx > px && xdiff>ydiff){
+            this.movedir = 1;
+        } else if(ydiff>=xdiff){
+            this.movedir = 0;
+        } else{
+            this.movedir = 3;
+        }
+    } else {
+        if(centerx > px && xdiff>ydiff){
+            this.movedir = 1;
+        } else if(ydiff>=xdiff){
+            this.movedir = 2;
+        } else{
+            this.movedir = 3;
+        }
     }
-
     
     this.healthBar.update();
     Entity.prototype.update.call(this);
@@ -872,68 +904,21 @@ mage.prototype.update = function () {
 
 mage.prototype.draw = function () {
 
-    if (this.attack && !this.dead) {
-        this.attackAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
-    } else if (this.following&& !this.dead) {
-        this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    if(this.attacking & !this.dead) {
+        this.attackAnimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir)
+    } else if(this.dead){
+        this.deathAnimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    } else {
+        this.walkAnimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
     }
 
     
-    for (var i = 0; i < this.game.entities.length; i++) {
-        var ent = this.game.entities[i];
-        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
-            this.attacking = false;
-            this.maxSpeed = 100;
-            var dist = distance(this, ent);
-            shiftDirection(this, ent);
-            if (collide(ent, {boundingBox: this.attackBox})) {
-                this.attacking = true;
-                this.maxSpeed = 50;
-                var difX = (ent.x - this.x)/dist;
-                var difY = (ent.y - this.y)/dist;
-                this.velocity.x += difX * acceleration  / (dist*dist);
-                this.velocity.y += difY * acceleration  / (dist * dist);
-                
-                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                    if (speed > this.maxSpeed) {
-                    var ratio = this.maxSpeed / speed;
-                    this.velocity.x *= ratio;
-                    this.velocity.y *= ratio;
-                    }
-            } else {
-                var difX = (ent.x - this.x)/dist;
-                var difY = (ent.y - this.y)/dist;
-                this.velocity.x += difX * acceleration  / (dist*dist);
-                this.velocity.y += difY * acceleration  / (dist * dist);
-                var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-                    if (speed > this.maxSpeed) {
-                    var ratio = this.maxSpeed / speed;
-                    this.velocity.x *= ratio;
-                    this.velocity.y *= ratio;
-                } 
-            }
-    
-            this.followPoint = ent;
-            let time = this.game.clockTick;
-           
-            if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
-                this.x += time * this.velocity.x;
-            }
-            if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
-                this.y += time * this.velocity.y;
-            }  
-        
-        } else if (ent instanceof Background) {
-            LevelBoundingBoxCollsion(ent, this);
-        }
+    if (this.game.showOutlines) {
+        this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
     }
-
-    if (this.health < 1) {
-        this.dead = true;
-    }
+    this.healthBar.draw();
 
     
-    this.healthBar.update();
-    Entity.prototype.update.call(this);
-
 }

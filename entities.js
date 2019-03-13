@@ -1,4 +1,5 @@
 function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupsheet, px, py) {
+    //function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale)
     this.animation = new Animation(walksheet, 64, 64, 8, .12, 32, true, 1.5);
     this.shootanimation = new Animation(shootsheet,64,64, 7, .027, 28, true, 1.5);
     this.standanimation = new Animation(standsheet, 64, 64, 1, .12, 4, true, 1.5);
@@ -307,7 +308,7 @@ function Powerup (game, x, y, type) {
         this.boundingBox = {
             x:this.x, 
             y:this.y,
-            width: 32,
+            width: 3,
             height: 16,
             offsetx:3,
             offsety:12
@@ -400,39 +401,44 @@ StoneDirection.prototype.draw = function() {
 function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, damage){
     var shootaudio;
     this.boundingBox;
+    var x;
+    var y;
+    var width;
+    var height;
     if (spritesheet.img === game.assetManager.getAsset('./img/enemyArrow.png') 
         || spritesheet.img === game.assetManager.getAsset('./img/arrow.png')) {
         shootaudio = new Audio('arrow_shooting.mp3');
-        this.boundingBox = {
-            x:this.x, 
-            y:this.y,
-            width: 31,
-            height: 4,
-            offsetx:3,
-            offsety:12
-        }
+        x = this.x + 3;
+        y = this.y + 12;
+        width = 31;
+        height = 4;
     
     } else if (spritesheet.img === game.assetManager.getAsset('./img/fireball.png') 
     || spritesheet.img === game.assetManager.getAsset('./img/modball.png')) {
         shootaudio = new Audio('fireball_shooting.mp3');
-        this.boundingBox = {
-            x:this.x, 
-            y:this.y,
-            width: 26,
-            height: 17,
-            offsetx:0,
-            offsety:0
-        }
-    } else {
+        x = this.x;
+        y = this.y;
+        width = 26;
+        height = 17;
+    } else  if(spritesheet.img === game.assetManager.getAsset("./img/big_modball.png")){
+        shootaudio = new Audio('fireball_shooting.mp3');
+        x = this.x;
+        y = this.y;
+        width = 175;
+        height = 175;
+    } else{
         shootaudio = new Audio('carrot_shooting.mp3');
-        this.boundingBox = {
-            x:this.x, 
-            y:this.y,
-            width: 49,
-            height: 5,
-            offsetx:0,
-            offsety:0
-        }
+        x = this.x;
+        y = this.y;
+        width = 49;
+        height = 5;
+    }
+
+    this.boundingBox = {
+        p1:{x:x, y:y},
+        p2:{x:x, y:y + height},
+        p3:{x:x+width, y:y + height},
+        p4:{x:x+width, y:y},
     }
         
     if(!game.mute){
@@ -482,11 +488,101 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
        /* console.log("Xspeed: " + this.xspeed);
         console.log("Yspeed: " + this.yspeed);*/
     }
+
+
     this.sheet = Entity.prototype.rotateAndCache(spritesheet, theta);
     var temp = Entity.prototype.rotateAndCache(this.boundingBox, theta);
     this.rotatedBoundingBox = temp.img;
     Entity.call(this, game, start.x, start.y);
 }
+
+Projectile.prototype = new Entity();
+Projectile.prototype.constructor = Projectile;
+
+Projectile.prototype.update = function() {
+    
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
+    let time = this.game.clockTick;
+    this.timer += time;
+    if(this.timer < this.lifetime){
+        for (var i = 0; i < this.game.entities.length; i++) {
+            var ent = this.game.entities[i];
+            if (!ent.removeFromWorld) {
+                if (this.shooter !== "Player" && ent instanceof Player && projectileCollide(this, ent)) {
+                    this.handleCollision(ent);
+                } else if (this.shooter === "Player" 
+                                        && (ent instanceof Bunny || ent instanceof shadowBoss 
+                                            || ent instanceof RangeEnemy || ent instanceof FinalRabbitDestination
+                                            || ent instanceof mage)
+                                        && projectileCollide(this, ent)) {
+                    this.handleCollision(ent);
+                } else if (ent instanceof Background) {
+                    LevelBoundingBoxCollsion(ent, this);
+                }
+            }
+        }
+        this.x += time * this.xspeed;
+        this.y += time * this.yspeed;
+
+
+    } else {
+        this.removeFromWorld = true;
+    }
+} 
+
+Projectile.prototype.draw = function(){
+    var x = this.x - this.sheet.center.x;
+    var y = this.y - this.sheet.center.y;
+    this.ctx.drawImage(this.sheet.img, x, y);
+    /*if(this.game.showOutlines)*/ //this.ctx.drawImage(this.rotatedBoundingBox, x, y);
+    var box = this.boundingBox;
+    this.ctx.moveTo(box.p1.x, box.p1.y);
+    this.ctx.lineTo(box.p2.x, box.p2.y);
+    this.ctx.lineTo(box.p3.x, box.p3.y);
+    this.ctx.lineTo(box.p4.x, box.p4.y);
+    this.ctx.lineTo(box.p1.x, box.p1.y);
+    this.ctx.stroke();
+    
+
+}
+
+function rotateBoundingBox(proj, theta){
+    var sin = Math.sin(theta);
+    var cos = Math.cos(theta);
+    var bb = proj.boundingBox;
+    bb.p1 = {x:bb.p1.x*cos + bb.p1.y*(-sin) , y:bb.p1.x*sin + bb.p1.x*cos};
+    bb.p2 = {x:bb.p2.x*cos + bb.p2.y*(-sin) , y:bb.p2.x*sin + bb.p2.x*cos};
+    bb.p3 = {x:bb.p3.x*cos + bb.p3.y*(-sin) , y:bb.p3.x*sin + bb.p3.x*cos};
+    bb.p4 = {x:bb.p4.x*cos + bb.p4.y*(-sin) , y:bb.p4.x*sin + bb.p4.x*cos};
+
+}
+
+function projectileCollide(me, ent) {
+    if ( !(me instanceof Background || me instanceof Crosshair)
+      && !(ent instanceof Background || ent instanceof Crosshair)) {
+          var box = me.boundingBox;
+        var left = lineRect(box.p1.x, box.p1.y, box.p2.x, box.p2.y,
+            ent.boundingBox.x, ent.boundingBox.y, 
+            ent.boundingBox.width, ent.boundingBox.height);
+        if(left) return true;
+        var bottom = lineRect(box.p2.x, box.p2.y, box.p3.x, box.p3.y,
+            ent.boundingBox.x, ent.boundingBox.y,
+            ent.boundingBox.width, ent.boundingBox.height);
+        if(bottom) return true;
+        var right = lineRect(box.p3.x, box.p3.y, box.p4.x, box.p4.y,
+            ent.boundingBox.x, ent.boundingBox.y,
+            ent.boundingBox.width, ent.boundingBox.height);
+        if(right) return true;
+        var top = lineRect(box.p4.x, box.p4.y, box.p1.x, box.p1.y,
+            ent.boundingBox.x, ent.boundingBox.y,
+            ent.boundingBox.width, ent.boundingBox.height);
+        if(top) return true;
+    }
+    return false;
+}
+
 
 function handleBoxCollision (ent, box){
     var hitboxlines = [
@@ -545,49 +641,6 @@ function handleBoxCollision (ent, box){
         }
     }
    // document.getElementById("debug-out").innerHTML = `left:${this.moveRestrictions.left}, right:${this.moveRestrictions.right}, up:${this.moveRestrictions.up}, down:${this.moveRestrictions.down}`
-}
-Projectile.prototype = new Entity();
-Projectile.prototype.constructor = Projectile;
-
-Projectile.prototype.update = function() {
-    
-    this.boundingBox.x = this.x + this.boundingBox.offsetx;
-    this.boundingBox.y = this.y + this.boundingBox.offsety;
-
-    let time = this.game.clockTick;
-    this.timer += time;
-    if(this.timer < this.lifetime){
-        for (var i = 0; i < this.game.entities.length; i++) {
-            var ent = this.game.entities[i];
-            if (!ent.removeFromWorld) {
-                if (this.shooter !== "Player" && ent instanceof Player && collide(this, ent)) {
-                    this.handleCollision(ent);
-                } else if (this.shooter === "Player" 
-                                        && (ent instanceof Bunny || ent instanceof shadowBoss 
-                                            || ent instanceof RangeEnemy || ent instanceof FinalRabbitDestination)
-                                        && collide(this, ent)) {
-                    this.handleCollision(ent);
-                } else if (ent instanceof Background) {
-                    LevelBoundingBoxCollsion(ent, this);
-                }
-            }
-        }
-        this.x += time * this.xspeed;
-        this.y += time * this.yspeed;
-
-
-    } else {
-        this.removeFromWorld = true;
-    }
-} 
-
-Projectile.prototype.draw = function(){
-    var x = this.x - this.sheet.center.x;
-    var y = this.y - this.sheet.center.y;
-    this.ctx.drawImage(this.sheet.img, x, y);
-    if(this.game.showOutlines) this.ctx.drawImage(this.rotatedBoundingBox, x, y);
-    
-
 }
 
 function LevelBoundingBoxCollsion(background, ent) {
