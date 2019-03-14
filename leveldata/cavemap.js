@@ -300,7 +300,7 @@ var caveLevelData =
         {
             "x":4300,
             "y":2300
-        },  
+        }
     ],
     "boundingBoxes": [
         {

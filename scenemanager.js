@@ -66,8 +66,8 @@ SceneManager.prototype.loadVillageMap = function(){
     
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
-    this.game.player.ammo = 200;
-    
+    this.game.player.ammo = 5;
+    this.game.player.health = 100;
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;
     this.game.addEntity(this.game.player);

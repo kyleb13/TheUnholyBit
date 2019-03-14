@@ -707,6 +707,178 @@ function FinalRabbitAttack(x, y, that) {
 
 }
 
+function FinalRabbitAttack2(x, y, that) {
+    var x2= x;
+    var y2 = y;
+    var x3 = x;
+    var y3 = y;
+    var x4= x;
+    var y4 = y;
+    var x5 = x;
+    var y5 = y;
+    var dir;
+  switch(that.direction){
+                case "up":
+                    x += that.attackAnimations["up"].frameWidth/2;
+                    y += that.attackAnimations["up"].frameHeight/2;
+                
+                    x2 += that.attackAnimations["up"].frameWidth/2 + 30;
+                    y2 += that.attackAnimations["up"].frameHeight/2;
+
+                    x3 += that.attackAnimations["up"].frameWidth/2 - 30;
+                    y3 += that.attackAnimations["up"].frameHeight/2;
+
+                    x4 += that.attackAnimations["up"].frameWidth/2 + 60;
+                    y4 += that.attackAnimations["up"].frameHeight/2;
+                    
+                    x5 += that.attackAnimations["up"].frameWidth/2 - 60;
+                    y5 += that.attackAnimations["up"].frameHeight/2;
+                    dir = "up";
+                    break;
+                case "left":
+                    x += that.attackAnimations["left"].frameWidth/2;
+                    y += that.attackAnimations["left"].frameHeight/2;
+                    
+                    x2 += that.attackAnimations["left"].frameWidth/2;
+                    y2 += that.attackAnimations["left"].frameHeight/2 + 40;
+
+                    x3 += that.attackAnimations["left"].frameWidth/2;
+                    y3 += that.attackAnimations["left"].frameHeight/2- 30;
+
+                    x4 += that.attackAnimations["left"].frameWidth/2;        
+                    y4 += that.attackAnimations["left"].frameHeight/2 + 60;
+
+                    
+                    x5 += that.attackAnimations["left"].frameWidth/2;
+                    y5 += that.attackAnimations["left"].frameHeight/2 - 60;
+                    dir = "left";
+                    break;
+                case "right":
+                    y += that.attackAnimations["right"].frameHeight/2;
+                    x += that.attackAnimations["right"].frameWidth/2;
+
+                    x2 += that.attackAnimations["right"].frameWidth/2;
+                    y2 += that.attackAnimations["right"].frameHeight/2 + 30;
+
+                    x3 += that.attackAnimations["right"].frameWidth/2;
+                    y3 += that.attackAnimations["right"].frameHeight/2- 30;
+
+                    x4 += that.attackAnimations["right"].frameWidth/2;        
+                    y4 += that.attackAnimations["right"].frameHeight/2 + 60;
+
+                    
+                    x5 += that.attackAnimations["right"].frameWidth/2;
+                    y5 += that.attackAnimations["right"].frameHeight/2 - 60;
+                    dir = "right";
+                    break;
+                case "down":
+                
+                    x += that.attackAnimations["down"].frameWidth/2;
+                    y += that.attackAnimations["down"].frameHeight/2;
+                   
+                    x2 += that.attackAnimations["down"].frameWidth/2 + 30;
+                    y2 += that.attackAnimations["down"].frameHeight/2;
+
+                    x3 += that.attackAnimations["down"].frameWidth/2 - 30;
+                    y3 += that.attackAnimations["down"].frameHeight/2;
+
+                    x4 += that.attackAnimations["down"].frameWidth/2 + 60;
+                    y4 += that.attackAnimations["down"].frameHeight/2;
+                    
+                    x5 += that.attackAnimations["down"].frameWidth/2 - 60;
+                    y5 += that.attackAnimations["down"].frameHeight/2;
+                    dir = "down";
+                    break;
+            }
+            var yOffset = 0;
+            if (dir === "left" || dir === "right") {
+                 yOffset = 120;
+            } 
+
+            that.game.addProjectile( 
+                new Projectile(that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                    width: 49,
+                    height: 28
+                }, 325, //speed
+                {//start point
+                    x:x, 
+                    y:y
+                }, 
+                {//end Point
+                    x:that.followPoint.center().x, 
+                    y:that.followPoint.center().y , 
+                }, 5, "Boss", 10));//lifetime  
+
+              that.game.addProjectile( 
+                new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                    width: 49,
+                    height: 28
+                }, 325, //speed
+                {//start point
+                    x:x2, 
+                    y:y2
+                }, 
+                {//end Point
+                    x:that.followPoint.center().x+120, 
+                    y:that.followPoint.center().y+ yOffset 
+                }, 5, "Boss", 10));//lifetime  
+
+                that.game.addProjectile( 
+                    new Projectile( that.game,
+                    {
+                        img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                        width: 49,
+                        height: 28
+                    }, 325, //speed
+                    {//start point
+                        x:x3, 
+                        y:y3
+                    }, 
+                    {//end Point
+                        x:that.followPoint.center().x - 120, 
+                        y:that.followPoint.center().y- yOffset 
+                    }, 5, "Boss", 10));//lifetime 
+              
+                    that.game.addProjectile( 
+                        new Projectile( that.game,
+                        {
+                            img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                            width: 49,
+                            height: 28
+                        }, 325, //speed
+                        {//start point
+                            x:x4, 
+                            y:y4
+                        }, 
+                        {//end Point
+                            x:that.followPoint.center().x + 220, 
+                            y:that.followPoint.center().y+ yOffset + 120
+                        }, 5, "Boss", 10));//lifetime 
+
+                    that.game.addProjectile( 
+                        new Projectile( that.game,
+                        {
+                            img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                            width: 49,
+                            height: 28
+                        }, 325, //speed
+                        {//start point
+                            x:x5, 
+                            y:y5
+                        }, 
+                        {//end Point
+                            x:that.followPoint.center().x - 220, 
+                            y:that.followPoint.center().y- yOffset - 120
+                        }, 5, "Boss", 10));//lifetime 
+                    
+
+
+}
+
 function fanningShotPoints(start, end){
     var slope = (end.y - start.y)/(end.x - start.x);
     if(isFinite(slope) && slope != 0){

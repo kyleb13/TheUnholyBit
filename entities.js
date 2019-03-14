@@ -13,7 +13,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.maxSpeed = 250;
     this.xspeed = 0;
     this.yspeed = 0;
-    this.ammo = 200;
+    this.ammo = 2;
     this.health = 100;
     this.changeTimer = 0;
     this.ctx = game.ctx;
@@ -75,24 +75,8 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                 break;
         }
         if (this.ammo > 0) {
-        that.ammo -=1;
-        
-        that.game.addProjectile(new Projectile(that.game, 
-            {
-                img:that.game.assetManager.getAsset("./img/arrow.png"), 
-                width:31, 
-                height:5
-            }, 400, //speed
-            {//start point
-                x:x, 
-                y:y
-            }, 
-            {//end Point
-                x:that.game.pointerx, 
-                y:that.game.pointery
-            }, 5, "Player", 18));//lifetime*/
-            /*
-            //triple shot
+            that.ammo -=1;
+            
             that.game.addProjectile(new Projectile(that.game, 
                 {
                     img:that.game.assetManager.getAsset("./img/arrow.png"), 
@@ -100,14 +84,15 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                     height:5
                 }, 400, //speed
                 {//start point
-                    x:x2, 
-                    y:y2
+                    x:x, 
+                    y:y
                 }, 
                 {//end Point
                     x:that.game.pointerx, 
                     y:that.game.pointery
-                }, 5, "Player", 18));//lifetime
-
+                }, 5, "Player", 18));//lifetime*/
+                /*
+                //triple shot
                 that.game.addProjectile(new Projectile(that.game, 
                     {
                         img:that.game.assetManager.getAsset("./img/arrow.png"), 
@@ -115,16 +100,32 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                         height:5
                     }, 400, //speed
                     {//start point
-                        x:x3, 
-                        y:y3
+                        x:x2, 
+                        y:y2
                     }, 
                     {//end Point
                         x:that.game.pointerx, 
                         y:that.game.pointery
-                    }, 5, "Player", 18)); //lifetime*/
-               
+                    }, 5, "Player", 18));//lifetime
+
+                    that.game.addProjectile(new Projectile(that.game, 
+                        {
+                            img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                            width:31, 
+                            height:5
+                        }, 400, //speed
+                        {//start point
+                            x:x3, 
+                            y:y3
+                        }, 
+                        {//end Point
+                            x:that.game.pointerx, 
+                            y:that.game.pointery
+                        }, 5, "Player", 18)); //lifetime*/
+                    }  
     });    
-}
+
+
     this.radius  = {
         x: this.x,
         r: 700,
@@ -255,7 +256,7 @@ Player.prototype.update = function () {
 }
 
 Player.prototype.draw = function () {
-    if(this.game.lclick || this.shootanimation.active && this.ammo > 0){
+    if(this.game.lclick || this.shootanimation.active){
         this.shootanimation.loop = this.game.lclick?true:false;
         this.shootanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
     } else {
@@ -269,7 +270,7 @@ Player.prototype.draw = function () {
                 this.powerupanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
                 this.explosionanimation.drawFrame(this.game.clockTick, this.ctx, this.x-365, this.y-379, 1.5, this);
                 this.usingPU = false;
-            }else if(!this.dead) {
+            } else if(!this.dead) {
               this.standanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
             }  
         }
