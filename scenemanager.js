@@ -120,7 +120,6 @@ SceneManager.prototype.loadCastleMap = function(){
     this.game.addEntity(this.game.player);
     this.game.addEntity(new Powerup(this.game, 2500,5300, "SlowTime"));
     this.game.addEntity(new mage(this.game, 10900, 2400));
-    this.game.addEntity(new TrapDoor(this.game));
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;
     for(var i = 0; i<data.enemySpawns.length; i++){
