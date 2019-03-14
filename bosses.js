@@ -382,6 +382,7 @@ function FinalRabbitDestination(game, spritesheet, x, y) {
     this.deathAnimations["left"] = new Animation2(spritesheet, 2304, 1440, 384, 512, 0.2, 3, false, false);
     
     this.health = 3000;
+    this.attackCounter = 0;
     this.healthBar = new HealthBar(game, this, 46, -10);
     Entity.call(this, game, x, y);
     this.game = game;
@@ -434,6 +435,7 @@ function FinalRabbitDestination(game, spritesheet, x, y) {
         this.attackAnimations[index].setCallbackOnFrame(3, {}, () => {
             var x = that.x;
             var y = that.y;
+
            FinalRabbitAttack(x, y, that)
            //FinalRabbitAttack2(x, y, that);
         });
@@ -536,7 +538,7 @@ FinalRabbitDestination.prototype.draw = function () {
 }
 
 
-function FinalRabbitAttack(x, y, that) {
+function FinalRabbitAttack(x, y, that, amount) {
 
     var x2= x;
     var y2 = y;
@@ -628,39 +630,25 @@ function FinalRabbitAttack(x, y, that) {
                 xOffset = 120;
             }
 
-            that.game.addProjectile( 
-                new Projectile(that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/carrot.png"), 
-                    width: 49,
-                    height: 28
-                }, 325, //speed
-                {//start point
-                    x:x, 
-                    y:y
-                }, 
-                {//end Point
-                    x:that.followPoint.center().x, 
-                    y:that.followPoint.center().y , 
-                }, 5, "Boss", 10));//lifetime  
 
-              that.game.addProjectile( 
-                new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/carrot.png"), 
-                    width: 49,
-                    height: 28
-                }, 325, //speed
-                {//start point
-                    x:x2, 
-                    y:y2
-                }, 
-                {//end Point
-                    x:that.followPoint.center().x + xOffset, 
-                    y:that.followPoint.center().y + yOffset 
-                }, 5, "Boss", 10));//lifetime  
-
+            if (that.AttackCounter < 3) {
                 that.game.addProjectile( 
+                    new Projectile(that.game,
+                    {
+                        img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                        width: 49,
+                        height: 28
+                    }, 325, //speed
+                    {//start point
+                        x:x, 
+                        y:y
+                    }, 
+                    {//end Point
+                        x:that.followPoint.center().x, 
+                        y:that.followPoint.center().y , 
+                    }, 5, "Boss", 10));//lifetime  
+    
+                  that.game.addProjectile( 
                     new Projectile( that.game,
                     {
                         img:that.game.assetManager.getAsset("./img/carrot.png"), 
@@ -668,45 +656,76 @@ function FinalRabbitAttack(x, y, that) {
                         height: 28
                     }, 325, //speed
                     {//start point
-                        x:x3, 
-                        y:y3
+                        x:x2, 
+                        y:y2
                     }, 
                     {//end Point
-                        x:that.followPoint.center().x - xOffset, 
-                        y:that.followPoint.center().y- yOffset 
-                    }, 5, "Boss", 10));//lifetime 
-              
-                    that.game.addProjectile( 
-                        new Projectile( that.game,
-                        {
-                            img:that.game.assetManager.getAsset("./img/carrot.png"), 
-                            width: 49,
-                            height: 28
-                        }, 325, //speed
-                        {//start point
-                            x:x4, 
-                            y:y4
-                        }, 
-                        {//end Point
-                            x:that.followPoint.center().x + xOffset + 100, 
-                            y:that.followPoint.center().y+ yOffset + 100
-                        }, 5, "Boss", 10));//lifetime 
+                        x:that.followPoint.center().x + xOffset, 
+                        y:that.followPoint.center().y + yOffset 
+                    }, 5, "Boss", 10));//lifetime  
 
-                    that.game.addProjectile( 
-                        new Projectile( that.game,
-                        {
-                            img:that.game.assetManager.getAsset("./img/carrot.png"), 
-                            width: 49,
-                            height: 28
-                        }, 325, //speed
-                        {//start point
-                            x:x5, 
-                            y:y5
-                        }, 
-                        {//end Point
-                            x:that.followPoint.center().x - xOffset - 100, 
-                            y:that.followPoint.center().y - yOffset - 100
-                        }, 5, "Boss", 10));//lifetime 
+                    if (that.attackCounter === 1) {
+                        that.game.addProjectile( 
+                            new Projectile( that.game,
+                            {
+                                img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                                width: 49,
+                                height: 28
+                            }, 325, //speed
+                            {//start point
+                                x:x3, 
+                                y:y3
+                            }, 
+                            {//end Point
+                                x:that.followPoint.center().x - xOffset, 
+                                y:that.followPoint.center().y- yOffset 
+                            }, 5, "Boss", 10));//lifetime 
+        
+                    }
+
+                    if (that.attackCounter === 2) {
+                    
+                        that.game.addProjectile( 
+                            new Projectile( that.game,
+                            {
+                                img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                                width: 49,
+                                height: 28
+                            }, 325, //speed
+                            {//start point
+                                x:x4, 
+                                y:y4
+                            }, 
+                            {//end Point
+                                x:that.followPoint.center().x + xOffset + 100, 
+                                y:that.followPoint.center().y+ yOffset + 100
+                            }, 5, "Boss", 10));//lifetime 
+    
+                        that.game.addProjectile( 
+                            new Projectile( that.game,
+                            {
+                                img:that.game.assetManager.getAsset("./img/carrot.png"), 
+                                width: 49,
+                                height: 28
+                            }, 325, //speed
+                            {//start point
+                                x:x5, 
+                                y:y5
+                            }, 
+                            {//end Point
+                                x:that.followPoint.center().x - xOffset - 100, 
+                                y:that.followPoint.center().y - yOffset - 100
+                            }, 5, "Boss", 10));//lifetime 
+                    }
+                } else {
+                    
+                }
+                    
+               
+            }
+                
+              
+                 
                
 
 }
