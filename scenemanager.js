@@ -11,7 +11,7 @@ var assets = [
     "bossBun-export.png",   "castlemap.png",        "KnightArcher.png",     "KnightMage.png",
     "blue.png",             "officialLogo.png",     "completeGame.png",
     "blue.png",             "mageWalk-export.png",  "mageAttack-export.png","mageDying-export.png",
-    "big_modball.png",      "completeFinalMap.png"
+    "big_modball.png",      "blackbunbun.png",      "completeFinalMap.png"
 ];
 function SceneManager(){
 
@@ -66,7 +66,7 @@ SceneManager.prototype.loadVillageMap = function(){
     
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
-    this.game.player.ammo = 5;
+    this.game.player.ammo = 200;
     this.game.player.health = 100;
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;
@@ -131,9 +131,7 @@ SceneManager.prototype.loadCastleMap = function(){
         } else if(enemyPercentage > 0.45 && enemyPercentage <= 0.85) {
             this.game.addEntity(new RangeEnemy(this.game, AM.getAsset("./img/KnightMage.png"), location.x, location.y, MagicType, "magic"));
         } else if (enemyPercentage > 0.85 && enemyPercentage <= 1) { 
-            this.game.addEntity(new Bunny(this.game, AM.getAsset("./img/bunbun.png"), location.x, location.y)); 
-            this.game.addEntity(new Bunny(this.game, AM.getAsset("./img/bunbun.png"), location.x+35, location.y)); 
-            this.game.addEntity(new Bunny(this.game, AM.getAsset("./img/bunbun.png"), location.x+70, location.y)); 
+            this.game.addEntity(new BlackBunny(this.game, AM.getAsset("./img/blackbunbun.png"), location.x, location.y)); 
         } else {
             this.game.addEntity(new RangeEnemy(this.game, AM.getAsset("./img/magicSkel.png"), location.x, location.y, MagicType, "magic", "AdvMagic"));
         }

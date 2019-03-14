@@ -809,36 +809,19 @@ function fanningShotPoints(start, end){
 function mage(game, x, y){
     //function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale)
     // this.walkAnimation = new Animation(AM.getAsset("./img/mageWalk-export.png"), 64, 64, 8, .12, 32, true, 1);
-    this.attackAnimation = new Animation(AM.getAsset("./img/mageAttack-export.png"), 192, 192, 7, .12, 28, true, 1);
+    this.attackAnimation = new Animation(AM.getAsset("./img/mageAttack-export.png"), 192, 192, 7, .2, 28, true, 1);
     this.deathAnimation = new Animation(AM.getAsset("./img/mageDying-export.png"), 192, 192, 6, .12, 6, false, 1);
     this.walkAnimation = new Animation(AM.getAsset("./img/mageWalk-export.png"), 192, 192, 8, .12, 32, true, 1);
     this.walkAnimation.rowMode();
     this.attackAnimation.rowMode();
-
+    this.attacktimer = 0;
+    this.canAttack = true;
     var that = this;
     this.deathAnimation.setCallbackOnFrame(6, [], function(){
         that.removeFromWorld = true;
     });
 
-    this.attackAnimation.setCallbackOnFrame(6, [], function() {
-        var x = that.x + 96;
-        var y = that.y + 96;
-        that.game.addProjectile( 
-            new Projectile(that.game,
-            {
-                img:that.game.assetManager.getAsset("./img/big_modball.png"), 
-                width: 175,
-                height: 175
-            }, 225, //speed
-            {//start point
-                x:x-96, 
-                y:y-96
-            }, 
-            {//end Point
-                x:that.followPoint.center().x, 
-                y:that.followPoint.center().y , 
-            }, 5, "Boss", 20));//lifetime  
-    });
+    this.attackAnimation.setCallbackOnFrame(6, [], function(){that.modballAttack(that)});
 
 
     this.movedir = 2;
@@ -907,6 +890,13 @@ mage.prototype.update = function () {
     this.attackBox.x = this.x + this.attackBox.offsetx;
     this.attackBox.y = this.y + this.attackBox.offsety;
 
+    let time = this.game.clockTick;
+
+    if(!this.canAttack) {
+        this.attackTimer += time;
+        this.canAttack = this.attackTimer>=3?true:false;
+    }
+
     if(this.health <= 0) {
         this.dead = true;
         bossDead = true;
@@ -922,8 +912,14 @@ mage.prototype.update = function () {
         this.attacking = false;
         this.maxSpeed = 100;
         var dist = distance(this, ent);
-        if (collide(ent, {boundingBox: this.attackBox})) {
+        if (this.canAttack && collide(ent, {boundingBox: this.attackBox})) {
+            console.log("He Attac");
             this.attacking = true;
+            this.canAttack = false;
+            this.attackTimer = 0;
+            this.attackAnimation.loop = true;
+        } else {
+            this.attackAnimation.loop = false;
         }
         var difX = (ent.x - this.x)/dist;
         var difY = (ent.y - this.y)/dist;
@@ -937,8 +933,7 @@ mage.prototype.update = function () {
         }
 
         this.followPoint = ent;
-        let time = this.game.clockTick;
-        if(!this.attacking){
+        if(!this.attackAnimation.active){
             if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
                 this.x += time * this.velocity.x;
             }
@@ -970,10 +965,180 @@ mage.prototype.update = function () {
     Entity.prototype.update.call(this);
 }
 
+mage.prototype.modballAttack = function(that) {
+    var x = that.x + 96;
+    var y = that.y + 96;
+    var projectile = new Projectile(that.game,
+        {
+            img:AM.getAsset("./img/big_modball.png"), 
+            width: 175,
+            height: 175
+        }, 265, //speed
+        {//start point
+            x:x-96, 
+            y:y-96
+        }, 
+        {//end Point
+            x:that.followPoint.center().x, 
+            y:that.followPoint.center().y , 
+        }, 2, "Boss", 30);
+    projectile.setOnDestroy(function(){
+        var rng = Math.random();
+        if(rng <= .8){
+            modballBurst(that, projectile);
+        } else {
+            that.game.addEntity(new BlackBunny(that.game, AM.getAsset("./img/blackbunbun.png"), projectile.x, projectile.y)); 
+            //that.game.addEntity(new BlackBunny(that.game, AM.getAsset("./img/blackbunbun.png"), projectile.x+30, projectile.y+30)); 
+        }
+    });
+    this.game.addProjectile(projectile);
+}
+
+function modballBurst(that, projectile){
+    for(var i = 0; i<1; i++){
+        that.game.addProjectile(
+            new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 325, //speed
+                {//start point
+                    x:projectile.x, 
+                    y:projectile.y
+                }, 
+                {//end Point
+                    x:projectile.x+1, 
+                    y:projectile.y+i
+                }, 10, "Boss", 15)
+        );
+        that.game.addProjectile(
+            new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 325, //speed
+                {//start point
+                    x:projectile.x, 
+                    y:projectile.y
+                }, 
+                {//end Point
+                    x:projectile.x+1+i, 
+                    y:projectile.y+1-i
+                }, 10, "Boss", 15)
+        );
+        that.game.addProjectile(
+            new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 325, //speed
+                {//start point
+                    x:projectile.x, 
+                    y:projectile.y
+                }, 
+                {//end Point
+                    x:projectile.x+i, 
+                    y:projectile.y+1
+                }, 10, "Boss", 15)
+        );
+        that.game.addProjectile(
+            new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 325, //speed
+                {//start point
+                    x:projectile.x, 
+                    y:projectile.y
+                }, 
+                {//end Point
+                    x:projectile.x-1+i, 
+                    y:projectile.y+1+i
+                }, 10, "Boss", 15)
+        );
+        that.game.addProjectile(
+            new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 325, //speed
+                {//start point
+                    x:projectile.x, 
+                    y:projectile.y
+                }, 
+                {//end Point
+                    x:projectile.x-1, 
+                    y:projectile.y+i
+                }, 10, "Boss", 15)
+        );
+        that.game.addProjectile(
+            new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 325, //speed
+                {//start point
+                    x:projectile.x, 
+                    y:projectile.y
+                }, 
+                {//end Point
+                    x:projectile.x-1-i, 
+                    y:projectile.y-1+i
+                }, 10, "Boss", 15)
+        );
+        that.game.addProjectile(
+            new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 325, //speed
+                {//start point
+                    x:projectile.x, 
+                    y:projectile.y
+                }, 
+                {//end Point
+                    x:projectile.x-i, 
+                    y:projectile.y-1
+                }, 10, "Boss", 15)
+        );
+        that.game.addProjectile(
+            new Projectile( that.game,
+                {
+                    img:that.game.assetManager.getAsset("./img/modball.png"), 
+                    width:26, 
+                    height:17,
+                    path:"./img/modball.png"
+                }, 325, //speed
+                {//start point
+                    x:projectile.x, 
+                    y:projectile.y
+                }, 
+                {//end Point
+                    x:projectile.x+1+i, 
+                    y:projectile.y-1+i
+                }, 10, "Boss", 15)
+        );
+            }
+}
+
 mage.prototype.draw = function () {
 
-    if(this.attacking & !this.dead) {
-        this.attackAnimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir)
+    if(this.attacking || this.attackAnimation.active  && !this.dead) {
+        this.attackAnimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
     } else if(this.dead){
         this.deathAnimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
     } else {
