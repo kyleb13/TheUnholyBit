@@ -13,7 +13,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.maxSpeed = 250;
     this.xspeed = 0;
     this.yspeed = 0;
-    this.ammo = 200;
+    this.ammo = 2;
     this.health = 100;
     this.changeTimer = 0;
     this.ctx = game.ctx;
@@ -248,22 +248,24 @@ Player.prototype.update = function () {
 }
 
 Player.prototype.draw = function () {
+    var time = this.game.clockTick;
+    if(timeSlowed) time *= 2;
     if(this.game.lclick || this.shootanimation.active && this.ammo > 0){
         this.shootanimation.loop = this.game.lclick?true:false;
-        this.shootanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
+        this.shootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
     } else {
         if(this.xspeed!==0 || this.yspeed!==0){
             if (!this.dead || !this.usingPU) {
-             this.animation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
+             this.animation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
             }
         } else {
             if(this.usingPU || this.powerupanimation.active || this.explosionanimation.active) { 
                 this.powerupanimation.loop = this.usingPU?true:false
-                this.powerupanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
-                this.explosionanimation.drawFrame(this.game.clockTick, this.ctx, this.x-365, this.y-379, 1.5, this);
+                this.powerupanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
+                this.explosionanimation.drawFrame(time, this.ctx, this.x-365, this.y-379, 1.5, this);
                 this.usingPU = false;
             }else if(!this.dead) {
-              this.standanimation.drawFrameFromRow(this.game.clockTick, this.ctx, this.x, this.y, this.movedir);
+              this.standanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
             }  
         }
     }
@@ -274,7 +276,7 @@ Player.prototype.draw = function () {
     this.ctx.fillStyle = "red";
     this.ctx.fillText(`Ammo: ${this.ammo}`, this.x+550, this.y+300);
     if (this.dead) {
-        this.deathanimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this); 
+        this.deathanimation.drawFrame(time, this.ctx, this.x, this.y, 1.5, this); 
     }
     this.healthBar.draw();
     this.game.crosshair.draw();
@@ -407,7 +409,7 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     var height;
     var offx;
     var offy;
-        
+    this.onDestroy = null;
     this.shooter = shooter;
     this.game = game;
     this.ctx = game.ctx;
@@ -512,6 +514,10 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
 Projectile.prototype = new Entity();
 Projectile.prototype.constructor = Projectile;
 
+Projectile.prototype.setOnDestroy = function(func) {
+    this.onDestroy = func;
+}
+
 Projectile.prototype.update = function() {
 
     let time = this.game.clockTick;
@@ -525,7 +531,7 @@ Projectile.prototype.update = function() {
                 } else if (this.shooter === "Player" 
                                         && (ent instanceof Bunny || ent instanceof shadowBoss 
                                             || ent instanceof RangeEnemy || ent instanceof FinalRabbitDestination
-                                            || ent instanceof mage || ent instanceof menuItem)
+                                            || ent instanceof mage || ent instanceof menuItem || ent instanceof BlackBunny)
                                         && projectileCollide(this, ent)) {
                     this.handleCollision(ent);
                 } else if (ent instanceof Background) {
@@ -546,6 +552,7 @@ Projectile.prototype.update = function() {
     } else {
         this.removeFromWorld = true;
     }
+    if(this.onDestroy && this.removeFromWorld) this.onDestroy();
 } 
 
 Projectile.prototype.draw = function(){
