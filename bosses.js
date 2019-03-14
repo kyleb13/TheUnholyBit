@@ -1065,8 +1065,8 @@ mage.prototype.modballAttack = function(that) {
         }, 2, "Boss", 30);
     projectile.setOnDestroy(function(){
         var rng = Math.random();
-        if(rng <= .8){
-            modballBurst(that, projectile);
+        if(rng <= .85){
+            projectileBurst(that, projectile, AM.getAsset("./img/modball.png"), 26, 17, 10, 10);
         } else {
             that.game.addEntity(new BlackBunny(that.game, AM.getAsset("./img/blackbunbun.png"), projectile.x, projectile.y)); 
             //that.game.addEntity(new BlackBunny(that.game, AM.getAsset("./img/blackbunbun.png"), projectile.x+30, projectile.y+30)); 
@@ -1075,145 +1075,142 @@ mage.prototype.modballAttack = function(that) {
     this.game.addProjectile(projectile);
 }
 
-function modballBurst(that, projectile){
-    for(var i = 0; i<1; i++){
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/modball.png"), 
-                    width:26, 
-                    height:17,
-                    path:"./img/modball.png"
-                }, 325, //speed
-                {//start point
-                    x:projectile.x, 
-                    y:projectile.y
-                }, 
-                {//end Point
-                    x:projectile.x+1, 
-                    y:projectile.y+i
-                }, 10, "Boss", 15)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/modball.png"), 
-                    width:26, 
-                    height:17,
-                    path:"./img/modball.png"
-                }, 325, //speed
-                {//start point
-                    x:projectile.x, 
-                    y:projectile.y
-                }, 
-                {//end Point
-                    x:projectile.x+1+i, 
-                    y:projectile.y+1-i
-                }, 10, "Boss", 15)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/modball.png"), 
-                    width:26, 
-                    height:17,
-                    path:"./img/modball.png"
-                }, 325, //speed
-                {//start point
-                    x:projectile.x, 
-                    y:projectile.y
-                }, 
-                {//end Point
-                    x:projectile.x+i, 
-                    y:projectile.y+1
-                }, 10, "Boss", 15)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/modball.png"), 
-                    width:26, 
-                    height:17,
-                    path:"./img/modball.png"
-                }, 325, //speed
-                {//start point
-                    x:projectile.x, 
-                    y:projectile.y
-                }, 
-                {//end Point
-                    x:projectile.x-1+i, 
-                    y:projectile.y+1+i
-                }, 10, "Boss", 15)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/modball.png"), 
-                    width:26, 
-                    height:17,
-                    path:"./img/modball.png"
-                }, 325, //speed
-                {//start point
-                    x:projectile.x, 
-                    y:projectile.y
-                }, 
-                {//end Point
-                    x:projectile.x-1, 
-                    y:projectile.y+i
-                }, 10, "Boss", 15)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/modball.png"), 
-                    width:26, 
-                    height:17,
-                    path:"./img/modball.png"
-                }, 325, //speed
-                {//start point
-                    x:projectile.x, 
-                    y:projectile.y
-                }, 
-                {//end Point
-                    x:projectile.x-1-i, 
-                    y:projectile.y-1+i
-                }, 10, "Boss", 15)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/modball.png"), 
-                    width:26, 
-                    height:17,
-                    path:"./img/modball.png"
-                }, 325, //speed
-                {//start point
-                    x:projectile.x, 
-                    y:projectile.y
-                }, 
-                {//end Point
-                    x:projectile.x-i, 
-                    y:projectile.y-1
-                }, 10, "Boss", 15)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:that.game.assetManager.getAsset("./img/modball.png"), 
-                    width:26, 
-                    height:17,
-                    path:"./img/modball.png"
-                }, 325, //speed
-                {//start point
-                    x:projectile.x, 
-                    y:projectile.y
-                }, 
-                {//end Point
-                    x:projectile.x+1+i, 
-                    y:projectile.y-1+i
-                }, 10, "Boss", 15)
-        );
-            }
+function projectileBurst(that, start, asset, width, height, damage, lifetime){
+
+    that.game.addProjectile(
+        new Projectile( that.game,
+            {
+                img:asset, 
+                width:width, 
+                height:height
+            }, 325, //speed
+            {//start point
+                x:start.x, 
+                y:start.y
+            }, 
+            {//end Point
+                x:start.x+1, 
+                y:start.y
+            }, lifetime, "Boss", damage)
+    );
+    that.game.addProjectile(
+        new Projectile( that.game,
+            {
+                img:asset, 
+                width:width, 
+                height:height
+            }, 325, //speed
+            {//start point
+                x:start.x, 
+                y:start.y
+            }, 
+            {//end Point
+                x:start.x+1, 
+                y:start.y+1
+            }, lifetime, "Boss", damage)
+    );
+    that.game.addProjectile(
+        new Projectile( that.game,
+            {
+                img:asset, 
+                width:width, 
+                height:height
+                
+            }, 325, //speed
+            {//start point
+                x:start.x, 
+                y:start.y
+            }, 
+            {//end Point
+                x:start.x, 
+                y:start.y+1
+            }, lifetime, "Boss", damage)
+    );
+    that.game.addProjectile(
+        new Projectile( that.game,
+            {
+                img:asset, 
+                width:width, 
+                height:height
+                
+            }, 325, //speed
+            {//start point
+                x:start.x, 
+                y:start.y
+            }, 
+            {//end Point
+                x:start.x-1, 
+                y:start.y+1
+            }, lifetime, "Boss", damage)
+    );
+    that.game.addProjectile(
+        new Projectile( that.game,
+            {
+                img:asset, 
+                width:width, 
+                height:height
+                
+            }, 325, //speed
+            {//start point
+                x:start.x, 
+                y:start.y
+            }, 
+            {//end Point
+                x:start.x-1, 
+                y:start.y
+            }, lifetime, "Boss", damage)
+    );
+    that.game.addProjectile(
+        new Projectile( that.game,
+            {
+                img:asset, 
+                width:width, 
+                height:height
+            
+            }, 325, //speed
+            {//start point
+                x:start.x, 
+                y:start.y
+            }, 
+            {//end Point
+                x:start.x-1, 
+                y:start.y-1
+            }, lifetime, "Boss", damage)
+    );
+    that.game.addProjectile(
+        new Projectile( that.game,
+            {
+                img:asset, 
+                width:width, 
+                height:height
+                
+            }, 325, //speed
+            {//start point
+                x:start.x, 
+                y:start.y
+            }, 
+            {//end Point
+                x:start.x, 
+                y:start.y-1
+            }, lifetime, "Boss", damage)
+    );
+    that.game.addProjectile(
+        new Projectile( that.game,
+            {
+                img:asset, 
+                width:width, 
+                height:height
+                
+            }, 325, //speed
+            {//start point
+                x:start.x, 
+                y:start.y
+            }, 
+            {//end Point
+                x:start.x+1, 
+                y:start.y-1
+            }, lifetime, "Boss", damage)
+    );
 }
 
 mage.prototype.draw = function () {
