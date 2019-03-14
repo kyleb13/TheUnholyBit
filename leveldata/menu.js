@@ -31,17 +31,17 @@ function menuItem (game, x, y, name) {
     this.game = game;
     this.ctx = game.ctx;
 
+    this.boundingBox = {
+        x: x-10, 
+        y:y,
+        width: 230,
+        height: 50,
+        offsetx:0,
+        offsety:-40
+    }
     if (name === "Start Game") {
 
-        this.boundingBox = {
-            x: x-10, 
-            y:y,
-            width: 230,
-            height: 50,
-            offsetx:0,
-            offsety:-40
-        }
-    } else {
+    }/* else {
         
         this.boundingBox = {
             x: x-10, 
@@ -51,7 +51,7 @@ function menuItem (game, x, y, name) {
             offsetx:15,
             offsety:-210
         }
-    }
+    }*/
     Entity.call(this, game, x, y);
 }
 
@@ -75,11 +75,12 @@ menuItem.prototype.doAThing = function() {
 menuItem.prototype.draw = function() {
     
     this.ctx.fillStyle = "white";
-    if (this.name === "Start Game") {
-        this.ctx.font = "50px Bahnschrift Condensed";
-        this.ctx.font = "50px Matura MT Script Capitals"; 
     
-        this.ctx.fillText(this.name, this.x, this.y);
+    this.ctx.font = "50px Matura MT Script Capitals"; 
+    
+    this.ctx.fillText(this.name, this.x, this.y);
+    if (this.name === "Start Game") {
+    
         this.ctx.font = "24px Bahnschrift Condensed";
         this.ctx.fillText("* Shoot \"Start Game\" to start game.*", 550, 660);
         this.ctx.font = "40px Bahnschrift";
@@ -94,6 +95,6 @@ menuItem.prototype.draw = function() {
     
     if(this.game.showOutlines){
         this.ctx.strokeRect(this.boundingBox.x+this.boundingBox.offsetx, 
-            this.boundingBox.y+this.boundingBox.offsety, this.boundingBox.width, this.boundingBox.height);
+        this.boundingBox.y+this.boundingBox.offsety, this.boundingBox.width, this.boundingBox.height);
     }   
 }

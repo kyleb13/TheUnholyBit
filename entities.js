@@ -13,7 +13,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.maxSpeed = 250;
     this.xspeed = 0;
     this.yspeed = 0;
-    this.ammo = 2;
+    this.ammo = 200;
     this.health = 100;
     this.changeTimer = 0;
     this.ctx = game.ctx;
@@ -74,24 +74,9 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                 
                 break;
         }
-        that.ammo -=1;
-        
-        that.game.addProjectile(new Projectile(that.game, 
-            {
-                img:that.game.assetManager.getAsset("./img/arrow.png"), 
-                width:31, 
-                height:5
-            }, 400, //speed
-            {//start point
-                x:x, 
-                y:y
-            }, 
-            {//end Point
-                x:that.game.pointerx, 
-                y:that.game.pointery
-            }, 5, "Player", 18));//lifetime*/
-            /*
-            //triple shot
+        if (this.ammo > 0) {
+            that.ammo -=1;
+            
             that.game.addProjectile(new Projectile(that.game, 
                 {
                     img:that.game.assetManager.getAsset("./img/arrow.png"), 
@@ -99,14 +84,15 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                     height:5
                 }, 400, //speed
                 {//start point
-                    x:x2, 
-                    y:y2
+                    x:x, 
+                    y:y
                 }, 
                 {//end Point
                     x:that.game.pointerx, 
                     y:that.game.pointery
-                }, 5, "Player", 18));//lifetime
-
+                }, 5, "Player", 18));//lifetime*/
+                /*
+                //triple shot
                 that.game.addProjectile(new Projectile(that.game, 
                     {
                         img:that.game.assetManager.getAsset("./img/arrow.png"), 
@@ -114,14 +100,32 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                         height:5
                     }, 400, //speed
                     {//start point
-                        x:x3, 
-                        y:y3
+                        x:x2, 
+                        y:y2
                     }, 
                     {//end Point
                         x:that.game.pointerx, 
                         y:that.game.pointery
-                    }, 5, "Player", 18)); //lifetime*/
+                    }, 5, "Player", 18));//lifetime
+
+                    that.game.addProjectile(new Projectile(that.game, 
+                        {
+                            img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                            width:31, 
+                            height:5
+                        }, 400, //speed
+                        {//start point
+                            x:x3, 
+                            y:y3
+                        }, 
+                        {//end Point
+                            x:that.game.pointerx, 
+                            y:that.game.pointery
+                        }, 5, "Player", 18)); //lifetime*/
+                    }  
     });    
+
+
     this.radius  = {
         x: this.x,
         r: 700,
@@ -203,10 +207,14 @@ Player.prototype.update = function () {
                     }
 
                 } else if(ent instanceof Background) {
+                    if ( collide({boundingBox: ent.nextLevelBox}, this)) {
+                        console.log("boundBox");
+                    }
+
+
                     if(bossDead && collide({boundingBox: ent.nextLevelBox}, this)) { 
-                        console.log("YAS?")
-                        sceneManager.loadNextLevel();
-                
+                        console.log("truuuu");
+                        sceneManager.loadNextLevel();          
                     }
                     LevelBoundingBoxCollsion(ent, this);
                 }
@@ -250,7 +258,7 @@ Player.prototype.update = function () {
 Player.prototype.draw = function () {
     var time = this.game.clockTick;
     if(timeSlowed) time *= 2;
-    if(this.game.lclick || this.shootanimation.active && this.ammo > 0){
+    if(this.game.lclick || this.shootanimation.active){
         this.shootanimation.loop = this.game.lclick?true:false;
         this.shootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
     } else {
@@ -559,7 +567,7 @@ Projectile.prototype.draw = function(){
     var x = this.x - this.sheet.center.x;
     var y = this.y - this.sheet.center.y;
     this.ctx.drawImage(this.sheet.img, x, y);
-    if(this.game.showOutlines) this.ctx.drawImage(this.rotatedBoundingBox, x, y);
+   // if(this.game.showOutlines) this.ctx.drawImage(this.rotatedBoundingBox, x, y);
     // var box = this.boundingBox;
     // this.ctx.strokeStyle = "red";
     // this.ctx.moveTo(box.p1.x, box.p1.y);

@@ -57,20 +57,30 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
             
             if (ent !== undefined) {
                 ent.removeFromWorld = true;
-                if (dropType !== undefined) {
-                    
-                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
-                    
+                if (ent instanceof Player) {
+                    sceneManager.reloadLevel();
+                } else if (ent instanceof FinalRabbitDestination) {
+                    sceneManager.loadNextLevel();
+                } else {
+                    if (dropType !== undefined) {          
+                        ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+                    }    
                 }
+                
             }
         }
         
     } else if (this.isDone()) {
         if (ent !== undefined) {
-           ent.removeFromWorld = true; 
-             if (dropType !== undefined) {
-                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
-            
+           ent.removeFromWorld = true;   
+           if (ent instanceof Player) {
+            sceneManager.reloadLevel();
+            } else if (ent instanceof FinalRabbitDestination) {
+                sceneManager.loadNextLevel();
+            }  else {
+                if (dropType !== undefined) {
+                    ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+                }
              }
         }
         return;
@@ -203,9 +213,7 @@ function AdvancedAttacks(x, y, that) {
 }
 
 function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species) {
-    if(!spritesheet){
-        console.log("????");
-    }
+
     this.walkAnimations = [];
     this.attackAnimations =[];
     this.standingAnimations = [];
@@ -246,7 +254,12 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, projectile, "Enemy", 10);
+                var dmg = 5;
+                if (projectile === "magic") {
+                    dmg += 5;
+                }
+
+                addProjectile(that, x, y, projectile, "Enemy", dmg)
             }         
         });
     }
@@ -486,7 +499,7 @@ function Bunny(game, spritesheet, x, y) {
     this.deathAnimations["down"] = new Animation2(spritesheet, 288, 0, 48, 64, 0.1, 3, false, false);
     this.deathAnimations["up"] = new Animation2(spritesheet, 288, 64, 48, 64, 0.1, 3, false, false);
     this.deathAnimations["right"] = new Animation2(spritesheet, 288, 128, 48, 64, 0.1, 3, false, false);
-    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, true);
+    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, false);
     
     this.direction = "right";
     this.visualRadius = 800;
@@ -667,9 +680,9 @@ function BlackBunny(game, spritesheet, x, y) {
     this.visualBox = {
         x:this.x, 
         y:this.y,
-        width: 1500,
+        width: 1900,
         height: 1500,
-        offsetx:-700,
+        offsetx:-900,
         offsety:-850
     }
     this.attackBox = {
@@ -736,8 +749,8 @@ BlackBunny.prototype.update = function () {
             this.velocity.x += difX * acceleration / (dist*dist);
             this.velocity.y += difY * acceleration / (dist * dist);
             var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
-            if (speed > this.maxSpeed) {
-                var ratio = this.maxSpeed / speed;
+            if (speed > mspeed) {
+                var ratio = mspeed / speed;
                 this.velocity.x *= ratio;
                 this.velocity.y *= ratio;
             }
@@ -828,7 +841,7 @@ BlackBunny.prototype.attack = function(){
             {//end Point
                 x:x1, 
                 y:y1
-            }, 10, "Enemy", 15)
+            }, 10, "Enemy", 10)
     );
     this.game.addProjectile(
         new Projectile( this.game,
@@ -845,7 +858,7 @@ BlackBunny.prototype.attack = function(){
             {//end Point
                 x:x2, 
                 y:y2
-            }, 10, "Enemy", 15)
+            }, 10, "Enemy", 10)
     );
     this.game.addProjectile(
         new Projectile( this.game,
@@ -862,7 +875,7 @@ BlackBunny.prototype.attack = function(){
             {//end Point
                 x:x3, 
                 y:y3
-            }, 10, "Enemy", 15)
+            }, 10, "Enemy", 10)
     );
 }
 
@@ -875,9 +888,12 @@ BlackBunny.prototype.draw = function () {
     }
     if (this.game.showOutlines) {
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+        this.ctx.strokeStyle = "black";
         this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+        this.ctx.strokeStyle = "red"
+        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
     }
-    this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+    
     Entity.prototype.draw.call(this);
     
     this.healthBar.draw();
