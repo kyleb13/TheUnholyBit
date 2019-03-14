@@ -57,20 +57,30 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
             
             if (ent !== undefined) {
                 ent.removeFromWorld = true;
-                if (dropType !== undefined) {
-                    
-                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
-                    
+                if (ent instanceof Player) {
+                    sceneManager.reloadLevel();
+                } else if (ent instanceof FinalRabbitDestination) {
+                    sceneManager.loadNextLevel();
+                } else {
+                    if (dropType !== undefined) {          
+                        ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+                    }    
                 }
+                
             }
         }
         
     } else if (this.isDone()) {
         if (ent !== undefined) {
-           ent.removeFromWorld = true; 
-             if (dropType !== undefined) {
-                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
-            
+           ent.removeFromWorld = true;   
+           if (ent instanceof Player) {
+            sceneManager.reloadLevel();
+            } else if (ent instanceof FinalRabbitDestination) {
+                sceneManager.loadNextLevel();
+            }  else {
+                if (dropType !== undefined) {
+                    ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+                }
              }
         }
         return;
@@ -203,9 +213,7 @@ function AdvancedAttacks(x, y, that) {
 }
 
 function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species) {
-    if(!spritesheet){
-        console.log("????");
-    }
+
     this.walkAnimations = [];
     this.attackAnimations =[];
     this.standingAnimations = [];
@@ -246,7 +254,12 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, projectile, "Enemy", 10);
+                var dmg = 5;
+                if (projectile === "magic") {
+                    dmg += 5;
+                }
+
+                addProjectile(that, x, y, projectile, "Enemy", dmg)
             }         
         });
     }
@@ -486,7 +499,7 @@ function Bunny(game, spritesheet, x, y) {
     this.deathAnimations["down"] = new Animation2(spritesheet, 288, 0, 48, 64, 0.1, 3, false, false);
     this.deathAnimations["up"] = new Animation2(spritesheet, 288, 64, 48, 64, 0.1, 3, false, false);
     this.deathAnimations["right"] = new Animation2(spritesheet, 288, 128, 48, 64, 0.1, 3, false, false);
-    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, true);
+    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, false);
     
     this.direction = "right";
     this.visualRadius = 800;

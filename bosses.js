@@ -376,15 +376,14 @@ function FinalRabbitDestination(game, spritesheet, x, y) {
     
 
     this.deathAnimations = [];
-    this.deathAnimations["down"] = new Animation2(spritesheet, 288, 0, 384, 512, 0.1, 3, false, false);
-    this.deathAnimations["up"] = new Animation2(spritesheet, 288, 64, 48, 64, 0.1, 3, false, false);
-    this.deathAnimations["right"] = new Animation2(spritesheet, 288, 128, 48, 64, 0.1, 3, false, false);
-    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, true);
+    this.deathAnimations["down"] = new Animation2(spritesheet, 2304, 0, 384, 512, 0.2, 3, false, false);
+    this.deathAnimations["up"] = new Animation2(spritesheet, 2304, 480, 384, 512, 0.2, 3, false, false);
+    this.deathAnimations["right"] = new Animation2(spritesheet, 2304, 960, 384, 512, 0.2, 3, false, false);
+    this.deathAnimations["left"] = new Animation2(spritesheet, 2304, 1440, 384, 512, 0.2, 3, false, false);
     
     this.health = 3000;
     this.healthBar = new HealthBar(game, this, 46, -10);
     Entity.call(this, game, x, y);
-    this.dead = false;
     this.game = game;
     
     this.attacking = false;
@@ -436,26 +435,6 @@ function FinalRabbitDestination(game, spritesheet, x, y) {
             var x = that.x;
             var y = that.y;
             FinalRabbitAttack(x, y, that)
-            /*
-            switch(that.direction){
-                case "up":
-                    x += that.attackAnimations["up"].frameWidth/2;
-                    y +=  that.attackAnimations["up"].frameHeight/2;
-                    break;
-                case "left":
-                    y += that.attackAnimations["left"].frameHeight/2;
-                    x += that.attackAnimations["left"].frameWidth/2;
-                    break;
-                case "right":
-                    y += that.attackAnimations["right"].frameHeight/2;
-                    x += that.attackAnimations["right"].frameWidth/2;
-                    break;
-                case "down":       
-                    y += that.attackAnimations["down"].frameHeight/2;
-                    x += that.attackAnimations["down"].frameWidth/2;
-                    break;
-            }
-            addProjectile(that, x, y, "carrot", "Enemy", 20);*/
         });
     }
 }
@@ -474,11 +453,6 @@ FinalRabbitDestination.prototype.update = function () {
 
     this.attackBox.x = this.x + this.attackBox.offsetx;
     this.attackBox.y = this.y + this.attackBox.offsety;
-
-    if (this.health < 1) {
-        console.log("D E D");
-        this.dead = true;
-    }
 
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
@@ -531,6 +505,8 @@ FinalRabbitDestination.prototype.update = function () {
 
     if (this.health < 1) {
         this.dead = true;
+        this.attacking = false;
+        bossDead = true;
     }
 
     
@@ -662,7 +638,7 @@ function FinalRabbitAttack(x, y, that) {
                 {//end Point
                     x:that.followPoint.center().x, 
                     y:that.followPoint.center().y , 
-                }, 5, "Boss", 20));//lifetime  
+                }, 5, "Boss", 10));//lifetime  
 
               that.game.addProjectile( 
                 new Projectile( that.game,
@@ -678,7 +654,7 @@ function FinalRabbitAttack(x, y, that) {
                 {//end Point
                     x:that.followPoint.center().x+120, 
                     y:that.followPoint.center().y+ yOffset 
-                }, 5, "Boss", 20));//lifetime  
+                }, 5, "Boss", 10));//lifetime  
 
                 that.game.addProjectile( 
                     new Projectile( that.game,
@@ -694,7 +670,7 @@ function FinalRabbitAttack(x, y, that) {
                     {//end Point
                         x:that.followPoint.center().x - 120, 
                         y:that.followPoint.center().y- yOffset 
-                    }, 5, "Boss", 20));//lifetime 
+                    }, 5, "Boss", 10));//lifetime 
               
                     that.game.addProjectile( 
                         new Projectile( that.game,
@@ -710,7 +686,7 @@ function FinalRabbitAttack(x, y, that) {
                         {//end Point
                             x:that.followPoint.center().x + 220, 
                             y:that.followPoint.center().y+ yOffset + 120
-                        }, 5, "Boss", 20));//lifetime 
+                        }, 5, "Boss", 10));//lifetime 
 
                     that.game.addProjectile( 
                         new Projectile( that.game,
@@ -726,7 +702,7 @@ function FinalRabbitAttack(x, y, that) {
                         {//end Point
                             x:that.followPoint.center().x - 220, 
                             y:that.followPoint.center().y- yOffset - 120
-                        }, 5, "Boss", 20));//lifetime 
+                        }, 5, "Boss", 10));//lifetime 
                     
 
 }
@@ -842,6 +818,7 @@ mage.prototype.update = function () {
 
     if(this.health <= 0) {
         this.dead = true;
+        bossDead = true;
     }
     var centerx = this.x + 96;
     var centery= this.y + 96;

@@ -74,6 +74,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                 
                 break;
         }
+        if (this.ammo > 0) {
         that.ammo -=1;
         
         that.game.addProjectile(new Projectile(that.game, 
@@ -121,7 +122,9 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                         x:that.game.pointerx, 
                         y:that.game.pointery
                     }, 5, "Player", 18)); //lifetime*/
+               
     });    
+}
     this.radius  = {
         x: this.x,
         r: 700,
@@ -203,10 +206,14 @@ Player.prototype.update = function () {
                     }
 
                 } else if(ent instanceof Background) {
+                    if ( collide({boundingBox: ent.nextLevelBox}, this)) {
+                        console.log("boundBox");
+                    }
+
+
                     if(bossDead && collide({boundingBox: ent.nextLevelBox}, this)) { 
-                        console.log("YAS?")
-                        sceneManager.loadNextLevel();
-                
+                        console.log("truuuu");
+                        sceneManager.loadNextLevel();          
                     }
                     LevelBoundingBoxCollsion(ent, this);
                 }
@@ -552,7 +559,7 @@ Projectile.prototype.draw = function(){
     var x = this.x - this.sheet.center.x;
     var y = this.y - this.sheet.center.y;
     this.ctx.drawImage(this.sheet.img, x, y);
-    if(this.game.showOutlines) this.ctx.drawImage(this.rotatedBoundingBox, x, y);
+   // if(this.game.showOutlines) this.ctx.drawImage(this.rotatedBoundingBox, x, y);
     // var box = this.boundingBox;
     // this.ctx.strokeStyle = "red";
     // this.ctx.moveTo(box.p1.x, box.p1.y);

@@ -11,14 +11,14 @@ var assets = [
     "bossBun-export.png",   "castlemap.png",        "KnightArcher.png",     "KnightMage.png",
     "blue.png",             "officialLogo.png",     "completeGame.png",
     "blue.png",             "mageWalk-export.png",  "mageAttack-export.png","mageDying-export.png",
-    "big_modball.png"
+    "big_modball.png",      "completeFinalMap.png"
 ];
 function SceneManager(){
 
     var canvas = document.getElementById("gameWorld");
     this.ctx = canvas.getContext("2d");
     canvas.onclick = function() {
-        canvas.requestPointerLock();
+       canvas.requestPointerLock();
     };
 
     assets.forEach((asset) => {
@@ -33,6 +33,30 @@ function SceneManager(){
     bossDead = false;
 }
 
+SceneManager.prototype.loadMenu = function() {
+    var that = this;
+    this.level = "menu";
+    AM.downloadAll(function (){
+        console.log("downloading");
+        that.game.assetManager = AM;
+        var data = loadMenuData();
+        that.game.addEntity(new Background(that.game, AM.getAsset("./img/officialLogo.png"), data));
+        var player = new Player(that.game, 
+            AM.getAsset("./img/charwalk.png"), 
+            AM.getAsset("./img/charshoot_loop.png"), 
+            AM.getAsset("./img/charstand.png"), 
+            AM.getAsset("./img/character_edited.png"), 
+            AM.getAsset("./img/char_power.png"),
+            data.playerSpawn.x, data.playerSpawn.y);
+        var camera = new Camera(that.game, player, AM.getAsset("./img/officialLogo.png"), 6400, 6400);
+        that.game.start(player, camera);
+        that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
+        that.game.addEntity(player);    
+        that.game.addEntity(new menuItem(that.game, 570, 600, "Start Game"));
+
+    
+    });
+}
 SceneManager.prototype.loadVillageMap = function(){
     this.level = "village";
     var that = this;
@@ -43,6 +67,9 @@ SceneManager.prototype.loadVillageMap = function(){
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
     this.game.player.ammo = 200;
+    
+    this.game.pointerx = this.game.player.x;
+    this.game.pointery =  this.game.player.y;
     this.game.addEntity(this.game.player);
     for(var i = 0; i<data.enemySpawns.length; i++){
         var location = data.enemySpawns[i];
@@ -77,6 +104,7 @@ SceneManager.prototype.loadVillageMap = function(){
 }
 
 SceneManager.prototype.loadCastleMap = function(){
+    bossDead = false;
     this.level = "castle";
     this.game.entities = [];
     audio.pause();
@@ -90,7 +118,7 @@ SceneManager.prototype.loadCastleMap = function(){
     /*this.game.player.x = 6000;
     this.game.player.y = 900;*/
     this.game.addEntity(this.game.player);
-    this.game.addEntity(new Powerup(this.game, 2500,5300,"SlowTime"));
+    this.game.addEntity(new Powerup(this.game, 2500,5300, "SlowTime"));
     this.game.addEntity(new mage(this.game, 10900, 2400));
     this.game.addEntity(new TrapDoor(this.game));
     this.game.pointerx = this.game.player.x;
@@ -119,19 +147,6 @@ SceneManager.prototype.loadCastleMap = function(){
                 this.game.addEntity(new Powerup(this.game, location.x, location.y, "HP"));
             }
         }
-    }
-}
-
-SceneManager.prototype.loadNextLevel = function() {
-    if (this.level === "menu") {
-        this.loadVillageMap();
-    } else if (this.level === "village") {
-        this.loadCastleMap();
-        console.log(this.level);
-    } else if (this.level === "castle") {
-        this.loadCaveMap();
-    } else if(this.level === "cave"){
-        this.loadFinalMap();
     }
 }
 
@@ -178,7 +193,8 @@ SceneManager.prototype.loadCaveMap = function() {
 }
 
 SceneManager.prototype.loadFinalMap = function() {
- this.level = "final";
+    this.level = "final";
+    bossDead = false;
     this.game.entities = [];
     audio.pause();
     audio = new Audio('./finalMusic.mp3');
@@ -201,73 +217,71 @@ SceneManager.prototype.loadFinalMap = function() {
          
 }
 
-SceneManager.prototype.loadMenu = function() {
-    var that = this;
-    this.level = "menu";
-    AM.downloadAll(function (){
-        console.log("downloading");
-        that.game.assetManager = AM;
-        that.game.init(that.ctx);
-        var data = loadMenuData();
-        that.game.addEntity(new Background(that.game, AM.getAsset("./img/officialLogo.png"), data));
-        var player = new Player(that.game, 
-            AM.getAsset("./img/charwalk.png"), 
-            AM.getAsset("./img/charshoot_loop.png"), 
-            AM.getAsset("./img/charstand.png"), 
-            AM.getAsset("./img/character_edited.png"), 
-            AM.getAsset("./img/char_power.png"),
-            data.playerSpawn.x, data.playerSpawn.y);
-        var camera = new Camera(that.game, player, AM.getAsset("./img/officialLogo.png"), 6400, 6400);
-        that.game.start(player, camera);
-        that.game.crosshair = new Crosshair(that.game, AM.getAsset("./img/crosshair-export.png"));
-        that.game.addEntity(player);    
-        that.game.addEntity(new menuItem(that.game, 590, 600, "Start Game"));
-      //  
 
+
+SceneManager.prototype.loadFinalBonusMap = function () {
     
-    });
+    this.game.entities = [];
+    this.level = "bonus";
+    var data = loadFinalBonusData();
+    this.game.addEntity(new Background(this.game, AM.getAsset("./img/completeFinalMap.png"), data));
+   /*
+    this.game.player.x = this.game.player.x;
+    this.game.player.y = this.game.player.y;*/
+    this.game.addEntity(this.game.player); 
+    
+    var box = data.nextLevelBox;
+
 }
 
+
+
 SceneManager.prototype.loadComplete = function() {
-    
     this.level = "complete";
-    
     this.game.entities = [];
     this.game.projectiles = [];
     
     var data = loadMenuData();
-    that.game.addEntity(new Background(that.game, AM.getAsset("./img/completeGame.png"), data));
+
+    this.game.addEntity(new Background(this.game, AM.getAsset("./img/completeGame.png"), data));
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
+    this.game.addEntity(this.game.player);
 
-    that.game.addEntity(new menuItem(that.game, 590, 600, "Replay ?"));
+    this.game.addEntity(new menuItem(this.game, 590, 600, " Replay ?"));
 }
-/*
-AM.queueDownload("./img/crosshair-export.png");
-//AM.queueDownload("./img/villagemap.png");
-AM.queueDownload("./img/castlemap.png");
-AM.queueDownload("./img/charwalk.png");
-AM.queueDownload("./img/charstand.png");
-AM.queueDownload("./img/charshoot_loop.png");
-AM.queueDownload("./img/character_edited.png");
-AM.queueDownload("./img/arrow.png");
-AM.queueDownload("./img/arrowPile.png");
-AM.queueDownload("./img/heart.png");
 
-AM.queueDownload("./img/bunbun.png");
-AM.queueDownload("./img/normalArcher.png");
-AM.queueDownload("./img/yap.png");
-AM.queueDownload("./img/arrowSkel.png");
-AM.queueDownload("./img/magicSkel.png");
-AM.queueDownload("./img/fireball.png");
 
-AM.queueDownload("./img/HoodedRanger.png");
-AM.queueDownload("./img/MageGirl.png");
+SceneManager.prototype.loadNextLevel = function() {
+    if (this.level === "menu" || this.level === "complete") {
+        this.loadVillageMap();
+    } else if (this.level === "village") {
+        this.loadCastleMap();
+    } else if (this.level === "castle") {
+        this.loadCaveMap();
+    } else if(this.level === "cave"){
+        this.loadFinalMap();
+    } else if (this.level === "final") {
+        this.loadFinalBonusMap();
+    } else {
+        this.loadComplete();
+    }
+    
+    console.log(this.level);
+}
 
-AM.queueDownload("./img/KnightArcher.png");
-AM.queueDownload("./img/KnightMage.png");
-AM.queueDownload("./img/movement.png");
-AM.queueDownload("./img/shadowLeft.png");
-AM.queueDownload("./img/shadowRight.png");
-AM.queueDownload("./img/modball.png");
-AM.queueDownload("./img/normalArcher.png");*/
+SceneManager.prototype.reloadLevel = function () {
+    this.game.player.dead = false;
+    this.game.player.removeFromWorld = false;
+    this.game.player.ammo = 200;
+    this.game.player.health = 100;
+    if (this.level === "village") {
+        this.loadVillageMap();
+    } else if (this.level === "castle") {
+        this.loadCastleMap();
+    } else if(this.level === "cave") {
+        this.loadCaveMap();
+    } else {
+        this.loadFinalMap();
+    }
+}

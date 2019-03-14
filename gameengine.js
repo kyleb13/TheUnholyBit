@@ -12,8 +12,8 @@ window.requestAnimFrame = (function () {
 var pointerLocked = false;
 var timeSlowed = false;
 var audio = new Audio('./villageMusic.mp3');
-//audio.volume = 0.10; // 75%
-audio.volume = 0;
+audio.volume = 0.10; // 75%
+//audio.volume = 0;
 audio.loop = true;
 
 
@@ -170,7 +170,7 @@ GameEngine.prototype.handleInputs = function(keycode, value){
             break;   
         case "KeyP":
             this.p = value;
-            break;   
+            break; 
             
     }   
 }

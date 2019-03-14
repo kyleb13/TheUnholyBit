@@ -139,14 +139,8 @@ Background.prototype.draw = function () {
             that.ctx.fillText(`${box.n}(3)`, box.p3.x+5, box.p3.y+5);
             that.ctx.fillText(`${box.n}(4)`, box.p4.x+5, box.p4.y+5);
         });
-    }/* if (this.game.showOutlines) {
-            that.ctx.moveTo(this.nextLevelBox.p1.x, this.nextLevelBox.p1.y);
-            that.ctx.lineTo(this.nextLevelBox.p2.x, this.nextLevelBox.p2.y);
-            that.ctx.lineTo(this.nextLevelBox.p3.x, this.nextLevelBox.p3.y);
-            that.ctx.lineTo(this.nextLevelBox.p4.x, this.nextLevelBox.p4.y);
-            that.ctx.lineTo(this.nextLevelBox.p1.x, this.nextLevelBox.p1.y);
-            that.ctx.stroke();
-    }*/
+
+    }
 };
 
 Background.prototype.update = function () {
@@ -186,4 +180,5 @@ function oncanvasload(){
     sceneManager = new SceneManager();
     //sceneManager.loadVillageMap();
     sceneManager.loadMenu();
+    //sceneManager.loadComplete();
 }
