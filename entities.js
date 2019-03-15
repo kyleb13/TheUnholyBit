@@ -226,7 +226,7 @@ Player.prototype.update = function () {
             }
             if((!this.moveRestrictions.up && this.yspeed<0) || (!this.moveRestrictions.down && this.yspeed>0)){
                 this.y += time * this.yspeed;
-                this.game.pointery += this.game.player.yspeed * this.game.clockTick;
+                this.game.pointery += this.game.player.yspeed * time;
             }
         }
         
@@ -750,7 +750,8 @@ function LevelBoundingBoxCollsion(background, ent) {
                 if (ent instanceof Player){
                     handleBoxCollision(ent, box);
                 } else if (ent instanceof Bunny || ent instanceof RangeEnemy
-                        || ent instanceof FinalRabbitDestination || ent instanceof shadowBoss) {            
+                        || ent instanceof FinalRabbitDestination || ent instanceof shadowBoss || 
+                        ent instanceof BlackBunny) {            
                     //handleBoxCollision(ent, box);
                     if (top) {
                         ent.y -= 1;
