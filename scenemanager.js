@@ -11,7 +11,8 @@ var assets = [
     "bossBun-export.png",   "castlemap.png",        "KnightArcher.png",     "KnightMage.png",
     "blue.png",             "officialLogo.png",     "completeGame.png",
     "blue.png",             "mageWalk-export.png",  "mageAttack-export.png","mageDying-export.png",
-    "big_modball.png",      "blackbunbun.png",      "completeFinalMap.png"
+    "big_modball.png",      "blackbunbun.png",      "completeFinalMap.png", "TripleShot.png",
+    "bomb.png"
 ];
 function SceneManager(){
 
@@ -60,6 +61,11 @@ SceneManager.prototype.loadMenu = function() {
 SceneManager.prototype.loadVillageMap = function(){
     this.level = "village";
     var that = this;
+    audio.pause();
+    audio = new Audio('./villageMusic.mp3');
+    audio.volume = 0.10; // 75%
+    audio.loop =true;
+
     this.game.entities = [];
     var data = loadVillageData();
     that.game.addEntity(new Background(that.game, AM.getAsset("./img/villagemap.png"), data));
@@ -96,7 +102,10 @@ SceneManager.prototype.loadVillageMap = function(){
             }
         }
     }
-    
+    that.game.addEntity(new Powerup(that.game, 900, 900, "TripleShot"));
+    that.game.addEntity(new Powerup(that.game, 950, 900, "ammo"));
+           
+    that.game.addEntity(new Powerup(that.game, 1000, 900, "Bomb"));
     that.game.addEntity(new shadowBoss(that.game,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
     console.log("All Done!");
 
@@ -150,6 +159,7 @@ SceneManager.prototype.loadCastleMap = function(){
 SceneManager.prototype.loadCaveMap = function() {
     this.level = "cave";
     this.game.entities = [];
+    this.game.projectiles = [];
     audio.pause();
     audio = new Audio('./caveMusic.mp3');
     audio.volume = 0.10; // 75%
@@ -193,6 +203,8 @@ SceneManager.prototype.loadFinalMap = function() {
     this.level = "final";
     bossDead = false;
     this.game.entities = [];
+    
+    this.game.projectiles = [];
     audio.pause();
     audio = new Audio('./finalMusic.mp3');
     audio.volume = 0.10; // 75%
@@ -217,14 +229,13 @@ SceneManager.prototype.loadFinalMap = function() {
 
 
 SceneManager.prototype.loadFinalBonusMap = function () {
-    
     this.game.entities = [];
     this.level = "bonus";
     var data = loadFinalBonusData();
     this.game.addEntity(new Background(this.game, AM.getAsset("./img/completeFinalMap.png"), data));
-   /*
-    this.game.player.x = this.game.player.x;
-    this.game.player.y = this.game.player.y;*/
+
+    this.game.pointerx = this.game.player.x;
+    this.game.pointery =  this.game.player.y;
     this.game.addEntity(this.game.player); 
     
     var box = data.nextLevelBox;
@@ -243,6 +254,9 @@ SceneManager.prototype.loadComplete = function() {
     this.game.addEntity(new Background(this.game, AM.getAsset("./img/completeGame.png"), data));
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
+    
+    this.game.pointerx = this.game.player.x;
+    this.game.pointery =  this.game.player.y;
     this.game.addEntity(this.game.player);
 
     this.game.addEntity(new menuItem(this.game, 590, 600, " Replay ?"));

@@ -344,6 +344,26 @@ function Powerup (game, x, y, type) {
             offsetx:0,
             offsety:0
         };
+    } else if (type === "TripleShot") {
+        spritesheet = AM.getAsset("./img/TripleShot.png");
+        this.boundingBox = {
+            x:this.x, 
+            y:this.y,
+            width: 25,
+            height: 24,
+            offsetx:0,
+            offsety:0
+        };
+    } else if (type === "Bomb") {
+        spritesheet = AM.getAsset("./img/bomb.png");
+        this.boundingBox = {
+            x:this.x, 
+            y:this.y,
+            width: 25,
+            height: 24,
+            offsetx:0,
+            offsety:0
+        };
     }
     this.sheet = spritesheet;
     Entity.call(this, game, x, y);
@@ -363,7 +383,6 @@ Powerup.prototype.update = function() {
                     } else {
                         ent.health += 15;
                     }
-
                 } else if(this.type === "SlowTime"){
                     timeSlowed = true;
                 }
