@@ -69,6 +69,8 @@ SceneManager.prototype.loadVillageMap = function(){
     this.game.entities = [];
     var data = loadVillageData();
     that.game.addEntity(new Background(that.game, AM.getAsset("./img/villagemap.png"), data));
+    this.game.addEntity(new Powerup(this.game, 1500, 5800, "Bomb"));
+
     
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
@@ -102,9 +104,6 @@ SceneManager.prototype.loadVillageMap = function(){
             }
         }
     }
-    that.game.addEntity(new Powerup(that.game, 900, 900, "TripleShot"));
-    that.game.addEntity(new Powerup(that.game, 950, 900, "SlowTime"));
-    that.game.addEntity(new Powerup(that.game, 1000, 900, "Bomb"));
            
     //that.game.addEntity(new Powerup(that.game, 1000, 900, "SlowTime"));
     that.game.addEntity(new shadowBoss(that.game,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
@@ -128,7 +127,7 @@ SceneManager.prototype.loadCastleMap = function(){
     /*this.game.player.x = 6000;
     this.game.player.y = 900;*/
     this.game.addEntity(this.game.player);
-    this.game.addEntity(new Powerup(this.game, 2500,5300, "SlowTime"));
+    this.game.addEntity(new Powerup(this.game, 5680,5200, "SlowTime"));
     this.game.addEntity(new mage(this.game, 10900, 2400));
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;
@@ -168,8 +167,9 @@ SceneManager.prototype.loadCaveMap = function() {
 
     var data = loadCaveData();
     this.game.addEntity(new Background(this.game, AM.getAsset("./img/cavemap.png"), data));
-    this.game.player.x = 400;
-    this.game.player.y = 400;
+    this.game.addEntity(new Powerup(this.game, 6000, 3200, "TripleShot"));
+    this.game.player.x = data.playerSpawn.x;
+    this.game.player.y = data.playerSpawn.y;
     /*this.game.player.x = 6000;
     this.game.player.y = 900;*/
     this.game.addEntity(this.game.player);
@@ -234,7 +234,7 @@ SceneManager.prototype.loadFinalBonusMap = function () {
     this.level = "bonus";
     var data = loadFinalBonusData();
     this.game.addEntity(new Background(this.game, AM.getAsset("./img/completeFinalMap.png"), data));
-
+    audio.pause();
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;
     this.game.addEntity(this.game.player); 
@@ -249,13 +249,15 @@ SceneManager.prototype.loadComplete = function() {
     this.level = "complete";
     this.game.entities = [];
     this.game.projectiles = [];
-    
+    this.game.player.powerUp = undefined;
+    audio.pause();
     var data = loadMenuData();
 
+    
     this.game.addEntity(new Background(this.game, AM.getAsset("./img/completeGame.png"), data));
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
-    
+    this.game.player.ammo = 200;
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;
     this.game.addEntity(this.game.player);

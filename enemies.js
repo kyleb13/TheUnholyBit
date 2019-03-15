@@ -796,35 +796,37 @@ BlackBunny.prototype.update = function () {
 }
 
 BlackBunny.prototype.attack = function(){
+    var x = this.x + 32;
+    var y = this.y + 50;
     var x1, y1, x2, y2, x3, y3;
     if(this.direction === "up"){
-        x1 = this.x;
-        y1 = this.y-2;
-        x2 = this.x+1;
-        y2 = this.y-1;
-        x3 = this.x-1;
-        y3 = this.y-1;
+        x1 = x;
+        y1 = y+1;
+        x2 = x+1;
+        y2 = y-1;
+        x3 = x-1;
+        y3 = y-1;
     } else if(this.direction === "down"){
-        x1 = this.x;
-        y1 = this.y+2;
-        x2 = this.x+1;
-        y2 = this.y+1;
-        x3 = this.x-1;
-        y3 = this.y+1;
+        x1 = x;
+        y1 = y-1;
+        x2 = x+1;
+        y2 = y+1;
+        x3 = x-1;
+        y3 = y+1;
     } else if(this.direction === "left"){
-        x1 = this.x - 2;
-        y1 = this.y;
-        x2 = this.x-1;
-        y2 = this.y+1;
-        x3 = this.x-1;
-        y3 = this.y-1;
+        x1 = x - 1;
+        y1 = y;
+        x2 = x-1;
+        y2 = y+1;
+        x3 = x-1;
+        y3 = y-1;
     } else {//right
-        x1 = this.x + 2;
-        y1 = this.y;
-        x2 = this.x+1;
-        y2 = this.y+1;
-        x3 = this.x+1;
-        y3 = this.y-1;
+        x1 = x + 1;
+        y1 = y;
+        x2 = x+1;
+        y2 = y+1;
+        x3 = x+1;
+        y3 = y-1;
     }
     this.game.addProjectile(
         new Projectile( this.game,
@@ -835,8 +837,8 @@ BlackBunny.prototype.attack = function(){
                 path:"./img/modball.png"
             }, 325, //speed
             {//start point
-                x:this.x, 
-                y:this.y
+                x:x, 
+                y:y
             }, 
             {//end Point
                 x:x1, 
@@ -852,8 +854,8 @@ BlackBunny.prototype.attack = function(){
                 path:"./img/modball.png"
             }, 325, //speed
             {//start point
-                x:this.x, 
-                y:this.y
+                x:x, 
+                y:y
             }, 
             {//end Point
                 x:x2, 
@@ -869,8 +871,8 @@ BlackBunny.prototype.attack = function(){
                 path:"./img/modball.png"
             }, 325, //speed
             {//start point
-                x:this.x, 
-                y:this.y
+                x:x, 
+                y:y
             }, 
             {//end Point
                 x:x3, 
@@ -893,7 +895,8 @@ BlackBunny.prototype.draw = function () {
         this.ctx.strokeStyle = "red"
         this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
     }
-    
+    this.ctx.strokeStyle = "red"
+    //this.ctx.strokeRect(this.x+32, this.y + 50, 2, 2);
     Entity.prototype.draw.call(this);
     
     this.healthBar.draw();

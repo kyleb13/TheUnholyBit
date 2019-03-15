@@ -187,7 +187,7 @@ Player.prototype.update = function () {
 
     if (this.TripleShot) {
         this.tpTimer += time; 
-        this.TripleShot = this.tpTimer>4 ? false:true;
+        this.TripleShot = this.tpTimer>6 ? false:true;
     } else {
         this.tpTimer = 0;
     }
@@ -238,11 +238,11 @@ Player.prototype.update = function () {
             }
             if((!this.moveRestrictions.left && this.xspeed<0) || (!this.moveRestrictions.right && this.xspeed>0)){
                 this.x += time * this.xspeed;
-                this.game.pointerx += this.xspeed * this.game.clockTick;
+                this.game.pointerx += this.xspeed * time;
             }
             if((!this.moveRestrictions.up && this.yspeed<0) || (!this.moveRestrictions.down && this.yspeed>0)){
                 this.y += time * this.yspeed;
-                this.game.pointery += this.game.player.yspeed * this.game.clockTick;
+                this.game.pointery += this.game.player.yspeed * time;
             }
         }
         
@@ -453,12 +453,6 @@ Powerup.prototype.update = function() {
                     if (ent.powerUp) {
                         ent.tpTimer = 0;
                         ent.canUsePU = true;
-                        ent.powerUp.removeFromWorld = false;
-                        ent.powerUp.x = this.x+50;
-                        ent.powerUp.y = this.y+30; 
-                        ent.powerUp.boundingBox.x = this.x+50;
-                        ent.powerUp.boundingBox.y = this.y+30;
-
                     }
                     ent.powerUp = this;
 
@@ -846,7 +840,8 @@ function LevelBoundingBoxCollsion(background, ent) {
                 if (ent instanceof Player){
                     handleBoxCollision(ent, box);
                 } else if (ent instanceof Bunny || ent instanceof RangeEnemy
-                        || ent instanceof FinalRabbitDestination || ent instanceof shadowBoss) {            
+                        || ent instanceof FinalRabbitDestination || ent instanceof shadowBoss || 
+                        ent instanceof BlackBunny) {            
                     //handleBoxCollision(ent, box);
                     if (top) {
                         ent.y -= 1;

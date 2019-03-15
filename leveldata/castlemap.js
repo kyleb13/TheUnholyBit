@@ -1,14 +1,40 @@
 
 function loadCastleData(){
     var castledata = {
-          playerSpawn:{x:1480, y:5300},
-        //playerSpawn:{x:10900, y:3500},
+         playerSpawn:{x:1480, y:5300},
+        // playerSpawn:{x:10900, y:3500},
         nextLevelBox:{
             x: 11050, 
             y:1782,
             width:52,
             height:67
         },
+        powerUpSpawns: [
+            {
+                x:10830,
+                y:4500
+            },
+            {
+                x:10880,
+                y:4500
+            },
+            {
+                x:10930,
+                y:4500
+            },
+            {
+                x:10830,
+                y:4600
+            },
+            {
+                x:10880,
+                y:4600
+            },
+            {
+                x:10930,
+                y:4600
+            }
+        ],
         enemySpawns:[
             {
                 x:2950,
@@ -103,12 +129,12 @@ function loadCastleData(){
                 y:5650
             },
             {
-                x:8100,
-                y:4550
+                x:8400,
+                y:4400
             },
             {
-                x:8100,
-                y:5000
+                x:8400,
+                y:5128
             },
             {
                 x:10250,

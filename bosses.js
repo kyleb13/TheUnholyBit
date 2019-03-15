@@ -774,6 +774,8 @@ mage.prototype.update = function () {
     if(this.health <= 0) {
         this.dead = true;
         bossDead = true;
+        this.game.addEntity(new TrapDoor(this.game));
+        this.game.addEntity(new StoneDirection(this.game, 10970, 2060));
     }
     var centerx = this.x + 96;
     var centery= this.y + 96;

@@ -141,6 +141,14 @@ Background.prototype.draw = function () {
         });
 
     }
+    this.ctx.font = "18px Arial";
+
+    if (sceneManager.level === "village") {
+        this.ctx.fillText("Search for the Power Ups!", 900, 850);
+        this.ctx.fillText("you can use \"1\" key to use Power Ups!", 900, 874);
+        this.ctx.fillText("*You will lose your current power up when you pick up a new one!", 900, 898);
+    
+    }
 };
 
 Background.prototype.update = function () {
