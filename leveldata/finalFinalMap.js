@@ -1,21 +1,12 @@
-var finalMapData = 
+var finalBonusMapData = 
 {
-    playerSpawn:{x:100, y:300},
-  
-  
-    nextLevelBox:   {
-        p1: {x:-99, y:-99},
-        p2: {x:-99, y:-99},
-        p3: {x:-99, y:-99},
-        p4: {x:-99, y:-99}
+    nextLevelBox:  {
+        x: 730, 
+        y:90,
+        width:93,
+        height:60
     }, 
 
-    enemySpawns:[
-        {
-            x:750,
-            y:200
-        }
-    ],
     boundingBoxes: [
         {
             n:1,
@@ -39,12 +30,18 @@ var finalMapData =
             n:4,
             p1: {x:0, y:0},
             p2: {x:0, y:148},
+            p3: {x:725, y:148},
+            p4: {x:725, y:0}
+        }, {
+            n:5,
+            p1: {x:830, y:0},
+            p2: {x:830, y:148},
             p3: {x:1500, y:148},
             p4: {x:1500, y:0}
         }
     ]
 };
 
-function loadFinalMapData(){
-    return finalMapData;
+function loadFinalBonusData() {
+    return finalBonusMapData;
 }

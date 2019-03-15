@@ -44,9 +44,9 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
 
     var itemPercentage = Math.random(); 
     var dropType;
-    if (itemPercentage > 0.5 && itemPercentage < 0.8) {
+    if (itemPercentage > 0.5 && itemPercentage < 0.75) {
         dropType = "ammo";
-    } else if(itemPercentage > 0.8 && itemPercentage <= 1.0) {
+    } else if(itemPercentage > 0.75 && itemPercentage <= 1.0) {
         dropType = "HP";
     }
 
@@ -57,20 +57,30 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, ent) {
             
             if (ent !== undefined) {
                 ent.removeFromWorld = true;
-                if (dropType !== undefined) {
-                    
-                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
-                    
+                if (ent instanceof Player) {
+                    sceneManager.reloadLevel();
+                } else if (ent instanceof FinalRabbitDestination) {
+                    sceneManager.loadNextLevel();
+                } else {
+                    if (dropType !== undefined) {          
+                        ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+                    }    
                 }
+                
             }
         }
         
     } else if (this.isDone()) {
         if (ent !== undefined) {
-           ent.removeFromWorld = true; 
-             if (dropType !== undefined) {
-                 ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
-            
+           ent.removeFromWorld = true;   
+           if (ent instanceof Player) {
+            sceneManager.reloadLevel();
+            } else if (ent instanceof FinalRabbitDestination) {
+                sceneManager.loadNextLevel();
+            }  else {
+                if (dropType !== undefined) {
+                    ent.game.addEntity(new Powerup(ent.game, ent.x, ent.y, dropType));
+                }
              }
         }
         return;
@@ -172,18 +182,19 @@ function AdvancedAttacks(x, y, that) {
                         y3 += 40;
                         break;
                     case "right":
+                    
+                        x+=25;
                         y += 30;
                         y2 -= 10;
                         y3 += 10;
-                        x+=25;
                         x2+=25;
                         x3+=25;
                         break;
                     case "down":
                         x +=30;
+                        y += 30;
                         x2 -= 10;
                         x3 += 10;
-                        y += 30;
                         y2 += 30;
                         y3 += 30;
                         break;
@@ -243,7 +254,12 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
                         y += 30;
                         break;
                 }
-                addProjectile(that, x, y, projectile, "Enemy", 10);
+                var dmg = 5;
+                if (projectile === "magic") {
+                    dmg += 5;
+                }
+
+                addProjectile(that, x, y, projectile, "Enemy", dmg)
             }         
         });
     }
@@ -483,7 +499,7 @@ function Bunny(game, spritesheet, x, y) {
     this.deathAnimations["down"] = new Animation2(spritesheet, 288, 0, 48, 64, 0.1, 3, false, false);
     this.deathAnimations["up"] = new Animation2(spritesheet, 288, 64, 48, 64, 0.1, 3, false, false);
     this.deathAnimations["right"] = new Animation2(spritesheet, 288, 128, 48, 64, 0.1, 3, false, false);
-    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, true);
+    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, false);
     
     this.direction = "right";
     this.visualRadius = 800;
@@ -517,7 +533,7 @@ function Bunny(game, spritesheet, x, y) {
         offsety:-850
     }
     this.dead = false;
-    this.health = 100;
+    this.health = 80;
     this.healthBar = new HealthBar(game, this, 46, -10);
 
 }
@@ -621,6 +637,272 @@ Bunny.prototype.draw = function () {
     this.healthBar.draw();
 }
 
+function BlackBunny(game, spritesheet, x, y) {
+    this.walkAnimations = [];
+    this.deathAnimations = [];
+    this.maxSpeed = 175;
+    
+    this.walkAnimations["down"] = new Animation2(spritesheet, 0, 0, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["up"] = new Animation2(spritesheet, 0, 64, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["right"] = new Animation2(spritesheet, 0, 128, 48, 64, 0.1, 7, true, false);
+    this.walkAnimations["left"] = new Animation2(spritesheet, 0, 192, 48, 64, 0.1, 7, true, false);
+ 
+    this.deathAnimations["down"] = new Animation2(spritesheet, 288, 0, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["up"] = new Animation2(spritesheet, 288, 64, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["right"] = new Animation2(spritesheet, 288, 128, 48, 64, 0.1, 3, false, false);
+    this.deathAnimations["left"] = new Animation2(spritesheet, 288, 192, 48, 64, 0.1, 3, false, true);
+    
+    this.direction = "right";
+    this.visualRadius = 1200;
+    this.attackRadius = 700;
+    this.ctx = game.ctx;
+    this.attacking = false;
+    this.attackTimer = 0;
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
+    this.velocity = { x: Math.random() * 1000, y: Math.random() * 1000 };
+    var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
+    if (speed > this.maxSpeed) {
+        var ratio = this.maxSpeed / speed;
+        this.velocity.x *= ratio;
+        this.velocity.y *= ratio;
+    }
+    Entity.call(this, game, x, y);
+    
+    this.boundingBox = {
+        x:this.x, 
+        y:this.y,
+        width: 40,
+        height: 40,
+        offsetx:15,
+        offsety:32
+    }
+
+    this.visualBox = {
+        x:this.x, 
+        y:this.y,
+        width: 1900,
+        height: 1500,
+        offsetx:-900,
+        offsety:-850
+    }
+    this.attackBox = {
+        x:this.x, 
+        y:this.y,
+        width: 1400,
+        height: 700,
+        offsetx:-700,
+        offsety:-350
+    }
+    this.dead = false;
+    this.health = 80;
+    this.healthBar = new HealthBar(game, this, 46, -10);
+
+}
+
+BlackBunny.prototype = new Entity();
+BlackBunny.prototype.constructor = BlackBunny;
+
+BlackBunny.prototype.collide = function (other) {
+    return distance(this, other) < this.radius + other.radius;
+};
+
+BlackBunny.prototype.collideLeft = function () {
+    return (this.x - this.radius) < 0;
+};
+
+BlackBunny.prototype.collideRight = function () {
+    return (this.x + this.radius) > 800;
+};
+
+BlackBunny.prototype.collideTop = function () {
+    return (this.y - this.radius) < 0;
+};
+
+BlackBunny.prototype.collideBottom = function () {
+    return (this.y + this.radius) > 650;
+};
+
+BlackBunny.prototype.update = function () {
+    let time = this.game.clockTick;
+    this.moveRestrictions = {left:false, right:false, up:false, down:false};
+    this.boundingBox.x = this.x + this.boundingBox.offsetx;
+    this.boundingBox.y = this.y + this.boundingBox.offsety;
+
+    this.visualBox.x = this.x + this.visualBox.offsetx;
+    this.visualBox.y = this.y + this.visualBox.offsety;
+    this.attackBox.x = this.x + this.attackBox.offsetx;
+    this.attackBox.y = this.y + this.attackBox.offsety;
+
+    for (var i = 0; i < this.game.entities.length; i++) {
+        var ent = this.game.entities[i];
+        if (collide(ent, {boundingBox: this.visualBox }) && ent instanceof Player ) {
+            var mspeed = this.maxSpeed;
+            this.attacking = false;
+            if(collide(ent, {boundingBox: this.attackBox})){
+                mspeed/=2;
+                this.attacking = true;
+            }
+            var dist = distance(this, ent);
+            shiftDirection(this, ent);
+            var difX = (ent.x - this.x)/dist;
+            var difY = (ent.y - this.y)/dist;
+            this.velocity.x += difX * acceleration / (dist*dist);
+            this.velocity.y += difY * acceleration / (dist * dist);
+            var speed = Math.sqrt(this.velocity.x*this.velocity.x + this.velocity.y*this.velocity.y);
+            if (speed > mspeed) {
+                var ratio = mspeed / speed;
+                this.velocity.x *= ratio;
+                this.velocity.y *= ratio;
+            }
+            
+            if (ent instanceof Player && collide(this, ent)) {
+                var temp = { x: this.velocity.x, y: this.velocity.y };
+
+                tempVelocityX = temp.x * friction;
+                tempVelocityY = temp.y * friction;
+                
+
+                this.x -= 10 * tempVelocityX * this.game.clockTick;
+                this.y -= 10 * tempVelocityY * this.game.clockTick;
+                ent.health -= 5;
+            }
+            if((!this.moveRestrictions.left && this.velocity.x<0) || (!this.moveRestrictions.right && this.velocity.x>0)){
+                this.x += time * this.velocity.x;
+            }
+            if((!this.moveRestrictions.up && this.velocity.y<0) || (!this.moveRestrictions.down && this.velocity.y>0)){
+                this.y += time * this.velocity.y;
+            }  
+                
+            
+        } else if (ent instanceof Background) {
+            LevelBoundingBoxCollsion(ent, this);
+        }
+    }
+
+    if (this.health < 1) {
+        this.dead = true;
+    }
+
+    if(this.attacking && this.attackTimer>=1){
+        this.attack();
+        this.attackTimer = 0;
+    } else if(this.attackTimer<1){
+        this.attackTimer += time;
+    }
+
+    
+    this.healthBar.update();
+    Entity.prototype.update.call(this);
+}
+
+BlackBunny.prototype.attack = function(){
+    var x = this.x + 32;
+    var y = this.y + 50;
+    var x1, y1, x2, y2, x3, y3;
+    if(this.direction === "up"){
+        x1 = x;
+        y1 = y+1;
+        x2 = x+1;
+        y2 = y-1;
+        x3 = x-1;
+        y3 = y-1;
+    } else if(this.direction === "down"){
+        x1 = x;
+        y1 = y-1;
+        x2 = x+1;
+        y2 = y+1;
+        x3 = x-1;
+        y3 = y+1;
+    } else if(this.direction === "left"){
+        x1 = x - 1;
+        y1 = y;
+        x2 = x-1;
+        y2 = y+1;
+        x3 = x-1;
+        y3 = y-1;
+    } else {//right
+        x1 = x + 1;
+        y1 = y;
+        x2 = x+1;
+        y2 = y+1;
+        x3 = x+1;
+        y3 = y-1;
+    }
+    this.game.addProjectile(
+        new Projectile( this.game,
+            {
+                img:this.game.assetManager.getAsset("./img/modball.png"), 
+                width:26, 
+                height:17,
+                path:"./img/modball.png"
+            }, 325, //speed
+            {//start point
+                x:x, 
+                y:y
+            }, 
+            {//end Point
+                x:x1, 
+                y:y1
+            }, 10, "Enemy", 10)
+    );
+    this.game.addProjectile(
+        new Projectile( this.game,
+            {
+                img:this.game.assetManager.getAsset("./img/modball.png"), 
+                width:26, 
+                height:17,
+                path:"./img/modball.png"
+            }, 325, //speed
+            {//start point
+                x:x, 
+                y:y
+            }, 
+            {//end Point
+                x:x2, 
+                y:y2
+            }, 10, "Enemy", 10)
+    );
+    this.game.addProjectile(
+        new Projectile( this.game,
+            {
+                img:this.game.assetManager.getAsset("./img/modball.png"), 
+                width:26, 
+                height:17,
+                path:"./img/modball.png"
+            }, 325, //speed
+            {//start point
+                x:x, 
+                y:y
+            }, 
+            {//end Point
+                x:x3, 
+                y:y3
+            }, 10, "Enemy", 10)
+    );
+}
+
+BlackBunny.prototype.draw = function () {
+  
+    if(this.dead){
+        this.deathAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5, this);
+    } else {
+        this.walkAnimations[this.direction].drawFrame(this.game.clockTick, this.ctx, this.x, this.y, 1.5);
+    }
+    if (this.game.showOutlines) {
+        this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
+        this.ctx.strokeStyle = "black";
+        this.ctx.strokeRect(this.visualBox.x, this.visualBox.y, this.visualBox.width, this.visualBox.height);
+        this.ctx.strokeStyle = "red"
+        this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
+    }
+    this.ctx.strokeStyle = "red"
+    //this.ctx.strokeRect(this.x+32, this.y + 50, 2, 2);
+    Entity.prototype.draw.call(this);
+    
+    this.healthBar.draw();
+}
+
+
 
 // the "main" code begins here
 var friction = 1;
@@ -637,9 +919,9 @@ function lineRect(x1, y1, x2, y2, rx, ry, rw, rh) {
     var right =  lineLine(x1,y1,x2,y2, rx+rw,ry, rx+rw,ry+rh);
     var top =    lineLine(x1,y1,x2,y2, rx,ry, rx+rw,ry);
     var bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
-    if(bottom){
-        bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
-    }
+    // if(bottom){
+    //     bottom = lineLine(x1,y1,x2,y2, rx,ry+rh, rx+rw,ry+rh);
+    // }
   
     // if ANY of the above are true, the line
     // has hit the rectangle
@@ -659,20 +941,18 @@ function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
             //point of intersection
             var xi = (m1*x1-m2*x3-y1+y3)/(m1-m2);
             var yi = m1*(xi-x1)+y1;
-            var xstart = x1;
-            var ystart = y1;
-            var xend = x2;
-            var yend = y2;
-            if(x1>x2){
-                xstart = x2;
-                xend = x1;
-            }
-            if(y1>y2){
-                ystart = y2;
-                yend = y1;
-            }
+            var xstart = Math.min(x1, x2);
+            var ystart = Math.min(y1, y2);
+            var xend = Math.max(x1, x2);
+            var yend = Math.max(y1, y2);
+            var xs2 = Math.min(x3, x4);
+            var ys2 = Math.min(y3, y4);
+            var xe2 = Math.max(x3, x4);
+            var ye2 = Math.max(y3, y4);
+
             //check if intersection point lies in the range of the line segment
-            if(xstart<=xi && xi<=xend && ystart<=yi && yi<=yend){
+            if(xstart<=xi && xi<=xend && ystart<=yi && yi<=yend
+                && xs2<=xi && xi<=xe2 && ys2<=yi && yi<=ye2){
                 return true;
             } else {
                 return false;
@@ -686,15 +966,19 @@ function lineLine(x1,y1,x2,y2,x3,y3,x4,y4){
         }
     } else {
         //both vertical
-        if(!isFinite(m1) && !isFinite(m2)){
+        /*if(!isFinite(m1) && !isFinite(m2)){
             //if they share any x values, they are intersecting
-            if(x1===x3)return true
+            var ymin = Math.min(y1, y2);
+            var ymax = Math.max(y1, y2);
+            if(x1===x3 && (y3>ymin && y3<ymax) || (y4>ymin && y4<ymax)) return true
             else return false;
         } else if(m1==0 && m2 == 0){
             //both horizontal
-            if(y1===y3)return true
+            var xmin = Math.min(x1, x2);
+            var xmax = Math.max(x1, x2);
+            if(y1===y3 && (x3>xmin && x3<xmax) || (x4>xmin && x4<xmax))return true
             else return false;
-        } else if(!isFinite(m1) && m2===0){
+        } else*/ if(!isFinite(m1) && m2===0){
             //l1 vertical and l2 horizontal
             return verticalHorizontal(x1, Math.min(y1, y2), Math.max(y1, y2), y3, Math.min(x3, x4), Math.max(x3, x4));
         } else if(m1==0 && !isFinite(m2)){
@@ -738,3 +1022,4 @@ function verticalDiagonal(vx, y1, y2, x3, y3, x4, y4){
     if(startx<=vx && vx<= endx && y1<=yi & yi<=y2) return true;
     else return false;
 }
+
