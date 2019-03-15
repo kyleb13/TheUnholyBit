@@ -103,9 +103,10 @@ SceneManager.prototype.loadVillageMap = function(){
         }
     }
     that.game.addEntity(new Powerup(that.game, 900, 900, "TripleShot"));
-    that.game.addEntity(new Powerup(that.game, 950, 900, "ammo"));
-           
+    that.game.addEntity(new Powerup(that.game, 950, 900, "SlowTime"));
     that.game.addEntity(new Powerup(that.game, 1000, 900, "Bomb"));
+           
+    //that.game.addEntity(new Powerup(that.game, 1000, 900, "SlowTime"));
     that.game.addEntity(new shadowBoss(that.game,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
     console.log("All Done!");
 

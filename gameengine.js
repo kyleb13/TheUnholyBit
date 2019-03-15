@@ -143,6 +143,11 @@ GameEngine.prototype.startInput = function () {
         if(e.code === "KeyN") {
             sceneManager.loadNextLevel();
         } 
+
+        if (e.code === "Digit1") {
+            this.player.usePowerUp();
+            this.player.usingPU = true;
+        }
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
         that.handleInputs(e.code, false);
