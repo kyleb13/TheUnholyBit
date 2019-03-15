@@ -1,7 +1,7 @@
 var villageLevelData = 
 {
     playerSpawn:{x:800, y:850},
-    powerUpSpawns: [
+     powerUpSpawns: [
         {
             x: 6000,
             y: 3000

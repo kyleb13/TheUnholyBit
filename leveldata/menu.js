@@ -81,7 +81,7 @@ menuItem.prototype.draw = function() {
     this.ctx.fillText(this.name, this.x, this.y);
     if (this.name === "Start Game") {
     
-        this.ctx.font = "24px Bahnschrift Condensed";
+       this.ctx.font = "24px Bahnschrift Condensed";
         this.ctx.fillText("* Shoot \"Start Game\" to start game.*", 550, 660);
         this.ctx.font = "40px Bahnschrift";
         this.ctx.fillText(`***Shoot: Left Click, M = mute sounds***`, 350, 700);

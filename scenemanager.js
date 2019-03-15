@@ -11,7 +11,8 @@ var assets = [
     "bossBun-export.png",   "castlemap.png",        "KnightArcher.png",     "KnightMage.png",
     "blue.png",             "officialLogo.png",     "completeGame.png",
     "blue.png",             "mageWalk-export.png",  "mageAttack-export.png","mageDying-export.png",
-    "big_modball.png",      "blackbunbun.png",      "completeFinalMap.png"
+    "big_modball.png",      "blackbunbun.png",      "completeFinalMap.png", "TripleShot.png",
+    "bomb.png"
 ];
 function SceneManager(){
 
@@ -60,9 +61,16 @@ SceneManager.prototype.loadMenu = function() {
 SceneManager.prototype.loadVillageMap = function(){
     this.level = "village";
     var that = this;
+    audio.pause();
+    audio = new Audio('./villageMusic.mp3');
+    audio.volume = 0.10; // 75%
+    audio.loop =true;
+
     this.game.entities = [];
     var data = loadVillageData();
     that.game.addEntity(new Background(that.game, AM.getAsset("./img/villagemap.png"), data));
+    this.game.addEntity(new Powerup(this.game, 1500, 5800, "Bomb"));
+
     
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
@@ -96,7 +104,8 @@ SceneManager.prototype.loadVillageMap = function(){
             }
         }
     }
-    
+           
+    //that.game.addEntity(new Powerup(that.game, 1000, 900, "SlowTime"));
     that.game.addEntity(new shadowBoss(that.game,AM.getAsset("./img/movement.png"), AM.getAsset("./img/shadowLeft.png"),AM.getAsset("./img/shadowRight.png")));
     console.log("All Done!");
 
@@ -118,7 +127,7 @@ SceneManager.prototype.loadCastleMap = function(){
     /*this.game.player.x = 6000;
     this.game.player.y = 900;*/
     this.game.addEntity(this.game.player);
-    this.game.addEntity(new Powerup(this.game, 2500,5300, "SlowTime"));
+    this.game.addEntity(new Powerup(this.game, 5680,5200, "SlowTime"));
     this.game.addEntity(new mage(this.game, 10900, 2400));
     this.game.pointerx = this.game.player.x;
     this.game.pointery =  this.game.player.y;
@@ -150,6 +159,7 @@ SceneManager.prototype.loadCastleMap = function(){
 SceneManager.prototype.loadCaveMap = function() {
     this.level = "cave";
     this.game.entities = [];
+    this.game.projectiles = [];
     audio.pause();
     audio = new Audio('./caveMusic.mp3');
     audio.volume = 0.10; // 75%
@@ -157,8 +167,9 @@ SceneManager.prototype.loadCaveMap = function() {
 
     var data = loadCaveData();
     this.game.addEntity(new Background(this.game, AM.getAsset("./img/cavemap.png"), data));
-    this.game.player.x = 400;
-    this.game.player.y = 400;
+    this.game.addEntity(new Powerup(this.game, 6000, 3200, "TripleShot"));
+    this.game.player.x = data.playerSpawn.x;
+    this.game.player.y = data.playerSpawn.y;
     /*this.game.player.x = 6000;
     this.game.player.y = 900;*/
     this.game.addEntity(this.game.player);
@@ -193,6 +204,8 @@ SceneManager.prototype.loadFinalMap = function() {
     this.level = "final";
     bossDead = false;
     this.game.entities = [];
+    
+    this.game.projectiles = [];
     audio.pause();
     audio = new Audio('./finalMusic.mp3');
     audio.volume = 0.10; // 75%
@@ -217,14 +230,13 @@ SceneManager.prototype.loadFinalMap = function() {
 
 
 SceneManager.prototype.loadFinalBonusMap = function () {
-    
     this.game.entities = [];
     this.level = "bonus";
     var data = loadFinalBonusData();
     this.game.addEntity(new Background(this.game, AM.getAsset("./img/completeFinalMap.png"), data));
-   /*
-    this.game.player.x = this.game.player.x;
-    this.game.player.y = this.game.player.y;*/
+    audio.pause();
+    this.game.pointerx = this.game.player.x;
+    this.game.pointery =  this.game.player.y;
     this.game.addEntity(this.game.player); 
     
     var box = data.nextLevelBox;
@@ -237,12 +249,17 @@ SceneManager.prototype.loadComplete = function() {
     this.level = "complete";
     this.game.entities = [];
     this.game.projectiles = [];
-    
+    this.game.player.powerUp = undefined;
+    audio.pause();
     var data = loadMenuData();
 
+    
     this.game.addEntity(new Background(this.game, AM.getAsset("./img/completeGame.png"), data));
     this.game.player.x = data.playerSpawn.x;
     this.game.player.y = data.playerSpawn.y;
+    this.game.player.ammo = 200;
+    this.game.pointerx = this.game.player.x;
+    this.game.pointery =  this.game.player.y;
     this.game.addEntity(this.game.player);
 
     this.game.addEntity(new menuItem(this.game, 590, 600, " Replay ?"));

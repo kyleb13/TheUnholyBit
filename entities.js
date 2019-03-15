@@ -15,7 +15,9 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.yspeed = 0;
     this.ammo = 200;
     this.health = 100;
+    this.powerUp;
     this.changeTimer = 0;
+    this.powerUpTimer = 0;
     this.ctx = game.ctx;
     this.movedir = 3;
     this.velocity = { x: 200, y: 200 };
@@ -91,23 +93,10 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                     x:that.game.pointerx, 
                     y:that.game.pointery
                 }, 5, "Player", 18));//lifetime*/
-                /*
+                
                 //triple shot
-                that.game.addProjectile(new Projectile(that.game, 
-                    {
-                        img:that.game.assetManager.getAsset("./img/arrow.png"), 
-                        width:31, 
-                        height:5
-                    }, 400, //speed
-                    {//start point
-                        x:x2, 
-                        y:y2
-                    }, 
-                    {//end Point
-                        x:that.game.pointerx, 
-                        y:that.game.pointery
-                    }, 5, "Player", 18));//lifetime
 
+                if (that.TripleShot) {
                     that.game.addProjectile(new Projectile(that.game, 
                         {
                             img:that.game.assetManager.getAsset("./img/arrow.png"), 
@@ -115,14 +104,31 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                             height:5
                         }, 400, //speed
                         {//start point
-                            x:x3, 
-                            y:y3
+                            x:x2, 
+                            y:y2
                         }, 
                         {//end Point
                             x:that.game.pointerx, 
                             y:that.game.pointery
-                        }, 5, "Player", 18)); //lifetime*/
-                    }  
+                        }, 5, "Player", 18));//lifetime
+    
+                        that.game.addProjectile(new Projectile(that.game, 
+                            {
+                                img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                                width:31, 
+                                height:5
+                            }, 400, //speed
+                            {//start point
+                                x:x3, 
+                                y:y3
+                            }, 
+                            {//end Point
+                                x:that.game.pointerx, 
+                                y:that.game.pointery
+                            }, 5, "Player", 18)); //lifetime*/
+                        }  
+                }
+               
     });    
 
 
@@ -132,13 +138,10 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
         offsetx: 0,
         offsety: 53
     };
-    
-    this.explosionRange = {
-        x: this.x,
-        r: 400,
-        offsetx: 10,
-        offsety: 53
-    }
+    this.putimerMax = 30;
+    this.canUsePU = true;
+    this.TripleShot = false;
+    this.tpTimer = 0;
     this.healthBar = new HealthBar(game, this, 46, -10);
 }
 
@@ -146,6 +149,8 @@ Player.prototype = new Entity();
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function () {
+
+
     this.moveRestrictions = {left:false, right:false, up:false, down:false};
     var px = this.game.pointerx;
     var py = this.game.pointery;
@@ -173,10 +178,21 @@ Player.prototype.update = function () {
             this.movedir = 3;
         }
     }
-    if (this.game.p) this.usingPU = true;
+
+    let time = this.game.clockTick;
+    if (!this.canUsePU) {
+        this.powerUpTimer += time;
+        this.canUsePU = this.powerUpTimer>this.putimerMax?true:false;
+    } 
+
+    if (this.TripleShot) {
+        this.tpTimer += time; 
+        this.TripleShot = this.tpTimer>6 ? false:true;
+    } else {
+        this.tpTimer = 0;
+    }
 
     if(!this.game.lclick && !this.shootanimation.active) {
-        let time = this.game.clockTick;
         if(timeSlowed) time *=2;
         this.xspeed = 0;
         this.yspeed = 0;
@@ -222,25 +238,13 @@ Player.prototype.update = function () {
             }
             if((!this.moveRestrictions.left && this.xspeed<0) || (!this.moveRestrictions.right && this.xspeed>0)){
                 this.x += time * this.xspeed;
-                this.game.pointerx += this.xspeed * this.game.clockTick;
+                this.game.pointerx += this.xspeed * time;
             }
             if((!this.moveRestrictions.up && this.yspeed<0) || (!this.moveRestrictions.down && this.yspeed>0)){
                 this.y += time * this.yspeed;
                 this.game.pointery += this.game.player.yspeed * time;
             }
         }
-        
-        if(this.usingPU){
-            console.log("YAS!");    
-            for (var i = 0; i < this.game.entities.length; i++) {
-                    var ent = this.game.entities[i];
-                    if ((ent instanceof Bunny || ent instanceof RangeEnemy) 
-                                && this.explosionDistance(ent) && !ent.removeFromWorld) {
-                                    ent.health = 0;
-                    }
-            }
-        }
-    
         
     } 
     
@@ -270,8 +274,8 @@ Player.prototype.draw = function () {
             if(this.usingPU || this.powerupanimation.active || this.explosionanimation.active) { 
                 this.powerupanimation.loop = this.usingPU?true:false
                 this.powerupanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
-                this.explosionanimation.drawFrame(time, this.ctx, this.x-365, this.y-379, 1.5, this);
                 this.usingPU = false;
+          
             }else if(!this.dead) {
               this.standanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
             }  
@@ -283,6 +287,13 @@ Player.prototype.draw = function () {
     this.ctx.font = "24px Arial";
     this.ctx.fillStyle = "red";
     this.ctx.fillText(`Ammo: ${this.ammo}`, this.x+550, this.y+300);
+   // this.ctx.fillStyle = "black";
+    if (!this.canUsePU) this.ctx.fillStyle = "black";
+    
+    if (this.powerUp) {
+        this.ctx.fillRect(this.x-675, this.y+295, this.powerUp.sheet.width, this.powerUp.sheet.height);
+        this.ctx.drawImage(this.powerUp.sheet, this.x-675, this.y+295);     
+    }
     if (this.dead) {
         this.deathanimation.drawFrame(time, this.ctx, this.x, this.y, 1.5, this); 
     }
@@ -291,6 +302,21 @@ Player.prototype.draw = function () {
     Entity.prototype.draw.call(this);
 }
 
+Player.prototype.usePowerUp = function () {
+   if (this.powerUp && this.canUsePU) { 
+        if (this.powerUp.type === "Bomb") {
+            this.game.addEntity(new Explosion(this.x, this.y, this.game));
+          
+        } else if (this.powerUp.type === "SlowTime") {
+            timeSlowed = true;
+        } else {
+            this.TripleShot = true;
+        }
+    }
+    this.canUsePU = false;
+    this.powerUpTimer = 0;
+    
+}
 Player.prototype.center = function() {
     var centerx = this.x + this.animation.frameWidth/2;
     var centery= this.y + this.animation.frameHeight/2;
@@ -301,10 +327,50 @@ Player.prototype.insideOfRadius = function (other) {
 }
 
 
-Player.prototype.explosionDistance = function (other) {
-    return distance(other, this) < (this.explosionRange.r);
+
+function Explosion (x, y, game) {
+
+    Entity.call(this, game, x, y);
+    this.boundingBox = {
+        x:-99, 
+        y:-99,
+        width: 0,
+        height: 0,
+        offsetx:0,
+        offsety:0
+    };
+    this.explosionRange = {
+        r: 400,
+        offsetx: 10,
+        offsety: 53
+    };
+    this.game = game;
+    this.explosionanimation = new Animation(AM.getAsset("./img/explosion.png"), 200, 200, 9, .01, 74, false, 4);
+    this.ctx = this.game.ctx;
+    for (var i = 0; i < this.game.entities.length; i++) {
+        var ent = this.game.entities[i];
+        if (!(ent instanceof Player) 
+                    && this.explosionDistance(ent) && !ent.removeFromWorld && ent.health) {
+                        ent.health -= 100;
+        }
+    }
+
+    var that = this;
+    this.explosionanimation.setCallbackOnFrame(74, {}, () =>{
+        that.removeFromWorld = true;
+    });
 }
 
+Explosion.prototype.update = function () {
+  
+}
+
+Explosion.prototype.explosionDistance = function (other) {
+    return distance(other, this) < (this.explosionRange.r);
+}
+Explosion.prototype.draw = function () {
+    this.explosionanimation.drawFrame(this.game.clockTick, this.ctx, this.x-365, this.y-379, 1.5, this);
+}
 function Powerup (game, x, y, type) {
     this.game = game;
     this.type = type;
@@ -318,7 +384,7 @@ function Powerup (game, x, y, type) {
         this.boundingBox = {
             x:this.x, 
             y:this.y,
-            width: 3,
+            width: 32,
             height: 16,
             offsetx:3,
             offsety:12
@@ -344,6 +410,26 @@ function Powerup (game, x, y, type) {
             offsetx:0,
             offsety:0
         };
+    } else if (type === "TripleShot") {
+        spritesheet = AM.getAsset("./img/TripleShot.png");
+        this.boundingBox = {
+            x:this.x, 
+            y:this.y,
+            width: 25,
+            height: 24,
+            offsetx:0,
+            offsety:0
+        };
+    } else if (type === "Bomb") {
+        spritesheet = AM.getAsset("./img/bomb.png");
+        this.boundingBox = {
+            x:this.x, 
+            y:this.y,
+            width: 25,
+            height: 24,
+            offsetx:0,
+            offsety:0
+        };
     }
     this.sheet = spritesheet;
     Entity.call(this, game, x, y);
@@ -363,10 +449,14 @@ Powerup.prototype.update = function() {
                     } else {
                         ent.health += 15;
                     }
+                } else {
+                    if (ent.powerUp) {
+                        ent.tpTimer = 0;
+                        ent.canUsePU = true;
+                    }
+                    ent.powerUp = this;
 
-                } else if(this.type === "SlowTime"){
-                    timeSlowed = true;
-                }
+                } 
             }
 
             

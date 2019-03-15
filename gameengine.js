@@ -39,8 +39,8 @@ function GameEngine() {
     this.pointerx = 50;
     this.pointery = 50;
     this.pointerLocked = false;
-    this.showOutlines = true;
-    this.showOutlines = false;
+    // this.showOutlines = true;
+   this.showOutlines = false;
     this.muteBackgroundMusic = false;
     this.camera = null;
     this.player = null;
@@ -143,6 +143,11 @@ GameEngine.prototype.startInput = function () {
         if(e.code === "KeyN") {
             sceneManager.loadNextLevel();
         } 
+
+        if (e.code === "Digit1") {
+            this.player.usePowerUp();
+            this.player.usingPU = true;
+        }
     });
     this.ctx.canvas.addEventListener("keyup", (e) => {
         that.handleInputs(e.code, false);

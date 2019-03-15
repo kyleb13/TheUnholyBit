@@ -801,14 +801,14 @@ BlackBunny.prototype.attack = function(){
     var x1, y1, x2, y2, x3, y3;
     if(this.direction === "up"){
         x1 = x;
-        y1 = y-1;
+        y1 = y+1;
         x2 = x+1;
         y2 = y-1;
         x3 = x-1;
         y3 = y-1;
     } else if(this.direction === "down"){
         x1 = x;
-        y1 = y+1;
+        y1 = y-1;
         x2 = x+1;
         y2 = y+1;
         x3 = x-1;
