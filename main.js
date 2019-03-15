@@ -147,7 +147,7 @@ Background.prototype.draw = function () {
         this.ctx.fillText("Search for the Power Ups!", 900, 850);
         this.ctx.fillText("you can use \"1\" key to use Power Ups!", 900, 874);
         this.ctx.fillText("*You will lose your current power up when you pick up a new one!", 900, 898);
-    
+        this.ctx.fillText("*Red box means power Up is ready. 30 sec cool down applies.", 900, 922);
     }
 };
 

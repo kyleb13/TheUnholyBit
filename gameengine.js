@@ -140,9 +140,6 @@ GameEngine.prototype.startInput = function () {
                 audio.play();
             }
         }
-        if(e.code === "KeyN") {
-            sceneManager.loadNextLevel();
-        } 
 
         if (e.code === "Digit1") {
             this.player.usePowerUp();
