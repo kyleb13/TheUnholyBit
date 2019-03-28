@@ -2,13 +2,14 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     //function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale)
     this.animation = new Animation(walksheet, 64, 64, 8, .06, 32, true, 1.5);
     this.shootanimation = new Animation(AM.getAsset("./img/charshootwalk.png"),64,64, 7, .055, 28, true, 1.5);
-
+    this.stillshootanimation = new Animation(AM.getAsset("./img/charshoot_loop.png"),64,64, 7, .055, 28, true, 1.5);
     this.standanimation = new Animation(standsheet, 64, 64, 1, .12, 4, true, 1.5);
     this.deathanimation =  new Animation2(wholesheet, 0, 1280, 64, 64, 0.1, 6, false, false);  
     this.powerupanimation = new Animation(powerupsheet, 64, 64, 7, .075, 28, true, 1.5);
     this.parryanimation = new Animation(AM.getAsset("./img/parrysheet.png"), 64, 64, 1, .01, 4, true, 1.5);
     this.usingPU = false;
     this.shootanimation.rowMode();
+    this.stillshootanimation.rowMode();
     this.powerupanimation.rowMode();
     this.parryanimation.rowMode();
     this.explosionanimation = new Animation(AM.getAsset("./img/explosion.png"), 200, 200, 9, .01, 81, false, 4);
@@ -44,6 +45,105 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     // Entity.call(this, game, 5600, 2797);
     var that = this;
     this.shootanimation.setCallbackOnFrame(6, {}, () =>{
+        var x = that.x;
+        var y = that.y;
+        var x2= x;
+        var y2 = y;
+        var x3 = x;
+        var y3 = y;
+        var pspeed = 600;
+        var pdamage = 25;
+        //change direction arrows come from based on
+        //direction character is facing
+        switch(that.movedir){
+            case 0:
+                x += 50;
+                y -= 5;
+                x2 -= 10 - 50;
+                x3 += 10 + 50;
+              
+                break;
+            case 1:
+                y += 44;
+                x +=8;
+                
+                y2 += 25;
+                y3 += 40;
+                break;
+            case 2:
+                y += 75;
+                x+=40;
+                x2 -= 10 - 40;
+                x3 += 10 + 40;
+                y2 += 75;
+                y3 += 75;
+                
+                break;
+            case 3:
+                x +=46;
+                y += 42;
+                y2 -= 10 -42;
+                y3 += 10 +42;
+                x2+=46;
+                x3+=46;
+                
+                break;
+        }
+        if (this.ammo > 0) {
+            that.ammo -=1;
+            
+            that.game.addProjectile(new Projectile(that.game, 
+                {
+                    img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                    width:31, 
+                    height:5
+                }, pspeed, //speed
+                {//start point
+                    x:x, 
+                    y:y
+                }, 
+                {//end Point
+                    x:that.game.pointerx, 
+                    y:that.game.pointery
+                }, 5, "Player", pdamage));//lifetime*/
+                
+                //triple shot
+
+                if (that.TripleShot) {
+                    that.game.addProjectile(new Projectile(that.game, 
+                        {
+                            img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                            width:31, 
+                            height:5
+                        }, pspeed, //speed
+                        {//start point
+                            x:x2, 
+                            y:y2
+                        }, 
+                        {//end Point
+                            x:that.game.pointerx, 
+                            y:that.game.pointery
+                        }, 5, "Player", pdamage));//lifetime
+    
+                        that.game.addProjectile(new Projectile(that.game, 
+                            {
+                                img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                                width:31, 
+                                height:5
+                            }, pspeed, //speed
+                            {//start point
+                                x:x3, 
+                                y:y3
+                            }, 
+                            {//end Point
+                                x:that.game.pointerx, 
+                                y:that.game.pointery
+                            }, 5, "Player", pdamage)); //lifetime*/
+                        }  
+                }
+               
+    });
+    this.stillshootanimation.setCallbackOnFrame(6, {}, () =>{
         var x = that.x;
         var y = that.y;
         var x2= x;
@@ -350,9 +450,25 @@ Player.prototype.draw = function () {
         this.powerupanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
         this.usingPU = false;
     }
-    if(this.game.lclick || this.shootanimation.active){
-        this.shootanimation.loop = this.game.lclick?true:false;
-        this.shootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
+    if(this.game.lclick || this.shootanimation.active|| this.stillshootanimation.active){
+        if(this.xspeed!==0 || this.yspeed!==0){
+            this.shootanimation.loop = this.game.lclick?true:false;
+            if(this.stillshootanimation.active){
+                this.stillshootanimation.active = false;
+                this.shootanimation.active = true;
+                this.shootanimation.elapsedTime = this.stillshootanimation.elapsedTime; 
+            }
+            this.shootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
+        } else {
+            this.stillshootanimation.loop = this.game.lclick?true:false;
+            if(this.shootanimation.active){
+                this.shootanimation.active = false;
+                this.stillshootanimation.active = true;
+                this.stillshootanimation.elapsedTime = this.shootanimation.elapsedTime; 
+            }
+            this.stillshootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
+        }
+        
     } else if(this.xspeed!==0 || this.yspeed!==0){
         this.animation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
     } else if(!this.dead){
