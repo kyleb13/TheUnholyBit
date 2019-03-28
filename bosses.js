@@ -789,7 +789,7 @@ mage.prototype.update = function () {
         this.maxSpeed = 100;
         var dist = distance(this, ent);
         if (this.canAttack && collide(ent, {boundingBox: this.attackBox})) {
-            console.log("He Attac");
+            console.log("he attac");
             this.attacking = true;
             this.canAttack = false;
             this.attackTimer = 0;
