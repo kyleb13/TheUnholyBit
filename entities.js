@@ -15,7 +15,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.explosionanimation = new Animation(AM.getAsset("./img/explosion.png"), 200, 200, 9, .01, 81, false, 4);
     this.shootmaxSpeed = 200;
     this.walkmaxSpeed = 300;
-    this.acceleration = 70;
+    this.acceleration = 80;
     this.xspeed = 0;
     this.yspeed = 0;
     this.ammo = 200;
@@ -25,8 +25,8 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.powerUpTimer = 0;
     this.parryUseTimer = 0;
     this.parryCooldownTimer = 0;
-    this.parryUseMax = .2;
-    this.parryCoolMax = .85;
+    this.parryUseMax = .22;
+    this.parryCoolMax = .75;
     this.parrying = false;
     this.canParry = true;
     this.ctx = game.ctx;
@@ -344,7 +344,7 @@ Player.prototype.update = function () {
             this.xspeed *= ratio;
             this.yspeed *= ratio;
         }
-        document.getElementById("debug-out").innerHTML = `acceleration: ${accel}`;
+        //document.getElementById("debug-out").innerHTML = `acceleration: ${accel}`;
         if (!this.xspeed !== 0 || !this.yspeed !== 0) {
             for (var i = 0; i < this.game.entities.length; i++) {
                 var ent = this.game.entities[i];
@@ -395,51 +395,7 @@ Player.prototype.update = function () {
     Entity.prototype.update.call(this);
 }
 
-// Player.prototype.draw = function () {
-//     var time = this.game.clockTick;
-//     if(timeSlowed) time *= 2;
-    
-//     if(this.xspeed!==0 || this.yspeed!==0){
-//         if (!this.dead || !this.usingPU) {
-//             this.animation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
-//         }
-//     } else {
-//         if(this.usingPU || this.powerupanimation.active || this.explosionanimation.active) { 
-//             this.powerupanimation.loop = this.usingPU?true:false
-//             this.powerupanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
-//             this.usingPU = false;
-        
-//         }else if(!this.dead) {
-//             this.standanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
-//         }  
-//     }
-//     if(this.game.lclick || this.shootanimation.active){
-//         this.shootanimation.loop = this.game.lclick?true:false;
-//         this.shootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y-5, this.movedir);
-//     } 
-//     if(this.parrying){
-//         this.parryanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
-//     }
-//     if(this.game.showOutlines){
-//         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
-//     }
-//     this.ctx.font = "24px Arial";
-//     this.ctx.fillStyle = "red";
-//     this.ctx.fillText(`Ammo: ${this.ammo}`, this.x+550, this.y+300);
-//    // this.ctx.fillStyle = "black";
-//     if (!this.canUsePU) this.ctx.fillStyle = "black";
-    
-//     if (this.powerUp) {
-//         this.ctx.fillRect(this.x-675, this.y+295, this.powerUp.sheet.width, this.powerUp.sheet.height);
-//         this.ctx.drawImage(this.powerUp.sheet, this.x-675, this.y+295);     
-//     }
-//     if (this.dead) {
-//         this.deathanimation.drawFrame(time, this.ctx, this.x, this.y, 1.5, this); 
-//     }
-//     this.healthBar.draw();
-//     this.game.crosshair.draw();
-//     Entity.prototype.draw.call(this);
-// }
+
 Player.prototype.draw = function () {
     var time = this.game.clockTick;
     if(timeSlowed) time *= 2;
@@ -709,6 +665,10 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     this.timer = 0;
     this.lifetime = lifetime;
     this.damage = damage;
+    //controlled should only be set if a projectile's position
+    //update is controlled by another class (ie MultiStageAttack)
+    this.controlled = false;
+    this.speed = speed;
 /*
     this.boundingBox = {
         x:this.x, 
@@ -790,12 +750,21 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
         p4:{x:x+width, y:y},
         offsetx:offx,
         offsety:offy
-    }
+    };
     if(!game.mute){
         shootaudio.volume = 0.10; // 75%
         shootaudio.play();
     }
-
+    this.originalBox = {
+        p1:{x:x, y:y},
+        p2:{x:x, y:y + height},
+        p3:{x:x+width, y:y + height},
+        p4:{x:x+width, y:y},
+        offsetx:offx,
+        offsety:offy
+    };
+    this.width = width;
+    this.height = height;
     this.originalSheet = spritesheet;
     this.originalTheta = theta;
     this.sheet = Entity.prototype.rotateAndCache(spritesheet, theta);
@@ -806,6 +775,47 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
 
 Projectile.prototype = new Entity();
 Projectile.prototype.constructor = Projectile;
+
+Projectile.prototype.changeDirection = function(start, end){
+    var speed = this.speed;
+    var theta = 0;
+    var dx = end.x - start.x;
+    var dy = end.y - start.y;
+    var pi = Math.PI;
+    if(dx === 0){
+        this.yspeed = dy<0?speed:-speed;
+        theta = dy<0?(3*pi)/2:pi/2;
+    } else if(dy === 0){
+        this.xspeed = dx>0?speed:-speed;
+        theta = dx>0?0:pi;
+    } else {
+        theta = Math.atan(Math.abs(dy/dx));
+        if(dy>0 && dx < 0) {
+            theta = pi + theta;
+        } else if(dy>0) {
+            theta = 2*pi - theta;
+        } else if(dx<0){
+            theta = pi-theta;
+        }
+        this.xspeed = speed*Math.cos(theta);
+        this.yspeed = -speed*Math.sin(theta);
+       /* console.log("Xspeed: " + this.xspeed);
+        console.log("Yspeed: " + this.yspeed);*/
+    }
+    var b = this.originalBox;
+    this.boundingBox = {
+        p1:{x:b.p1.x, y:b.p1.y},
+        p2:{x:b.p2.x, y:b.p2.y},
+        p3:{x:b.p3.x, y:b.p3.y},
+        p4:{x:b.p4.x, y:b.p4.y},
+        offsetx:b.offsetx,
+        offsety:b.offsety
+    };
+    this.sheet = Entity.prototype.rotateAndCache(this.originalSheet, theta);
+    var temp = Entity.prototype.rotateAndCache(this.boundingBox, theta);
+    this.rotatedBoundingBox = temp.img;
+    rotateBoundingBox(this, theta);
+}
 
 Projectile.prototype.setOnDestroy = function(func) {
     this.onDestroy = func;
@@ -841,12 +851,46 @@ Projectile.prototype.update = function() {
         box.p2 = {x:box.p2.x + dx, y:box.p2.y + dy};
         box.p3 = {x:box.p3.x + dx, y:box.p3.y + dy};
         box.p4 = {x:box.p4.x + dx, y:box.p4.y + dy};
-
     } else {
         this.removeFromWorld = true;
     }
     if(this.onDestroy && this.removeFromWorld) this.onDestroy();
 } 
+
+Projectile.prototype.controlledUpdate = function(update, index, time, args) {
+    this.timer += time;
+    if(this.timer < this.lifetime){
+        for (var i = 0; i < this.game.entities.length; i++) {
+            var ent = this.game.entities[i];
+            if (!ent.removeFromWorld) {
+                if (this.shooter !== "Player" && ent instanceof Player && projectileCollide(this, ent)) {
+                    this.handleCollision(ent);
+                } else if (this.shooter === "Player" 
+                                        && (ent instanceof Bunny || ent instanceof shadowBoss 
+                                            || ent instanceof RangeEnemy || ent instanceof FinalRabbitDestination
+                                            || ent instanceof mage || ent instanceof menuItem || ent instanceof BlackBunny)
+                                        && projectileCollide(this, ent)) {
+                    this.handleCollision(ent);
+                } else if (ent instanceof Background) {
+                    LevelBoundingBoxCollsion(ent, this);
+                }
+            }
+        }
+        var x = this.x;
+        var y = this.y;
+        update(this, index, time, args);
+        var dx = this.x - x;
+        var dy = this.y - y;
+        var box = this.boundingBox;
+        box.p1 = {x:box.p1.x + dx, y:box.p1.y + dy};
+        box.p2 = {x:box.p2.x + dx, y:box.p2.y + dy};
+        box.p3 = {x:box.p3.x + dx, y:box.p3.y + dy};
+        box.p4 = {x:box.p4.x + dx, y:box.p4.y + dy};
+    } else{
+        this.removeFromWorld = true;
+    }
+    if(this.onDestroy && this.removeFromWorld) this.onDestroy();
+}
 
 Projectile.prototype.draw = function(){
     var x = this.x - this.sheet.center.x;
@@ -869,7 +913,7 @@ Projectile.prototype.handleCollision = function(ent) {
         this.xspeed = -this.xspeed * 1.5;
         this.yspeed = -this.yspeed * 1.5; 
         this.shooter = "Player";
-        this.damage *= 2;
+        this.damage *= 3;
         this.sheet = Entity.prototype.rotateAndCache(this.originalSheet, this.originalTheta + Math.PI);
         rotateBoundingBox(this, Math.PI);
     } else if(ent.health){
@@ -1082,3 +1126,5 @@ TrapDoor.prototype.update = function(){}
 TrapDoor.prototype.draw = function(){
     this.ctx.drawImage(AM.getAsset("./img/trapdoor.png"), this.x, this.y);
 }
+
+
