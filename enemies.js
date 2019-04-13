@@ -694,7 +694,7 @@ function BlackBunny(game, spritesheet, x, y) {
         offsety:-350
     }
     this.dead = false;
-    this.health = 80;
+    this.health = 75;
     this.healthBar = new HealthBar(game, this, 46, -10);
 
 }

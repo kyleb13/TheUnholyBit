@@ -943,12 +943,13 @@ function fanningShotPoints(start, end){
 function mage(game, x, y){
     //function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale)
     // this.walkAnimation = new Animation(AM.getAsset("./img/mageWalk-export.png"), 64, 64, 8, .12, 32, true, 1);
-    this.attackAnimation = new Animation(AM.getAsset("./img/mageAttack-export.png"), 192, 192, 7, .2, 28, true, 1);
+    this.attackAnimation = new Animation(AM.getAsset("./img/mageAttack-export.png"), 192, 192, 7, .15, 28, true, 1);
     this.deathAnimation = new Animation(AM.getAsset("./img/mageDying-export.png"), 192, 192, 6, .12, 6, false, 1);
     this.walkAnimation = new Animation(AM.getAsset("./img/mageWalk-export.png"), 192, 192, 8, .12, 32, true, 1);
     this.walkAnimation.rowMode();
     this.attackAnimation.rowMode();
     this.attacktimer = 0;
+    this.attackCooldown = 2.25;
     this.canAttack = true;
     var that = this;
     this.deathAnimation.setCallbackOnFrame(6, [], function(){
@@ -1028,7 +1029,7 @@ mage.prototype.update = function () {
 
     if(!this.canAttack) {
         this.attackTimer += time;
-        this.canAttack = this.attackTimer>=3?true:false;
+        this.canAttack = this.attackTimer>=this.attackCooldown?true:false;
     }
 
     if(this.health <= 0) {
@@ -1104,12 +1105,13 @@ mage.prototype.update = function () {
 mage.prototype.modballAttack = function(that) {
     var x = that.x + 96;
     var y = that.y + 96;
+    var speed = 295;
     var projectile = new Projectile(that.game,
         {
             img:AM.getAsset("./img/big_modball.png"), 
             width: 175,
             height: 175
-        }, 265, //speed
+        }, speed, //speed
         {//start point
             x:x-96, 
             y:y-96
