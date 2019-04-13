@@ -26,7 +26,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.parryUseTimer = 0;
     this.parryCooldownTimer = 0;
     this.parryUseMax = .22;
-    this.parryCoolMax = .75;
+    this.parryCoolMax = .6;
     this.parrying = false;
     this.canParry = true;
     this.ctx = game.ctx;

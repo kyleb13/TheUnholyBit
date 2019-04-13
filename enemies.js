@@ -895,7 +895,7 @@ BlackBunny.prototype.draw = function () {
         this.ctx.strokeStyle = "red"
         this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
     }
-    this.ctx.strokeStyle = "red"
+    this.ctx.strokeStyle = "black"
     //this.ctx.strokeRect(this.x+32, this.y + 50, 2, 2);
     Entity.prototype.draw.call(this);
     

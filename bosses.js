@@ -949,14 +949,23 @@ function mage(game, x, y){
     this.walkAnimation.rowMode();
     this.attackAnimation.rowMode();
     this.attacktimer = 0;
-    this.attackCooldown = 2.25;
+    this.attackCooldown = 2.37;
     this.canAttack = true;
     var that = this;
     this.deathAnimation.setCallbackOnFrame(6, [], function(){
         that.removeFromWorld = true;
     });
 
-    this.attackAnimation.setCallbackOnFrame(6, [], function(){that.modballAttack(that)});
+    var atkcnt = 0;
+
+    this.attackAnimation.setCallbackOnFrame(6, [], function(){
+        if(atkcnt%5 === 0){
+            that.spiralAttack();
+        } else {
+            that.modballAttack(that);
+        }
+        atkcnt += 1;
+    });
 
 
     this.movedir = 2;
@@ -1102,9 +1111,40 @@ mage.prototype.update = function () {
     Entity.prototype.update.call(this);
 }
 
+mage.prototype.spiralAttack = function() {
+    //function MultiStageAttack(game, projectiles, stageUpdates, timers, destroyTimer, args){
+    var theFunc = function(proj, idx, time, args) {
+        args.attackTimer += time;
+        if(args.attackTimer >= .25){
+            var that = args.that;
+            var theta = args.lastTheta + args.angInc;
+            projectileBurst(that, that.center(), AM.getAsset("./img/modball.png"), 26, 17, 10, 10, false, theta, 250);
+            args.lastTheta = theta;
+            args.attackTimer = 0;
+        }
+        
+    }
+    var funcs = [
+        theFunc, theFunc
+    ];
+
+    this.game.addCollisionlessEntity(
+        new MultiStageAttack(
+            this.game, [new dummyProjectile()], funcs,
+            [1], 2,
+            {
+                that:this,
+                lastTheta:0,
+                angInc:.15,
+                attackTimer:.3
+            }
+        )
+    );
+}
+
 mage.prototype.modballAttack = function(that) {
-    var x = that.x + 96;
-    var y = that.y + 96;
+    var x = that.center().x;
+    var y = that.center().y;
     var speed = 295;
     var projectile = new Projectile(that.game,
         {
@@ -1113,8 +1153,8 @@ mage.prototype.modballAttack = function(that) {
             height: 175
         }, speed, //speed
         {//start point
-            x:x-96, 
-            y:y-96
+            x:x, 
+            y:y
         }, 
         {//end Point
             x:that.followPoint.center().x, 
@@ -1122,8 +1162,8 @@ mage.prototype.modballAttack = function(that) {
         }, 2, "Boss", 30);
     projectile.setOnDestroy(function(){
         var rng = Math.random();
-        if(rng <= .85){
-            projectileBurst(that, projectile, AM.getAsset("./img/modball.png"), 26, 17, 10, 10);
+        if(rng <= .87){
+            projectileBurst(that, projectile, AM.getAsset("./img/modball.png"), 26, 17, 10, 10, false, 0);
         } else {
             that.game.addEntity(new BlackBunny(that.game, AM.getAsset("./img/blackbunbun.png"), projectile.x, projectile.y)); 
             //that.game.addEntity(new BlackBunny(that.game, AM.getAsset("./img/blackbunbun.png"), projectile.x+30, projectile.y+30)); 
@@ -1132,283 +1172,8 @@ mage.prototype.modballAttack = function(that) {
     this.game.addProjectile(projectile);
 }
 
-function projectileBurst(that, start, asset, width, height, damage, lifetime, additionalBurst){
-
-    that.game.addProjectile(
-        new Projectile( that.game,
-            {
-                img:asset, 
-                width:width, 
-                height:height
-            }, 325, //speed
-            {//start point
-                x:start.x, 
-                y:start.y
-            }, 
-            {//end Point
-                x:start.x+1, 
-                y:start.y
-            }, lifetime, "Boss", damage)
-    );
-
-    that.game.addProjectile(
-        new Projectile( that.game,
-            {
-                img:asset, 
-                width:width, 
-                height:height
-            }, 325, //speed
-            {//start point
-                x:start.x, 
-                y:start.y
-            }, 
-            {//end Point
-                x:start.x+1, 
-                y:start.y+1
-            }, lifetime, "Boss", damage)
-    );
-    that.game.addProjectile(
-        new Projectile( that.game,
-            {
-                img:asset, 
-                width:width, 
-                height:height
-                
-            }, 325, //speed
-            {//start point
-                x:start.x, 
-                y:start.y
-            }, 
-            {//end Point
-                x:start.x, 
-                y:start.y+1
-            }, lifetime, "Boss", damage)
-    );
-    that.game.addProjectile(
-        new Projectile( that.game,
-            {
-                img:asset, 
-                width:width, 
-                height:height
-                
-            }, 325, //speed
-            {//start point
-                x:start.x, 
-                y:start.y
-            }, 
-            {//end Point
-                x:start.x-1, 
-                y:start.y+1
-            }, lifetime, "Boss", damage)
-    );
-    that.game.addProjectile(
-        new Projectile( that.game,
-            {
-                img:asset, 
-                width:width, 
-                height:height
-                
-            }, 325, //speed
-            {//start point
-                x:start.x, 
-                y:start.y
-            }, 
-            {//end Point
-                x:start.x-1, 
-                y:start.y
-            }, lifetime, "Boss", damage)
-    );
-    that.game.addProjectile(
-        new Projectile( that.game,
-            {
-                img:asset, 
-                width:width, 
-                height:height
-            
-            }, 325, //speed
-            {//start point
-                x:start.x, 
-                y:start.y
-            }, 
-            {//end Point
-                x:start.x-1, 
-                y:start.y-1
-            }, lifetime, "Boss", damage)
-    );
-    that.game.addProjectile(
-        new Projectile( that.game,
-            {
-                img:asset, 
-                width:width, 
-                height:height
-                
-            }, 325, //speed
-            {//start point
-                x:start.x, 
-                y:start.y
-            }, 
-            {//end Point
-                x:start.x, 
-                y:start.y-1
-            }, lifetime, "Boss", damage)
-    );
-    that.game.addProjectile(
-        new Projectile( that.game,
-            {
-                img:asset, 
-                width:width, 
-                height:height
-                
-            }, 325, //speed
-            {//start point
-                x:start.x, 
-                y:start.y
-            }, 
-            {//end Point
-                x:start.x+1, 
-                y:start.y-1
-            }, lifetime, "Boss", damage)
-    );
-
-    if(additionalBurst) {
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:asset, 
-                    width:width, 
-                    height:height
-                    
-                }, 325, //speed
-                {//start point
-                    x:start.x, 
-                    y:start.y
-                }, 
-                {//end Point
-                    x:start.x+2, 
-                    y:start.y-1
-                }, lifetime, "Boss", damage)
-        );
-
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:asset, 
-                    width:width, 
-                    height:height
-                    
-                }, 325, //speed
-                {//start point
-                    x:start.x, 
-                    y:start.y
-                }, 
-                {//end Point
-                    x:start.x+1, 
-                    y:start.y-2
-                }, lifetime, "Boss", damage)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:asset, 
-                    width:width, 
-                    height:height
-                    
-                }, 325, //speed
-                {//start point
-                    x:start.x, 
-                    y:start.y
-                }, 
-                {//end Point
-                    x:start.x-1, 
-                    y:start.y-2
-                }, lifetime, "Boss", damage)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:asset, 
-                    width:width, 
-                    height:height
-                    
-                }, 325, //speed
-                {//start point
-                    x:start.x, 
-                    y:start.y
-                }, 
-                {//end Point
-                    x:start.x-2, 
-                    y:start.y-1
-                }, lifetime, "Boss", damage)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:asset, 
-                    width:width, 
-                    height:height
-                    
-                }, 325, //speed
-                {//start point
-                    x:start.x, 
-                    y:start.y
-                }, 
-                {//end Point
-                    x:start.x-2, 
-                    y:start.y+1
-                }, lifetime, "Boss", damage)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:asset, 
-                    width:width, 
-                    height:height
-                    
-                }, 325, //speed
-                {//start point
-                    x:start.x, 
-                    y:start.y
-                }, 
-                {//end Point
-                    x:start.x-1, 
-                    y:start.y+2
-                }, lifetime, "Boss", damage)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:asset, 
-                    width:width, 
-                    height:height
-                    
-                }, 325, //speed
-                {//start point
-                    x:start.x, 
-                    y:start.y
-                }, 
-                {//end Point
-                    x:start.x+1, 
-                    y:start.y+2
-                }, lifetime, "Boss", damage)
-        );
-        that.game.addProjectile(
-            new Projectile( that.game,
-                {
-                    img:asset, 
-                    width:width, 
-                    height:height
-                    
-                }, 325, //speed
-                {//start point
-                    x:start.x, 
-                    y:start.y
-                }, 
-                {//end Point
-                    x:start.x+2, 
-                    y:start.y+1
-                }, lifetime, "Boss", damage)
-        );
-    }
+mage.prototype.center = function(){
+    return {x:this.x+90, y:this.y + 100};
 }
 
 mage.prototype.draw = function () {
@@ -1430,53 +1195,4 @@ mage.prototype.draw = function () {
     this.healthBar.draw();
 
     
-}
-
-/*
-    Controller class for a multistage attack involving multiple projectiles. Projectiles, stageUpdates,
-and timers should all be arrays. Projectiles should have all the projectiles involved in the attack,
-stageUpdates should have functions that controls how individual projectiles update at various stages,
-and timers has the time at which stages should change. destroyTimer has the time at which the attack 
-should end (or be removed), and args is function arguments that should be passed every time (args will
-be up to you, use it for update logic specific to your attack). See the Shadow Boss's class for an example
-of this classes usage
-*/
-function MultiStageAttack(game, projectiles, stageUpdates, timers, destroyTimer, args){
-    this.game = game;
-    this.ctx = game.ctx;
-    this.projectiles = projectiles;
-    this.updates = stageUpdates;
-    this.stage = 0;
-    this.timers = timers;
-    this.endTime = destroyTimer;
-    this.fargs = args;
-    this.curtime = 0;
-    for(var i = 0; i<projectiles.length; i++){
-        projectiles[i].controlled = true;
-        game.addProjectile(projectiles[i]);
-    }
-    this.removeFromWorld = false;
-    this.active = true;
-}
-
-MultiStageAttack.prototype.update = function(){
-    var time = this.game.clockTick;
-    this.curtime += time;
-    if(this.curtime > this.endTime){
-        this.projectiles.forEach(prj => {prj.removeFromWorld = true;});
-        this.active = false;
-        this.removeFromWorld = true;
-    } else if(this.timers[this.stage] && this.curtime > this.timers[this.stage]){
-        this.stage++;
-    }
-
-    for(var i = 0; i<this.projectiles.length; i++){
-        var proj = this.projectiles[i];
-        if(!proj.removeFromWorld) proj.controlledUpdate(this.updates[this.stage], i, time, this.fargs);
-    }
-
-}
-
-MultiStageAttack.prototype.draw = function(ctx){
-
 }
