@@ -533,7 +533,7 @@ function Bunny(game, spritesheet, x, y) {
         offsety:-850
     }
     this.dead = false;
-    this.health = 80;
+    this.health = 75;
     this.healthBar = new HealthBar(game, this, 46, -10);
 
 }
@@ -694,7 +694,7 @@ function BlackBunny(game, spritesheet, x, y) {
         offsety:-350
     }
     this.dead = false;
-    this.health = 75;
+    this.health = 100;
     this.healthBar = new HealthBar(game, this, 46, -10);
 
 }
