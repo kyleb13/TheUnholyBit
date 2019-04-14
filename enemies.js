@@ -533,7 +533,7 @@ function Bunny(game, spritesheet, x, y) {
         offsety:-850
     }
     this.dead = false;
-    this.health = 80;
+    this.health = 75;
     this.healthBar = new HealthBar(game, this, 46, -10);
 
 }
@@ -694,7 +694,7 @@ function BlackBunny(game, spritesheet, x, y) {
         offsety:-350
     }
     this.dead = false;
-    this.health = 80;
+    this.health = 100;
     this.healthBar = new HealthBar(game, this, 46, -10);
 
 }
@@ -895,7 +895,7 @@ BlackBunny.prototype.draw = function () {
         this.ctx.strokeStyle = "red"
         this.ctx.strokeRect(this.attackBox.x, this.attackBox.y, this.attackBox.width, this.attackBox.height);
     }
-    this.ctx.strokeStyle = "red"
+    this.ctx.strokeStyle = "black"
     //this.ctx.strokeRect(this.x+32, this.y + 50, 2, 2);
     Entity.prototype.draw.call(this);
     
