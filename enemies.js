@@ -243,10 +243,10 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
                         y -= 15;
                         break;
                     case "left":
-                        y += 25;
+                        y += 35;
                         break;
                     case "right":
-                        y += 30;
+                        y += 35;
                         x+=25;
                         break;
                     case "down":
@@ -254,7 +254,7 @@ function RangeEnemy(game, spritesheet, spawnX, spawnY, type, projectile, species
                         y += 30;
                         break;
                 }
-                var dmg = 5;
+                var dmg = 13;
                 if (projectile === "magic") {
                     dmg += 5;
                 }
@@ -801,32 +801,32 @@ BlackBunny.prototype.attack = function(){
     var x1, y1, x2, y2, x3, y3;
     if(this.direction === "up"){
         x1 = x;
-        y1 = y+1;
-        x2 = x+1;
-        y2 = y-1;
-        x3 = x-1;
-        y3 = y-1;
+        y1 = y+5;
+        x2 = x+5;
+        y2 = y-5;
+        x3 = x-5;
+        y3 = y-5;
     } else if(this.direction === "down"){
         x1 = x;
-        y1 = y-1;
-        x2 = x+1;
-        y2 = y+1;
-        x3 = x-1;
-        y3 = y+1;
+        y1 = y-5;
+        x2 = x+5;
+        y2 = y+5;
+        x3 = x-5;
+        y3 = y+5;
     } else if(this.direction === "left"){
-        x1 = x - 1;
+        x1 = x-5;
         y1 = y;
-        x2 = x-1;
-        y2 = y+1;
-        x3 = x-1;
-        y3 = y-1;
+        x2 = x-5;
+        y2 = y+5;
+        x3 = x-5;
+        y3 = y-5;
     } else {//right
-        x1 = x + 1;
+        x1 = x+5;
         y1 = y;
-        x2 = x+1;
-        y2 = y+1;
-        x3 = x+1;
-        y3 = y-1;
+        x2 = x+5;
+        y2 = y+5;
+        x3 = x+5;
+        y3 = y-5;
     }
     this.game.addProjectile(
         new Projectile( this.game,
@@ -843,7 +843,7 @@ BlackBunny.prototype.attack = function(){
             {//end Point
                 x:x1, 
                 y:y1
-            }, 10, "Enemy", 10)
+            }, 10, "Enemy", 15)
     );
     this.game.addProjectile(
         new Projectile( this.game,

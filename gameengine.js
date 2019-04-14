@@ -24,6 +24,7 @@ audio.loop = true;
 function GameEngine() {
     this.entities = [];
     this.projectiles = [];
+    this.noCollideEnts = [];
     this.ctx = null;
     this.surfaceWidth = null;
     this.surfaceHeight = null;
@@ -35,6 +36,7 @@ function GameEngine() {
     this.mute = false;
     this.lclick = false;
     this.pclick = false;
+    this.space = false;
     this.change = false;
     this.pointerx = 50;
     this.pointery = 50;
@@ -131,6 +133,7 @@ GameEngine.prototype.startInput = function () {
     });
 
     this.ctx.canvas.addEventListener("keydown", (e) => {
+
         that.handleInputs(e.code, true);
         if(e.code === "KeyM"){
             this.mute = !this.mute;
@@ -140,7 +143,13 @@ GameEngine.prototype.startInput = function () {
                 audio.play();
             }
         }
+        // if(e.code === "KeyN") {
+        //     sceneManager.loadNextLevel();
+        // } 
+        if(e.code === "Space"){
+            e.preventDefault();
 
+        }
         if (e.code === "Digit1") {
             this.player.usePowerUp();
             this.player.usingPU = true;
@@ -172,7 +181,9 @@ GameEngine.prototype.handleInputs = function(keycode, value){
         case "KeyP":
             this.p = value;
             break; 
-            
+        case "Space":
+            this.space = value;
+            break;
     }   
 }
 
@@ -185,6 +196,11 @@ GameEngine.prototype.addProjectile = function (entity) {
     this.projectiles.push(entity);
 }
 
+GameEngine.prototype.addCollisionlessEntity = function (entity) {
+    console.log('added collisionless entity');
+    this.noCollideEnts.push(entity);
+}
+
 GameEngine.prototype.draw = function () {
     this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
     this.ctx.save();
@@ -192,6 +208,11 @@ GameEngine.prototype.draw = function () {
     for (var i = 0; i < this.entities.length; i++) {
         if(!this.entities[i].removeFromWorld){
             this.entities[i].draw(this.ctx);
+        }
+    }
+    for (var i = 0; i < this.noCollideEnts.length; i++) {
+        if(!this.noCollideEnts[i].removeFromWorld){
+            this.noCollideEnts[i].draw(this.ctx);
         }
     }
     for (var i = 0; i < this.projectiles.length; i++) {
@@ -216,9 +237,14 @@ GameEngine.prototype.update = function () {
             entity.update();
         }
     }
+    for (var i = 0; i < this.noCollideEnts.length; i++) {
+        if(!this.noCollideEnts[i].removeFromWorld){
+            this.noCollideEnts[i].update();
+        }
+    }
     for (var i = 0; i < this.projectiles.length; i++) {
         var entity = this.projectiles[i];
-        if(!entity.removeFromWorld){
+        if(!entity.removeFromWorld && !entity.controlled){
             entity.update();
         }
     }
@@ -232,7 +258,7 @@ GameEngine.prototype.loop = function () {
 
 function Timer() {
     this.gameTime = 0;
-    this.maxStep = 0.05;
+    this.maxStep = 0.045;
     this.wallLastTimestamp = 0;
     this.slowTimer = 0;
 }

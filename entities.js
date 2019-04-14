@@ -1,16 +1,21 @@
 function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupsheet, px, py) {
     //function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale)
-    this.animation = new Animation(walksheet, 64, 64, 8, .12, 32, true, 1.5);
-    this.shootanimation = new Animation(shootsheet,64,64, 7, .027, 28, true, 1.5);
+    this.animation = new Animation(walksheet, 64, 64, 8, .06, 32, true, 1.5);
+    this.shootanimation = new Animation(AM.getAsset("./img/charshootwalk.png"),64,64, 7, .055, 28, true, 1.5);
+    this.stillshootanimation = new Animation(AM.getAsset("./img/charshoot_loop.png"),64,64, 7, .055, 28, true, 1.5);
     this.standanimation = new Animation(standsheet, 64, 64, 1, .12, 4, true, 1.5);
     this.deathanimation =  new Animation2(wholesheet, 0, 1280, 64, 64, 0.1, 6, false, false);  
     this.powerupanimation = new Animation(powerupsheet, 64, 64, 7, .075, 28, true, 1.5);
+    this.parryanimation = new Animation(AM.getAsset("./img/parrysheet.png"), 64, 64, 1, .01, 4, true, 1.5);
     this.usingPU = false;
     this.shootanimation.rowMode();
+    this.stillshootanimation.rowMode();
     this.powerupanimation.rowMode();
-    
+    this.parryanimation.rowMode();
     this.explosionanimation = new Animation(AM.getAsset("./img/explosion.png"), 200, 200, 9, .01, 81, false, 4);
-    this.maxSpeed = 250;
+    this.shootmaxSpeed = 200;
+    this.walkmaxSpeed = 300;
+    this.acceleration = 80;
     this.xspeed = 0;
     this.yspeed = 0;
     this.ammo = 200;
@@ -18,6 +23,12 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
     this.powerUp;
     this.changeTimer = 0;
     this.powerUpTimer = 0;
+    this.parryUseTimer = 0;
+    this.parryCooldownTimer = 0;
+    this.parryUseMax = .22;
+    this.parryCoolMax = .75;
+    this.parrying = false;
+    this.canParry = true;
     this.ctx = game.ctx;
     this.movedir = 3;
     this.velocity = { x: 200, y: 200 };
@@ -40,6 +51,8 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
         var y2 = y;
         var x3 = x;
         var y3 = y;
+        var pspeed = 600;
+        var pdamage = 25;
         //change direction arrows come from based on
         //direction character is facing
         switch(that.movedir){
@@ -84,7 +97,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                     img:that.game.assetManager.getAsset("./img/arrow.png"), 
                     width:31, 
                     height:5
-                }, 400, //speed
+                }, pspeed, //speed
                 {//start point
                     x:x, 
                     y:y
@@ -92,7 +105,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                 {//end Point
                     x:that.game.pointerx, 
                     y:that.game.pointery
-                }, 5, "Player", 18));//lifetime*/
+                }, 5, "Player", pdamage));//lifetime*/
                 
                 //triple shot
 
@@ -102,7 +115,7 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                             img:that.game.assetManager.getAsset("./img/arrow.png"), 
                             width:31, 
                             height:5
-                        }, 400, //speed
+                        }, pspeed, //speed
                         {//start point
                             x:x2, 
                             y:y2
@@ -110,14 +123,14 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                         {//end Point
                             x:that.game.pointerx, 
                             y:that.game.pointery
-                        }, 5, "Player", 18));//lifetime
+                        }, 5, "Player", pdamage));//lifetime
     
                         that.game.addProjectile(new Projectile(that.game, 
                             {
                                 img:that.game.assetManager.getAsset("./img/arrow.png"), 
                                 width:31, 
                                 height:5
-                            }, 400, //speed
+                            }, pspeed, //speed
                             {//start point
                                 x:x3, 
                                 y:y3
@@ -125,11 +138,110 @@ function Player(game, walksheet, shootsheet, standsheet, wholesheet, powerupshee
                             {//end Point
                                 x:that.game.pointerx, 
                                 y:that.game.pointery
-                            }, 5, "Player", 18)); //lifetime*/
+                            }, 5, "Player", pdamage)); //lifetime*/
                         }  
                 }
                
-    });    
+    });
+    this.stillshootanimation.setCallbackOnFrame(6, {}, () =>{
+        var x = that.x;
+        var y = that.y;
+        var x2= x;
+        var y2 = y;
+        var x3 = x;
+        var y3 = y;
+        var pspeed = 600;
+        var pdamage = 25;
+        //change direction arrows come from based on
+        //direction character is facing
+        switch(that.movedir){
+            case 0:
+                x += 50;
+                y -= 5;
+                x2 -= 10 - 50;
+                x3 += 10 + 50;
+              
+                break;
+            case 1:
+                y += 44;
+                x +=8;
+                
+                y2 += 25;
+                y3 += 40;
+                break;
+            case 2:
+                y += 75;
+                x+=40;
+                x2 -= 10 - 40;
+                x3 += 10 + 40;
+                y2 += 75;
+                y3 += 75;
+                
+                break;
+            case 3:
+                x +=46;
+                y += 42;
+                y2 -= 10 -42;
+                y3 += 10 +42;
+                x2+=46;
+                x3+=46;
+                
+                break;
+        }
+        if (this.ammo > 0) {
+            that.ammo -=1;
+            
+            that.game.addProjectile(new Projectile(that.game, 
+                {
+                    img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                    width:31, 
+                    height:5
+                }, pspeed, //speed
+                {//start point
+                    x:x, 
+                    y:y
+                }, 
+                {//end Point
+                    x:that.game.pointerx, 
+                    y:that.game.pointery
+                }, 5, "Player", pdamage));//lifetime*/
+                
+                //triple shot
+
+                if (that.TripleShot) {
+                    that.game.addProjectile(new Projectile(that.game, 
+                        {
+                            img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                            width:31, 
+                            height:5
+                        }, pspeed, //speed
+                        {//start point
+                            x:x2, 
+                            y:y2
+                        }, 
+                        {//end Point
+                            x:that.game.pointerx, 
+                            y:that.game.pointery
+                        }, 5, "Player", pdamage));//lifetime
+    
+                        that.game.addProjectile(new Projectile(that.game, 
+                            {
+                                img:that.game.assetManager.getAsset("./img/arrow.png"), 
+                                width:31, 
+                                height:5
+                            }, pspeed, //speed
+                            {//start point
+                                x:x3, 
+                                y:y3
+                            }, 
+                            {//end Point
+                                x:that.game.pointerx, 
+                                y:that.game.pointery
+                            }, 5, "Player", pdamage)); //lifetime*/
+                        }  
+                }
+               
+    });
 
 
     this.radius  = {
@@ -150,7 +262,6 @@ Player.prototype.constructor = Player;
 
 Player.prototype.update = function () {
 
-
     this.moveRestrictions = {left:false, right:false, up:false, down:false};
     var px = this.game.pointerx;
     var py = this.game.pointery;
@@ -159,7 +270,7 @@ Player.prototype.update = function () {
     var centery= center.y;
     var xdiff = Math.abs(px - centerx);
     var ydiff = Math.abs(py - centery);
-    var player = this;
+    // var player = this;
     //update direction character is pointing
     if(py< centery){//pointer is above character
         if(centerx > px && xdiff>ydiff){
@@ -178,6 +289,7 @@ Player.prototype.update = function () {
             this.movedir = 3;
         }
     }
+    if(this.game.space && this.canParry) this.parrying = true;
 
     let time = this.game.clockTick;
     if (!this.canUsePU) {
@@ -192,23 +304,47 @@ Player.prototype.update = function () {
         this.tpTimer = 0;
     }
 
-    if(!this.game.lclick && !this.shootanimation.active) {
-        if(timeSlowed) time *=2;
-        this.xspeed = 0;
-        this.yspeed = 0;
+    if(this.parrying){
+        this.parryUseTimer += time;
+        if(this.parryUseTimer>this.parryUseMax) {
+            this.parrying = false;
+            this.canParry = false;
+            this.parryUseTimer = 0;
+        }
+    } else if(!this.canParry){
+        this.parryCooldownTimer += time;
+        if(this.parryCooldownTimer > this.parryCoolMax){
+            this.canParry = true;
+            this.parryCooldownTimer = 0;
+        }
+    }
 
-        if(this.game.w) this.yspeed -=250;
-        if(this.game.s) this.yspeed +=250;
-        if(this.game.a) this.xspeed -=250;
-        if(this.game.d) this.xspeed +=250;
+    //if(!this.game.lclick && !this.shootanimation.active) {
+        if(timeSlowed) time *=2;
+        // this.xspeed = 0;
+        // this.yspeed = 0;
+        var maxspeed = this.shootanimation.active?this.shootmaxSpeed:this.walkmaxSpeed;
+        var accel = 0;
+        if(this.game.w || this.game.s || this.game.a || this.game.d){
+            accel = xor(this.game.w, this.game.s) && xor(this.game.a, this.game.d)?this.acceleration/2:this.acceleration;
+            if(this.game.w) this.yspeed += -accel;
+            if(this.game.s && !this.game.w) this.yspeed += accel;
+            if(this.game.a) this.xspeed += -accel;
+            if(this.game.d) this.xspeed += accel;
+        } else {
+            //we need to decelerate
+            this.xspeed  =0;
+            this.yspeed = 0;
+        }
+        
+        var speed = Math.sqrt(this.xspeed * this.xspeed + this.yspeed * this.yspeed);
         //slow down x and y if moving diagonally
-        if(this.xspeed!==0 && this.yspeed !== 0){
-            var speed = Math.sqrt(this.xspeed * this.xspeed + this.yspeed * this.yspeed);
-            var ratio = this.maxSpeed / speed;
+        if(speed >= maxspeed){
+            var ratio = maxspeed / speed;
             this.xspeed *= ratio;
             this.yspeed *= ratio;
         }
-
+        //document.getElementById("debug-out").innerHTML = `acceleration: ${accel}`;
         if (!this.xspeed !== 0 || !this.yspeed !== 0) {
             for (var i = 0; i < this.game.entities.length; i++) {
                 var ent = this.game.entities[i];
@@ -246,7 +382,7 @@ Player.prototype.update = function () {
             }
         }
         
-    } 
+    //} 
     
 
     if(this.health < 1) {
@@ -259,27 +395,40 @@ Player.prototype.update = function () {
     Entity.prototype.update.call(this);
 }
 
+
 Player.prototype.draw = function () {
     var time = this.game.clockTick;
     if(timeSlowed) time *= 2;
-    if(this.game.lclick || this.shootanimation.active){
-        this.shootanimation.loop = this.game.lclick?true:false;
-        this.shootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
-    } else {
+    if(this.parrying){
+        this.parryanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
+    }else if(this.usingPU || this.powerupanimation.active || this.explosionanimation.active) { 
+        this.powerupanimation.loop = this.usingPU?true:false
+        this.powerupanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
+        this.usingPU = false;
+    }
+    if(this.game.lclick || this.shootanimation.active|| this.stillshootanimation.active){
         if(this.xspeed!==0 || this.yspeed!==0){
-            if (!this.dead || !this.usingPU) {
-             this.animation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
+            this.shootanimation.loop = this.game.lclick?true:false;
+            if(this.stillshootanimation.active){
+                this.stillshootanimation.active = false;
+                this.shootanimation.active = true;
+                this.shootanimation.elapsedTime = this.stillshootanimation.elapsedTime; 
             }
+            this.shootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
         } else {
-            if(this.usingPU || this.powerupanimation.active || this.explosionanimation.active) { 
-                this.powerupanimation.loop = this.usingPU?true:false
-                this.powerupanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
-                this.usingPU = false;
-          
-            }else if(!this.dead) {
-              this.standanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
-            }  
+            this.stillshootanimation.loop = this.game.lclick?true:false;
+            if(this.shootanimation.active){
+                this.shootanimation.active = false;
+                this.stillshootanimation.active = true;
+                this.stillshootanimation.elapsedTime = this.shootanimation.elapsedTime; 
+            }
+            this.stillshootanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
         }
+        
+    } else if(this.xspeed!==0 || this.yspeed!==0){
+        this.animation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
+    } else if(!this.dead){
+        this.standanimation.drawFrameFromRow(time, this.ctx, this.x, this.y, this.movedir);
     }
     if(this.game.showOutlines){
         this.ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.width, this.boundingBox.height);
@@ -516,6 +665,10 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     this.timer = 0;
     this.lifetime = lifetime;
     this.damage = damage;
+    //controlled should only be set if a projectile's position
+    //update is controlled by another class (ie MultiStageAttack)
+    this.controlled = false;
+    this.speed = speed;
 /*
     this.boundingBox = {
         x:this.x, 
@@ -533,10 +686,10 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
     var pi = Math.PI;
     if(dx === 0){
         this.yspeed = dy<0?speed:-speed;
-        theta = dy<0?(4*pi)/3:pi/2;
+        theta = dy<0?(3*pi)/2:pi/2;
     } else if(dy === 0){
         this.xspeed = dx>0?speed:-speed;
-        theta = dx>0?pi:0;
+        theta = dx>0?0:pi;
     } else {
         theta = Math.atan(Math.abs(dy/dx));
         if(dy>0 && dx < 0) {
@@ -597,12 +750,23 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
         p4:{x:x+width, y:y},
         offsetx:offx,
         offsety:offy
-    }
+    };
     if(!game.mute){
         shootaudio.volume = 0.10; // 75%
         shootaudio.play();
     }
-
+    this.originalBox = {
+        p1:{x:x, y:y},
+        p2:{x:x, y:y + height},
+        p3:{x:x+width, y:y + height},
+        p4:{x:x+width, y:y},
+        offsetx:offx,
+        offsety:offy
+    };
+    this.width = width;
+    this.height = height;
+    this.originalSheet = spritesheet;
+    this.originalTheta = theta;
     this.sheet = Entity.prototype.rotateAndCache(spritesheet, theta);
     var temp = Entity.prototype.rotateAndCache(this.boundingBox, theta);
     this.rotatedBoundingBox = temp.img;
@@ -611,6 +775,47 @@ function Projectile(game, spritesheet, speed, start, end, lifetime, shooter, dam
 
 Projectile.prototype = new Entity();
 Projectile.prototype.constructor = Projectile;
+
+Projectile.prototype.changeDirection = function(start, end){
+    var speed = this.speed;
+    var theta = 0;
+    var dx = end.x - start.x;
+    var dy = end.y - start.y;
+    var pi = Math.PI;
+    if(dx === 0){
+        this.yspeed = dy<0?speed:-speed;
+        theta = dy<0?(3*pi)/2:pi/2;
+    } else if(dy === 0){
+        this.xspeed = dx>0?speed:-speed;
+        theta = dx>0?0:pi;
+    } else {
+        theta = Math.atan(Math.abs(dy/dx));
+        if(dy>0 && dx < 0) {
+            theta = pi + theta;
+        } else if(dy>0) {
+            theta = 2*pi - theta;
+        } else if(dx<0){
+            theta = pi-theta;
+        }
+        this.xspeed = speed*Math.cos(theta);
+        this.yspeed = -speed*Math.sin(theta);
+       /* console.log("Xspeed: " + this.xspeed);
+        console.log("Yspeed: " + this.yspeed);*/
+    }
+    var b = this.originalBox;
+    this.boundingBox = {
+        p1:{x:b.p1.x, y:b.p1.y},
+        p2:{x:b.p2.x, y:b.p2.y},
+        p3:{x:b.p3.x, y:b.p3.y},
+        p4:{x:b.p4.x, y:b.p4.y},
+        offsetx:b.offsetx,
+        offsety:b.offsety
+    };
+    this.sheet = Entity.prototype.rotateAndCache(this.originalSheet, theta);
+    var temp = Entity.prototype.rotateAndCache(this.boundingBox, theta);
+    this.rotatedBoundingBox = temp.img;
+    rotateBoundingBox(this, theta);
+}
 
 Projectile.prototype.setOnDestroy = function(func) {
     this.onDestroy = func;
@@ -646,29 +851,78 @@ Projectile.prototype.update = function() {
         box.p2 = {x:box.p2.x + dx, y:box.p2.y + dy};
         box.p3 = {x:box.p3.x + dx, y:box.p3.y + dy};
         box.p4 = {x:box.p4.x + dx, y:box.p4.y + dy};
-
     } else {
         this.removeFromWorld = true;
     }
     if(this.onDestroy && this.removeFromWorld) this.onDestroy();
 } 
 
+Projectile.prototype.controlledUpdate = function(update, index, time, args) {
+    this.timer += time;
+    if(this.timer < this.lifetime){
+        for (var i = 0; i < this.game.entities.length; i++) {
+            var ent = this.game.entities[i];
+            if (!ent.removeFromWorld) {
+                if (this.shooter !== "Player" && ent instanceof Player && projectileCollide(this, ent)) {
+                    this.handleCollision(ent);
+                } else if (this.shooter === "Player" 
+                                        && (ent instanceof Bunny || ent instanceof shadowBoss 
+                                            || ent instanceof RangeEnemy || ent instanceof FinalRabbitDestination
+                                            || ent instanceof mage || ent instanceof menuItem || ent instanceof BlackBunny)
+                                        && projectileCollide(this, ent)) {
+                    this.handleCollision(ent);
+                } else if (ent instanceof Background) {
+                    LevelBoundingBoxCollsion(ent, this);
+                }
+            }
+        }
+        var x = this.x;
+        var y = this.y;
+        update(this, index, time, args);
+        var dx = this.x - x;
+        var dy = this.y - y;
+        var box = this.boundingBox;
+        box.p1 = {x:box.p1.x + dx, y:box.p1.y + dy};
+        box.p2 = {x:box.p2.x + dx, y:box.p2.y + dy};
+        box.p3 = {x:box.p3.x + dx, y:box.p3.y + dy};
+        box.p4 = {x:box.p4.x + dx, y:box.p4.y + dy};
+    } else{
+        this.removeFromWorld = true;
+    }
+    if(this.onDestroy && this.removeFromWorld) this.onDestroy();
+}
+
 Projectile.prototype.draw = function(){
     var x = this.x - this.sheet.center.x;
     var y = this.y - this.sheet.center.y;
     this.ctx.drawImage(this.sheet.img, x, y);
-   // if(this.game.showOutlines) this.ctx.drawImage(this.rotatedBoundingBox, x, y);
-    // var box = this.boundingBox;
-    // this.ctx.strokeStyle = "red";
-    // this.ctx.moveTo(box.p1.x, box.p1.y);
-    // this.ctx.lineTo(box.p2.x, box.p2.y);
-    // this.ctx.lineTo(box.p3.x, box.p3.y);
-    // this.ctx.lineTo(box.p4.x, box.p4.y);
-    // this.ctx.lineTo(box.p1.x, box.p1.y);
-    // this.ctx.stroke();
-    // this.ctx.strokeRect(this.x, this.y, 2, 2);
-    
+}
 
+Projectile.prototype.handleCollision = function(ent) {
+    if (ent instanceof Bunny || ent instanceof RangeEnemy) {    
+        tempVelocityX = this.xspeed * friction;
+        tempVelocityY = this.yspeed * friction;
+        
+        ent.x += 4 * tempVelocityX * this.game.clockTick;   
+        ent.y += 4 * tempVelocityY * this.game.clockTick;
+        
+        
+    }   
+
+    if(ent instanceof Player && ent.parrying){
+        this.xspeed = -this.xspeed * 1.5;
+        this.yspeed = -this.yspeed * 1.5; 
+        this.shooter = "Player";
+        this.damage *= 3;
+        this.sheet = Entity.prototype.rotateAndCache(this.originalSheet, this.originalTheta + Math.PI);
+        rotateBoundingBox(this, Math.PI);
+    } else if(ent.health){
+        ent.health = ent.health - this.damage;
+    }
+
+    if(ent instanceof menuItem) ent.doAThing();
+    
+    if(!ent.parrying) this.removeFromWorld = true;
 }
 
 function rotateBoundingBox(proj, theta){
@@ -690,21 +944,7 @@ function rotateBoundingBox(proj, theta){
 
 }
 
-// function xyDist(p1, p2){
-//     var x1 = math.min(p1.x, p2.x);
-//     var x2 = math.max(p1.x, p2.x);
-//     var y1 = math.min(p1.y, p2.y);
-//     var y2 = math.max(p1.y, p2.y);
-//     return {x:(x2-x1), y:(y2-y1)};
-// }
 
-// function midpoint(p1, p2){
-//     var x1 = math.min(p1.x, p2.x);
-//     var x2 = math.max(p1.x, p2.x);
-//     var y1 = math.min(p1.y, p2.y);
-//     var y2 = math.max(p1.y, p2.y);
-//     return {x:x1 + (x2-x1)/2, y:y1 + (y2-y1)/2};
-// }
 function projectileCollide(me, ent) {
     if ( !(me instanceof Background || me instanceof Crosshair)
       && !(ent instanceof Background || ent instanceof Crosshair)) {
@@ -867,26 +1107,6 @@ function LevelBoundingBoxCollsion(background, ent) {
     return false;
 }
 
-Projectile.prototype.handleCollision = function(ent) {
-    if (ent instanceof Bunny || ent instanceof RangeEnemy) {    
-        tempVelocityX = this.xspeed * friction;
-        tempVelocityY = this.yspeed * friction;
-        
-        ent.x += 4 * tempVelocityX * this.game.clockTick;   
-        ent.y += 4 * tempVelocityY * this.game.clockTick;
-        
-        
-    }   
-
-    if(ent.health){
-        ent.health = ent.health - this.damage;
-    }
-
-    if(ent instanceof menuItem) ent.doAThing();
-    
-    this.removeFromWorld = true;
-}
-
 function TrapDoor(game){
     this.ctx = game.ctx;
     this.x = 11050;
@@ -906,3 +1126,5 @@ TrapDoor.prototype.update = function(){}
 TrapDoor.prototype.draw = function(){
     this.ctx.drawImage(AM.getAsset("./img/trapdoor.png"), this.x, this.y);
 }
+
+

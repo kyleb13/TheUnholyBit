@@ -9,14 +9,16 @@ var assets = [
     "modball.png",          "normalArcher.png",     "cavemap.png",          "hourglass.png",
     "magicSkel.png",        "arrowSkel.png",        "finalBossMap.png",     "carrot.png",
     "bossBun-export.png",   "castlemap.png",        "KnightArcher.png",     "KnightMage.png",
-    "blue.png",             "officialLogo.png",     "completeGame.png",
-    "blue.png",             "mageWalk-export.png",  "mageAttack-export.png","mageDying-export.png",
+    "blue.png",             "officialLogo.png",     "completeGame.png",     "parrysheet.png",
+    "mageWalk-export.png",  "mageAttack-export.png","mageDying-export.png", "bomb.png",
     "big_modball.png",      "blackbunbun.png",      "completeFinalMap.png", "TripleShot.png",
-    "bomb.png"
+    "charshootwalk.png",    "test_walkshoot2.png"
 ];
 function SceneManager(){
 
     var canvas = document.getElementById("gameWorld");
+    canvas.width = document.body.clientWidth;
+    canvas.height = document.body.clientHeight;
     this.ctx = canvas.getContext("2d");
     canvas.onclick = function() {
        canvas.requestPointerLock();

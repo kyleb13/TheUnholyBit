@@ -1,7 +1,10 @@
 var AM = new AssetManager();
 
-var ArrowType = {x:0, y:1025, w:64, h:64, d:0.09, f:13, l:true, r:false};
-var MagicType = {x:0, y:0, w:64, h:64, d:0.17, f:7, l:true, r:false};
+var ArrowType = {x:0, y:1025, w:64, h:64, d:0.05, f:13, l:true, r:false};
+var MagicType = {x:0, y:0, w:64, h:64, d:0.1, f:7, l:true, r:false};
+function xor(a, b) {
+    return a?!b:b;
+}
 
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
