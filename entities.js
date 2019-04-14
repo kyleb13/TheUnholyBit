@@ -1084,16 +1084,16 @@ function LevelBoundingBoxCollsion(background, ent) {
                         ent instanceof BlackBunny) {            
                     //handleBoxCollision(ent, box);
                     if (top) {
-                        ent.y -= 1;
+                        ent.y -= 3;
                         ent.velocity.y = -ent.velocity.y; 
                     } if (right) {
-                        ent.x += 1;
+                        ent.x += 3;
                         ent.velocity.x = -ent.velocity.x;
                     } if (left) {
-                        ent.x -= 1;
+                        ent.x -= 3;
                         ent.velocity.x = -ent.velocity.x;
                     } if(bottom) {
-                        ent.y += 1;
+                        ent.y += 3;
                         ent.velocity.y = -ent.velocity.y
                     }
         
